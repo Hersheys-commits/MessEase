@@ -1,0 +1,24 @@
+{
+  "name": "mess_management",
+  "version": "1.0.0",
+  "description": "a project to manage mess for students and hostels",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mess",
+    "management",
+    "hostel",
+    "college"
+  ],
+  "author": "Harsh, Meet, Manu",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "nodemon": "^3.1.9",
+    "socket.io": "^4.8.1"
+  }
+}
