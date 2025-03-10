@@ -1,37 +1,28 @@
-import React, { useState, useEffect } from "react";
-import { Route, Routes, Navigate } from "react-router-dom";
-import { Toaster } from "react-hot-toast";
-import HomePage from "./pages/HomePage";
-import PageNotFound from "./pages/PageNotFound";
-import AdminSignup from "./pages/AdminSignup";
-import AdminLogin from "./pages/AdminLogin";
-import AdminHome from "./pages/AdminHome";
+
+// src/App.js (Routes)
+import React from 'react';
+import {Routes, Route } from 'react-router-dom';
+import Signup from "./pages/auth/Signup";
+import Login from './pages/auth/Login';
 import CollegeVerifyPage from "./pages/CollegeVerifyPage";
 import CreateCollegePage from "./pages/CreateCollegePage";
-import StudentLogin from "./pages/StudentLogin";
-import StudentSignup from "./pages/StudentSignup";
+import PageNotFound from "./pages/PageNotFound";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { Toaster } from 'react-hot-toast';
+// Import your actual components here
+import HomePage from "./pages/HomePage";
+import AdminHome from './pages/AdminHome';
 
 function App() {
-    return (
-        <div>
-            <Routes>
-                <Route
-                  path="/"
-                  element={<HomePage/>}
-                />
-                <Route
-                  path="/admin/signup"
-                  element={<AdminSignup/>}
-                />
-                <Route
-                  path="/admin/login"
-                  element={<AdminLogin/>}
-                />
-                <Route
-                  path="/admin/home"
-                  element={<AdminHome/>}
-                />
-                <Route
+  return (
+    <>
+      <Routes>
+          {/* Public Auth Routes */}
+          <Route path="/admin/signup" element={<Signup userType="admin" />} />
+          <Route path="/admin/login" element={<Login userType="admin" />} />
+          <Route path="/student/signup" element={<Signup userType="student" />} />
+          <Route path="/student/login" element={<Login userType="student" />} />
+          <Route
                   path="/college/verify/:code"
                   element={<CollegeVerifyPage />}
                 />
@@ -40,21 +31,35 @@ function App() {
                   element={<CreateCollegePage/>}
                 />
                 <Route
-                  path="/student/login"
-                  element={<StudentLogin/>}
-                />
-                <Route
-                  path="/student/signup"
-                  element={<StudentSignup/>}
-                />
-                <Route
                   path="*"
                   element={<PageNotFound/>}
                 />
-            </Routes>
-            <Toaster />
-        </div>
-    );
+          
+          {/* Protected Routes */}
+          <Route 
+            path="/admin/home" 
+            element={
+              <ProtectedRoute userType="admin">
+                <AdminHome />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/student/home" 
+            element={
+              <ProtectedRoute userType="student">
+                <HomePage />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Redirect root to student login */}
+          <Route path="/" element={<Login userType="student" />} />
+        </Routes>
+        <Toaster/>
+    </>
+  );
 }
 
 export default App;

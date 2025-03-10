@@ -1,7 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 // Try to load the user from localStorage for persistence
-const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+const userInfoRaw = localStorage.getItem('userInfo');
+const userInfo = userInfoRaw && userInfoRaw !== "undefined" && userInfoRaw !== "null" 
+  ? JSON.parse(userInfoRaw) 
+  : null;
+
 
 const initialState = {
   user: userInfo || null,
