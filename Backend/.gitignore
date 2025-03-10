@@ -48,7 +48,6 @@ build/Release
 # Dependency directories
 node_modules/
 jspm_packages/
-Backend/node_modules/
 
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
@@ -158,3 +157,4 @@ thumb
 sketch
 
 # End of https://www.toptal.com/developers/gitignore/api/react,node,dotenv
+
