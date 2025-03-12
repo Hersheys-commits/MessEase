@@ -37,15 +37,10 @@ const collegeSchema = new Schema({
     //   ref: 'Hostel'
     // }],
     admins: [{
-      user: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-      },
-      permissions: [{
-        type: String,
-        enum: ['manageUsers', 'manageHostels', 'manageMess', 'manageComplaints', 'viewReports']
-      }]
-    }],
+        ref: 'User' 
+    } 
+    ],
   },{
     timestamps: true,
   });

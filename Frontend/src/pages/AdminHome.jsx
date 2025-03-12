@@ -70,12 +70,23 @@ const AdminHome = () => {
                 </>
             ):
             (
+              <div className="space-y-4 flex flex-col px-4 max-w-max  ">
                 <Link
                 to="/admin/college/create"
                 className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
                 >
                 Create College
                 </Link>
+                
+                <Link
+                to="/admin/college/join"
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-5px"
+                >
+                Join College
+                </Link>
+
+               </div>
+
             ) 
         )}
     </div>
