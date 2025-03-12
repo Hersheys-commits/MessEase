@@ -1,4 +1,3 @@
-
 // src/App.js (Routes)
 import React from 'react';
 import {Routes, Route } from 'react-router-dom';
@@ -12,6 +11,7 @@ import { Toaster } from 'react-hot-toast';
 // Import your actual components here
 import HomePage from "./pages/HomePage";
 import AdminHome from './pages/AdminHome';
+import HostelForm from './pages/HotelForm';
 
 function App() {
   return (
@@ -56,6 +56,8 @@ function App() {
           
           {/* Redirect root to student login */}
           <Route path="/" element={<Login userType="student" />} />
+          <Route path="/create-hostel" element={<HostelForm />} />
+
         </Routes>
         <Toaster/>
     </>

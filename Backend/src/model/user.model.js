@@ -23,8 +23,6 @@ const userSchema = new Schema({
         unique: true,
         sparse: true, // This makes the index ignore documents where googleId is not set
     },
-    
-    
     role: {
       type: String,
       enum: ['student', 'messManager', 'accountant', 'professor', 'chiefWarden', 'developer', 'admin'],

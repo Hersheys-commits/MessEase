@@ -7,6 +7,8 @@ function HomePage() {
       <Header/>
       <div>
         Homepage
+        {/* //  hostel  mess  */}
+        {/* intermediate page */}
       </div>
     </div>
   )
