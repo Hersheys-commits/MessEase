@@ -1,13 +1,13 @@
 // src/components/AdminHome.js
 import React,{useState,useEffect} from "react";
 import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../utils/axiosRequest";
 
 const AdminHome = () => {
   const [college, setCollege] = useState(null);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [collegeExists, setCollegeExists] =useState(false);
   const [requestPending, setRequestPending] =useState(false);
   
@@ -60,6 +60,13 @@ const AdminHome = () => {
                 {college.address.pincode}, {college.address.country}
             </p>
             </div>
+
+            <Link to="/create-hostel">
+              <button className="bg-red-500 p-10 mt-5 text-white rounded">
+                Add Hostel
+              </button>
+          </Link>
+        
         </div>
     ) :( requestPending?
             (
