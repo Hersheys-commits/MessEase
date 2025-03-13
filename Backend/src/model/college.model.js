@@ -32,19 +32,13 @@ const collegeSchema = new Schema({
     contactEmail: String,
     contactPhone: String,
     website: String,
-    // hostels: [{
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: 'Hostel'
-    // }],
+    hostel: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Hostel'
+    }],
     admins: [{
-      user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-      },
-      permissions: [{
-        type: String,
-        enum: ['manageUsers', 'manageHostels', 'manageMess', 'manageComplaints', 'viewReports']
-      }]
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     }],
   },{
     timestamps: true,

@@ -60,6 +60,11 @@ const AdminHome = () => {
                 {college.address.pincode}, {college.address.country}
             </p>
             </div>
+            <Link to="/admin/create-hostel">
+                <button className="bg-red-500 p-10 mt-5 text-white rounded">
+                Add Hostel
+                </button>
+            </Link>
         </div>
     ) :( requestPending?
             (

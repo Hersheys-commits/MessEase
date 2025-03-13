@@ -23,11 +23,9 @@ const userSchema = new Schema({
         unique: true,
         sparse: true, // This makes the index ignore documents where googleId is not set
     },
-    
-    
     role: {
       type: String,
-      enum: ['student', 'messManager', 'accountant', 'professor', 'chiefWarden', 'developer', 'admin'],
+      enum: ['student', 'messManager','hostelManager', 'accountant', 'professor', 'chiefWarden', 'developer', 'admin'],
       required: true
     },
     profilePicture: {
@@ -37,13 +35,17 @@ const userSchema = new Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'College'
     },
+    mess:{
+        type: mongoose.Schema.Types.ObjectId,
+      ref: 'Mess'
+    },
     hostel: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Hostel'
     },
-    isActive: {
-      type: Boolean,
-      default: true
+    room:{
+        type: String,
+        default: null,
     },
     isBlocked: {
       type: Boolean,

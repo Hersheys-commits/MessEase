@@ -19,10 +19,15 @@ export const createCollegeRequest = async (req, res) => {
       contactPhone,
       address, // expects an object: { street, city, state, pincode, country }
     } = req.body;
-
+    
+    // Find the admin user by email and ensure the role is admin
+    const adminUser = await User.findOne({_id: req.user._id});
+    if (!adminUser) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
     // Generate a unique code for the college
     const code = crypto.randomBytes(3).toString("hex");
-
+    
     // Create new college object with status "unverified"
     const newCollege = new College({
       name,
@@ -33,16 +38,11 @@ export const createCollegeRequest = async (req, res) => {
       contactEmail,
       contactPhone,
       address,
-      // admins: You could add initial admin info here if needed
+      admins:[adminUser._id],
     });
 
     await newCollege.save();
 
-    // Find the admin user by email and ensure the role is admin
-    const adminUser = await User.findOne({_id: req.user._id});
-    if (!adminUser) {
-      return res.status(400).json({ message: "Invalid credentials" });
-    }
 
     adminUser.college=newCollege._id;
     await adminUser.save()

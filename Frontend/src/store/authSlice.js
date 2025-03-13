@@ -9,6 +9,9 @@ const userInfo = userInfoRaw && userInfoRaw !== "undefined" && userInfoRaw !== "
 
 const initialState = {
   user: userInfo || null,
+  isAuthenticated: false,
+  isLoading: false,
+  error: null
 };
 
 const authSlice = createSlice({
@@ -24,6 +27,7 @@ const authSlice = createSlice({
     // Remove user on logout
     logout: (state) => {
       state.user = null;
+      state.isAuthenticated = false;
       localStorage.removeItem('userInfo');
     },
   },
