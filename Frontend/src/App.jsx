@@ -4,6 +4,7 @@ import {Routes, Route } from 'react-router-dom';
 import Signup from "./pages/auth/Signup";
 import Login from './pages/auth/Login';
 import CollegeVerifyPage from "./pages/CollegeVerifyPage";
+import { JoinCollegePage } from './pages/JoinCollegePage';
 import CreateCollegePage from "./pages/CreateCollegePage";
 import PageNotFound from "./pages/PageNotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -29,6 +30,10 @@ function App() {
                 <Route
                   path="/admin/college/create"
                   element={<CreateCollegePage/>}
+                />
+                <Route
+                  path="/admin/college/join"
+                  element={<JoinCollegePage/>}
                 />
                 <Route
                   path="*"
