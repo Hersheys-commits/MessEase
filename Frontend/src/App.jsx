@@ -14,6 +14,8 @@ import StudentHome from "./pages/StudentHome";
 import HomePage from './pages/HomePage';
 import AdminHome from './pages/AdminHome';
 import HostelForm from './pages/HostelForm';
+import AvailableRooms from './pages/AvailableRooms';
+import BookRooms from './pages/BookRooms';
 
 function App() {
   return (
@@ -60,7 +62,10 @@ function App() {
               </ProtectedRoute>
             } 
           />
+          <Route path='/available-rooms' element={<AvailableRooms/>}> </Route>
           
+          <Route path="/book-rooms" element={<BookRooms />} />
+
           {/* Redirect root to student login */}
           <Route path="/" element={<Login userType="student" />} />
   

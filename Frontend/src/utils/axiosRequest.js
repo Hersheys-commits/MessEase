@@ -18,7 +18,7 @@ api.interceptors.response.use(
         
         try {
           const refreshToken = localStorage.getItem('refreshToken');
-          
+          console.log("REFRESH",refreshToken);
           if (!refreshToken) {
             // No refresh token available, redirect to login
             window.location.href = '/login';
@@ -26,8 +26,8 @@ api.interceptors.response.use(
           }
           
           // Attempt to refresh token
-          const response = await axios.post(
-            `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/refresh-token`,
+          const response = await axios.post( 
+            `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/refresh-token`, // dont know i think it should be 4001
             { refreshToken }
           );
           

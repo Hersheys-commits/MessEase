@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { logout} from "../store/authSlice";
 import api from "../utils/axiosRequest";
 import toast from "react-hot-toast";
+import axios from "axios";
 
 const Header = () => {
     const dispatch = useDispatch();
@@ -10,10 +11,13 @@ const Header = () => {
 
     const handleLogout = async () => {
         try {
-            await api.post("/api/student/logout", {}, { withCredentials: true });
+            // await axios.post("/")
+            console.log("API",api);
+            // await new Promise((resolve) => setTimeout(resolve,100* 1000)); 
+            await api.post("/api/student/logout", {}, { withCredentials: true }); // this is not working 
             dispatch(logout());
             toast.success("Logged out successfully!");
-            navigate("/student/login");
+            navigate("/student/login"); // this doesnt work 
         } catch (error) {
             console.error("Logout failed:", error);
             toast.error("Logout failed. Please try again.");

@@ -9,7 +9,8 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
         const token =
             req.cookies?.accessToken ||
             req.header("Authorization")?.replace("Bearer ", "");
-        // console.log("first",token)
+
+        console.log("first",token) // refresh token is not comming from student login ? 
         if (!token) {
             // console.log("first")
             return res
