@@ -27,7 +27,7 @@ export const createCollegeRequest = async (req, res) => {
     }
     // Generate a unique code for the college
     const code = crypto.randomBytes(3).toString("hex");
-    
+      
     // Create new college object with status "unverified"
     const newCollege = new College({
       name,

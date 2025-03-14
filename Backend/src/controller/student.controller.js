@@ -250,6 +250,7 @@ export const googleAuth = async (req, res) => {
    */
   export const logout = async (req, res) => {
     try {
+      // console.log("user",req);
       await User.findByIdAndUpdate(
         req.user._id,
         { $unset: { refreshToken: 1 } },

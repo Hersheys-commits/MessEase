@@ -6,7 +6,8 @@ import connectDB from "./db/index.js"; // MongoDB connection
 import adminRoutes from "./route/admin.route.js";
 import collegeRoutes from "./route/college.route.js";
 import studentRoutes from "./route/student.route.js";
-
+import guestRoutes from './route/guest.route.js';
+import hostelRoutes from "./route/hostel.route.js";
 dotenv.config({ path: "./.env" });
 
 const app = express();
@@ -41,6 +42,8 @@ connectDB()
 app.use("/api/admin", adminRoutes);
 app.use("/api/college", collegeRoutes);
 app.use("/api/student",studentRoutes);
+app.use("/api/hostel",hostelRoutes);
+app.use("/api/guest",guestRoutes);
 
 // Global Error Handling Middleware
 app.use((err, req, res, next) => {

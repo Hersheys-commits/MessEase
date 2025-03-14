@@ -1,5 +1,6 @@
-import  mongoose,{ Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
+// Existing Hostel Schema with modifications
 const HostelSchema = new Schema({
     name: { 
         type: String, 
@@ -17,6 +18,18 @@ const HostelSchema = new Schema({
         type: Number, 
         required: true,
     },
+    // Add guest rooms field to the hostel schema
+    guestRooms: {
+        count: {
+            type: Number,
+            default: 0,
+            required: true
+        },
+        roomNumbers: [{
+            type: String
+        }]
+    },
+    
     college: { 
         type: Schema.Types.ObjectId, 
         ref: 'College', 
@@ -39,13 +52,11 @@ const HostelSchema = new Schema({
         }
     }],
   },
-    {
-        timestamps: true,
-    });
-  
+  {
+    timestamps: true,
+  });
 
 
 const Hostel = mongoose.model("Hostel", HostelSchema);
-  
+
 export default Hostel;
-  
