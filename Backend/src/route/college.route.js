@@ -10,7 +10,7 @@ import { verifyJWT } from "../middleware/auth.middleware.js";
 const router = express.Router();
 
 // Endpoint for admin to create a new college request
-router.post("/create", verifyJWT,createCollegeRequest);
+router.post("/create", verifyJWT, createCollegeRequest);
 
 // Endpoint to get college details for verification (developer view)
 router.get("/verification/:code", getCollegeByCode);

@@ -1,6 +1,6 @@
 // src/pages/auth/Signup.js
 import React, { useState } from "react";
-import AuthForm from "../../components/auth/AuthForm";
+import AuthForm from "../../components/auth/authForm";
 import OTPVerification from "../../components/auth/OTPVerification";
 import GoogleAuthButton from "../../components/auth/GoogleAuthButton";
 import { Toaster } from "react-hot-toast";
@@ -8,7 +8,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import api from "../../utils/axiosRequest";
 import toast from "react-hot-toast";
 
-const Signup = ({ userType = 'student' }) => {
+const Signup = ({ userType = "student" }) => {
   const [otpSent, setOtpSent] = useState(false);
   const [userData, setUserData] = useState(null);
 
@@ -19,50 +19,51 @@ const Signup = ({ userType = 'student' }) => {
         id: "email",
         label: "Email",
         type: "email",
-        validation: { 
-          required: 'Email is required'
-        }
+        validation: {
+          required: "Email is required",
+        },
       },
       {
         id: "name",
         label: "Full Name",
         type: "text",
-        validation: { 
-          required: 'Name is required'
-        }
+        validation: {
+          required: "Name is required",
+        },
       },
       {
         id: "password",
         label: "Password",
         type: "password",
         validation: {
-          required: 'Password is required',
+          required: "Password is required",
           minLength: {
             value: 8,
-            message: 'Password must be at least 8 characters'
-          }
-        }
+            message: "Password must be at least 8 characters",
+          },
+        },
       },
       {
         id: "confirmPassword",
         label: "Confirm Password",
         type: "password",
         validation: {
-          required: 'Please confirm your password',
-          validate: value => value === getFormValues('password') || 'Passwords do not match'
-        }
-      }
+          required: "Please confirm your password",
+          validate: (value) =>
+            value === getFormValues("password") || "Passwords do not match",
+        },
+      },
     ];
 
     // Add phone number field for admin users
-    if (userType === 'admin') {
+    if (userType === "admin") {
       commonFields.push({
         id: "phoneNumber",
         label: "Phone Number",
         type: "text",
-        validation: { 
-          required: 'Phone number is required'
-        }
+        validation: {
+          required: "Phone number is required",
+        },
       });
     }
 
@@ -81,23 +82,27 @@ const Signup = ({ userType = 'student' }) => {
 
   const handleFormSubmit = async (data) => {
     try {
-      const endpoint = userType === 'admin' ? '/api/admin/register' : '/api/student/signup';
-      
+      const endpoint =
+        userType === "admin" ? "/api/admin/register" : "/api/student/signup";
+
       await api.post(endpoint, data);
       toast.success("OTP sent to your email.");
-      
+
       // Pass user data to OTP component
       handleOTPSent(data);
     } catch (error) {
-      toast.error(error.response?.data?.message || `Error registering ${userType}`);
+      toast.error(
+        error.response?.data?.message || `Error registering ${userType}`
+      );
     }
   };
 
-  const pageStyle = userType === 'admin'
-    ? "min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-50 via-indigo-100 to-blue-200 p-6"
-    : "min-h-screen flex items-center justify-center bg-gray-100 p-4";
+  const pageStyle =
+    userType === "admin"
+      ? "min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-50 via-indigo-100 to-blue-200 p-6"
+      : "min-h-screen flex items-center justify-center bg-gray-100 p-4";
 
-  const redirectPath = userType === 'admin' ? '/admin/home' : '/student/home';
+  const redirectPath = userType === "admin" ? "/admin/home" : "/student/home";
 
   return (
     <div className={pageStyle}>
@@ -116,12 +121,14 @@ const Signup = ({ userType = 'student' }) => {
           <AuthForm
             fields={getFormFields()}
             onSubmit={handleFormSubmit}
-            submitText={`Register as ${userType === 'admin' ? 'Admin' : 'Student'}`}
-            title={`${userType === 'admin' ? 'Admin' : 'Student'} Registration`}
-            GoogleAuthComponent={<GoogleAuthButton 
-              userType={userType} 
-              buttonText={`Sign up with Google`}
-            />}
+            submitText={`Register as ${userType === "admin" ? "Admin" : "Student"}`}
+            title={`${userType === "admin" ? "Admin" : "Student"} Registration`}
+            GoogleAuthComponent={
+              <GoogleAuthButton
+                userType={userType}
+                buttonText={`Sign up with Google`}
+              />
+            }
           />
         )}
       </GoogleOAuthProvider>

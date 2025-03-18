@@ -22,7 +22,9 @@ const GoogleAuthButton = ({ userType, buttonText }) => {
               alt="Google logo"
               className="w-5 h-5"
             />
-            <span className="text-gray-700 font-medium">{buttonText || `Sign in with Google`}</span>
+            <span className="text-gray-700 font-medium">
+              {buttonText || `Sign in with Google`}
+            </span>
           </button>
         )}
       />

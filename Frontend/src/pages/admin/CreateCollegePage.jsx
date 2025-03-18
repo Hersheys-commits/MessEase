@@ -1,7 +1,7 @@
 // src/components/CreateCollegePage.js
 import React from "react";
 import { useForm } from "react-hook-form";
-import api from "../utils/axiosRequest";
+import api from "../../utils/axiosRequest";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 

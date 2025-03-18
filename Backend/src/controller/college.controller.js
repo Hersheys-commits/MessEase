@@ -1,6 +1,6 @@
 // controllers/collegeController.js
 import College from "../model/college.model.js";
-import User from "../model/user.model.js"
+import User from "../model/user.model.js";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
 
@@ -19,15 +19,15 @@ export const createCollegeRequest = async (req, res) => {
       contactPhone,
       address, // expects an object: { street, city, state, pincode, country }
     } = req.body;
-    
+
     // Find the admin user by email and ensure the role is admin
-    const adminUser = await User.findOne({_id: req.user._id});
+    const adminUser = await User.findOne({ _id: req.user._id });
     if (!adminUser) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
     // Generate a unique code for the college
     const code = crypto.randomBytes(3).toString("hex");
-      
+
     // Create new college object with status "unverified"
     const newCollege = new College({
       name,
@@ -38,15 +38,13 @@ export const createCollegeRequest = async (req, res) => {
       contactEmail,
       contactPhone,
       address,
-      admins:[adminUser._id],
+      admins: [adminUser._id],
     });
 
     await newCollege.save();
 
-
-    adminUser.college=newCollege._id;
-    await adminUser.save()
-
+    adminUser.college = newCollege._id;
+    await adminUser.save();
 
     // Create a transporter (configure with your email provider credentials)
     const transporter = nodemailer.createTransport({
@@ -136,7 +134,9 @@ export const verifyCollege = async (req, res) => {
 
       await transporter.sendMail(mailOptions);
 
-      return res.status(200).json({ message: "College verified successfully." });
+      return res
+        .status(200)
+        .json({ message: "College verified successfully." });
     } else if (decision === "reject") {
       // Delete the college request
       await College.deleteOne({ code });
@@ -158,7 +158,9 @@ export const verifyCollege = async (req, res) => {
 
       await transporter.sendMail(mailOptions);
 
-      return res.status(200).json({ message: "College request rejected and deleted." });
+      return res
+        .status(200)
+        .json({ message: "College request rejected and deleted." });
     } else {
       return res.status(400).json({ message: "Invalid decision" });
     }
@@ -167,4 +169,3 @@ export const verifyCollege = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
-

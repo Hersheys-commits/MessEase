@@ -1,47 +1,48 @@
 import mongoose, { Schema } from "mongoose";
 
-const GuestRoomSchema = new Schema({
-    hostel: { 
-        type: Schema.Types.ObjectId, 
-        ref: 'Hostel', 
-        required: true 
+const GuestRoomSchema = new Schema(
+  {
+    hostel: {
+      type: Schema.Types.ObjectId,
+      ref: "Hostel",
+      required: true,
     },
-    roomNumber: { 
-        type: String, 
-        required: true 
+    roomNumber: {
+      type: String,
+      required: true,
     },
-    guest: { 
-        type: Schema.Types.ObjectId, 
-        ref: 'User', 
-        required: true 
+    guest: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
-    checkInDate: { 
-        type: Date, 
-        required: true 
+    checkInDate: {
+      type: Date,
+      required: true,
     },
-    checkOutDate: { 
-        type: Date ,
-        required:true
+    checkOutDate: {
+      type: Date,
+      required: true,
     },
-    status: { 
-        type: String, 
-        enum: ["occupied", "available", "reserved"], 
-        default: "reserved" 
+    status: {
+      type: String,
+      enum: ["occupied", "available", "reserved"],
+      default: "reserved",
     },
-    purpose: { 
-        type: String 
-    }
-}, { timestamps: true });
+    purpose: {
+      type: String,
+    },
+  },
+  { timestamps: true }
+);
 
 const GuestRoom = mongoose.model("GuestRoom", GuestRoomSchema);
 export default GuestRoom;
 
-
 // import mongoose from "mongoose";
 
-
 // const guestRoomSchema = new mongoose.Schema(
-//   { 
+//   {
 //     occupant: {
 //       // i think the size of room should be fixed 2 so dont put because guest are majority times parents so thinking not to put the size of room
 //       user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -59,7 +60,6 @@ export default GuestRoom;
 
 // const GuestRoom = mongoose.model("GuestRoom", guestRoomSchema);
 // export default GuestRoom;
-
 
 // // import { Schema } from "mongoose";
 
@@ -115,28 +115,28 @@ export default GuestRoom;
 // //   if (!hostel || !hostel.guestRooms || hostel.guestRooms.count === 0) {
 // //       return { available: false, message: "No guest rooms in this hostel" };
 // //   }
-  
+
 // //   // Get all bookings for the specified date
 // //   const bookings = await this.find({
 // //       hostel: hostelId,
 // //       $or: [
 // //           // Check if the requested date falls within any existing booking
-// //           { 
+// //           {
 // //               checkInDate: { $lte: date },
 // //               checkOutDate: { $gte: date }
 // //           }
 // //       ],
 // //       status: { $in: ['pending', 'confirmed'] }
 // //   });
-  
+
 // //   // Get all room numbers in use for that date
 // //   const bookedRooms = bookings.map(booking => booking.roomNumber);
-  
+
 // //   // Find available rooms
 // //   const availableRooms = hostel.guestRooms.roomNumbers.filter(
 // //       room => !bookedRooms.includes(room)
 // //   );
-  
+
 // //   return {
 // //       available: availableRooms.length > 0,
 // //       availableRooms: availableRooms,
