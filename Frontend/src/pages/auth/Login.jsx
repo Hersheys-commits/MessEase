@@ -1,6 +1,6 @@
 // src/pages/auth/Login.js
 import React from "react";
-import AuthForm from "../../components/auth/authForm";
+import AuthForm from "../../components/auth/AuthForm";
 import GoogleAuthButton from "../../components/auth/GoogleAuthButton";
 import { Toaster } from "react-hot-toast";
 import { GoogleOAuthProvider } from "@react-oauth/google";

@@ -1,14 +1,16 @@
-import React, { useState } from "react";
+import React, { useId, useState } from "react";
 import Header from "../../components/Header";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 function AvailableRooms() {
   const [checkInDate, setCheckInDate] = useState("");
   const [checkOutDate, setCheckOutDate] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-
+  const location = useLocation();
+  const userId = location.state?.userId; // Retrieve userId from navigation state
+  console.log("BOOKING PAGE USER: ", userId);
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!checkInDate) {
@@ -19,39 +21,43 @@ function AvailableRooms() {
     console.log(typeof checkInDate);
     try {
       // send userId with this with the help of redux
-      // const response = await axios.post("http://localhost:4001/api/guest/see-availability", {
-      //   checkInDate,
-      //   checkOutDate,
-      // });
-      const response = {
-        hostel: "patel",
-        college: "MNNIT Allahabad",
-        freeRooms: [
-          "G-1",
-          "G-2",
-          "G-3",
-          "G-4",
-          "G-5",
-          "G-6",
-          "G-7",
-          "G-8",
-          "G-9",
-          "G-10",
-          "G-11",
-          "G-12",
-          "G-13",
-          "G-14",
-          "G-15",
-          "G-16",
-          "G-17",
-          "G-18",
-          "G-19",
-          "G-20",
-        ],
-      };
-      console.log("Available room: ", response);
-      // const availableRooms = response.data.freeRooms; // Get available rooms
-      const availableRooms = response.freeRooms; // Get available rooms
+      const response = await axios.post(
+        "http://localhost:4001/api/guest/see-availability",
+        {
+          userId,
+          checkInDate,
+          checkOutDate,
+        }
+      );
+      // const response = {
+      //   hostel: "patel",
+      //   college: "MNNIT Allahabad",
+      //   freeRooms: [
+      //     "G-1",
+      //     "G-2",
+      //     "G-3",
+      //     "G-4",
+      //     "G-5",
+      //     "G-6",
+      //     "G-7",
+      //     "G-8",
+      //     "G-9",
+      //     "G-10",
+      //     "G-11",
+      //     "G-12",
+      //     "G-13",
+      //     "G-14",
+      //     "G-15",
+      //     "G-16",
+      //     "G-17",
+      //     "G-18",
+      //     "G-19",
+      //     "G-20",
+      //   ],
+      // };
+      console.log("Available room: ", response.data);
+      const availableRooms = response.data.freeRooms; // Get available rooms
+      // const availableRooms = response.freeRooms; // Get available rooms
 
       if (availableRooms.length === 0) {
         setError("No rooms available for the selected dates.");
@@ -59,8 +65,9 @@ function AvailableRooms() {
       }
 
       // Navigate to the Available Rooms page with room data
-      navigate("/available-rooms", {
-        state: { availableRooms, checkInDate, checkOutDate },
+      console.log(userId);
+      navigate("/book-rooms", {
+        state: { availableRooms, checkInDate, checkOutDate, userId },
       });
     } catch (error) {
       console.error("Error fetching available rooms:", error);

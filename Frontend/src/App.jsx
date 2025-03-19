@@ -18,6 +18,7 @@ import BookRooms from "./pages/student/BookRooms";
 import HostelDetailPage from "./pages/admin/HostelDetailPage";
 import MessForm from "./pages/admin/MessForm";
 import MessDetails from "./pages/admin/MessDetails";
+import { BookedRooms } from "./pages/student/BookedRooms";
 
 function App() {
   return (
@@ -60,6 +61,7 @@ function App() {
         </Route>
 
         <Route path="/book-rooms" element={<BookRooms />} />
+        <Route path="/see-booking" element={<BookedRooms />} />
 
         {/* Redirect root to student login */}
         <Route path="/" element={<Login userType="student" />} />

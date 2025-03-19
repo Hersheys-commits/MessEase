@@ -1,6 +1,6 @@
 // src/pages/auth/Signup.js
 import React, { useState } from "react";
-import AuthForm from "../../components/auth/authForm";
+import AuthForm from "../../components/auth/AuthForm";
 import OTPVerification from "../../components/auth/OTPVerification";
 import GoogleAuthButton from "../../components/auth/GoogleAuthButton";
 import { Toaster } from "react-hot-toast";

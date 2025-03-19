@@ -9,8 +9,10 @@ function BookRooms() {
     availableRooms = [],
     checkInDate,
     checkOutDate,
+    userId,
   } = location.state || {};
-
+  console.log("S", location.state);
+  console.log(location.state.userId);
   const [selectedRoom, setSelectedRoom] = useState("");
 
   const handleRoomSelection = (room) => {
@@ -22,7 +24,7 @@ function BookRooms() {
       alert("Please select a room!");
       return;
     }
-    console.log(selectedRoom, checkInDate, checkOutDate);
+    console.log(userId, selectedRoom, checkInDate, checkOutDate);
     // return ;
     // send userID with the use of redux
     try {
@@ -32,12 +34,13 @@ function BookRooms() {
           roomNumber: selectedRoom,
           checkInDate,
           checkOutDate,
+          userId,
         }
       );
 
       if (response.status === 200) {
         alert("Room booked successfully!");
-        navigate("/"); // Redirect back to home
+        navigate("/student/home"); // Redirect back to home
       }
     } catch (error) {
       console.error("Booking error:", error);
