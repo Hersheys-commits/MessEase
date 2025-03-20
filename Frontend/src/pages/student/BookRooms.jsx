@@ -44,6 +44,9 @@ function BookRooms() {
       alert("Please select a room!");
       return;
     }
+    console.log(userId, selectedRoom, checkInDate, checkOutDate);
+    // return ;
+    // send userID with the use of redux
     try {
       const response = await axios.post(
         "http://localhost:4001/api/guest/book-guest-room",
