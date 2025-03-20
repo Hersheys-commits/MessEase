@@ -4,28 +4,28 @@ import { logout } from "../store/authSlice";
 import api from "../utils/axiosRequest";
 import toast from "react-hot-toast";
 
-const Header = () => {
+const AdminHeader = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleLogout = async () => {
     try {
-      const res = await api.post("/api/student/logout", {});
+      const res = await api.post("/api/admin/logout", {});
       dispatch(logout());
       toast.success("Logged out successfully!");
-      navigate("/student/login");
+      navigate("/admin/login");
     } catch (error) {
       console.error("Logout failed:", error);
       toast.error("Logout failed. Please try again.");
     }
   };
 
-  // Navigation links with their paths and icons (similar to AdminHeader)
+  // Navigation links with their paths
   const navLinks = [
-    { title: "Home", path: "/student/home", icon: "home" },
-    { title: "Elections", path: "/student/election", icon: "vote-yea" },
-    { title: "Profile", path: "/student/profile", icon: "user" },
+    { title: "Dashboard", path: "/admin/home", icon: "home" },
+    { title: "Elections", path: "/admin/election", icon: "vote-yea" },
+    { title: "Profile", path: "/admin/profile", icon: "user" },
   ];
 
   return (
@@ -46,7 +46,7 @@ const Header = () => {
           />
         </svg>
         <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-          Student Portal
+          Admin Portal
         </h1>
       </div>
 
@@ -160,7 +160,7 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Logout Button (hidden on desktop) */}
+      {/* Logout Button (hidden on mobile) */}
       <button
         onClick={handleLogout}
         className="hidden md:flex items-center bg-gradient-to-r from-red-500 to-red-700 text-white hover:from-red-600 hover:to-red-800 px-4 py-2 rounded-md transition duration-200 shadow-lg"
@@ -183,4 +183,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default AdminHeader;

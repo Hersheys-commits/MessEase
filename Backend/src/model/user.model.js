@@ -12,6 +12,9 @@ const userSchema = new Schema(
       trim: true,
       index: true,
     },
+    rollNumber: {
+      type: String,
+    },
     password: {
       type: String,
     },
@@ -48,6 +51,12 @@ const userSchema = new Schema(
     mess: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Mess",
+    },
+    branch: {
+      type: String,
+    },
+    year: {
+      type: Number,
     },
     hostel: {
       type: mongoose.Schema.Types.ObjectId,

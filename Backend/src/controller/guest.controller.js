@@ -1,7 +1,7 @@
 import GuestRoom from "../model/guest.model.js";
 import express from "express";
 import User from "../model/user.model.js";
-
+import mongoose from "mongoose";
 export const checkAvailability = async (req, res) => {
   try {
     const { userId, checkInDate } = req.body;
@@ -87,5 +87,54 @@ export const allocateRoom = async (req, res) => {
   } catch (error) {
     console.error("Error booking the room:", error.message);
     res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const allBookedRoom = async (req, res) => {
+  try {
+    const { userId } = req.query; // for get
+    console.log(userId);
+    if (!userId) {
+      res.status(401).json({ error: "Not a valid User" });
+    }
+    const date = new Date();
+    const activeRooms = await GuestRoom.find({
+      guest: userId, // Convert userId to ObjectId
+      checkOutDate: { $gt: date },
+    }).sort({ checkInDate: 1 }); // to get all the booked guest rooms with inc order of checkin so that the user will see the first coming booking first
+    console.log(activeRooms);
+    res.json(activeRooms);
+  } catch (error) {
+    console.error("Error fetching active rooms:", error.message);
+
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const deleteBookedRoom = async (req, res) => {
+  try {
+    const { userId, bookingId } = req.body;
+
+    if (!userId || !bookingId) {
+      return res
+        .status(400)
+        .json({ message: "User ID and Booking ID are required." });
+    }
+
+    // Find and delete the booking
+    const deletedBooking = await GuestRoom.findOneAndDelete({
+      _id: bookingId,
+      guest: userId,
+    });
+
+    if (!deletedBooking) {
+      return res
+        .status(404)
+        .json({ message: "Booking not found or already cancelled." });
+    }
+    return res.status(200).json({ message: "Booking cancelled successfully." });
+  } catch (error) {
+    console.error("Error cancelling booking:", error);
+    return res.status(500).json({ message: "Internal server error." });
   }
 };

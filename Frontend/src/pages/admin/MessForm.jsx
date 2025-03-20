@@ -3,6 +3,7 @@ import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import api from "../../utils/axiosRequest";
+import AdminHeader from "../../components/AdminHeader";
 
 const MessForm = () => {
   const [hostels, setHostels] = useState([]);
@@ -22,28 +23,64 @@ const MessForm = () => {
       location: "",
       capacity: 100,
       workers: [{ name: "", mobileNumber: "" }],
+      // A single timing input for each meal type
+      mealTimings: {
+        breakfast: { hour: 7, minute: 30, am_pm: "am" },
+        lunch: { hour: 12, minute: 30, am_pm: "pm" },
+        eveningSnacks: { hour: 4, minute: 30, am_pm: "pm" },
+        dinner: { hour: 8, minute: 0, am_pm: "pm" },
+      },
+      // Weekly menu: one row per day, with one field per meal type
       meals: [
-        ...[
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday",
-          "Sunday",
-        ].map((day) => ({
-          day,
-          breakfast: {
-            items: [""],
-            timing: { hour: 7, minute: 30, am_pm: "am" },
-          },
-          lunch: { items: [""], timing: { hour: 12, minute: 30, am_pm: "pm" } },
-          eveningSnacks: {
-            items: [""],
-            timing: { hour: 4, minute: 30, am_pm: "pm" },
-          },
-          dinner: { items: [""], timing: { hour: 8, minute: 0, am_pm: "pm" } },
-        })),
+        {
+          day: "Monday",
+          breakfast: "",
+          lunch: "",
+          eveningSnacks: "",
+          dinner: "",
+        },
+        {
+          day: "Tuesday",
+          breakfast: "",
+          lunch: "",
+          eveningSnacks: "",
+          dinner: "",
+        },
+        {
+          day: "Wednesday",
+          breakfast: "",
+          lunch: "",
+          eveningSnacks: "",
+          dinner: "",
+        },
+        {
+          day: "Thursday",
+          breakfast: "",
+          lunch: "",
+          eveningSnacks: "",
+          dinner: "",
+        },
+        {
+          day: "Friday",
+          breakfast: "",
+          lunch: "",
+          eveningSnacks: "",
+          dinner: "",
+        },
+        {
+          day: "Saturday",
+          breakfast: "",
+          lunch: "",
+          eveningSnacks: "",
+          dinner: "",
+        },
+        {
+          day: "Sunday",
+          breakfast: "",
+          lunch: "",
+          eveningSnacks: "",
+          dinner: "",
+        },
       ],
     },
   });
@@ -57,13 +94,21 @@ const MessForm = () => {
     name: "workers",
   });
 
-  // Effect to fetch hostels without mess
+  const workOptions = [
+    "roomCleaner",
+    "hostelCleaner",
+    "gardenCleaner",
+    "electrician",
+    "accountant",
+    "warden",
+  ];
+
+  // Fetch hostels without mess
   useEffect(() => {
     const fetchHostels = async () => {
       try {
         const response = await api.post("/api/hostel/without-mess");
         setHostels(response.data);
-        console.log("first", response);
       } catch (error) {
         toast.error("Failed to fetch hostels");
         console.error("Error fetching hostels:", error);
@@ -76,8 +121,20 @@ const MessForm = () => {
   const onSubmit = async (data) => {
     setLoading(true);
     const loadingToast = toast.loading("Creating mess...");
-
     try {
+      // Process each day's meals.
+      // For each meal type on each day, you can either leave them as strings
+      // or convert them to arrays. Here, we send them as strings and let the backend handle splitting.
+      // If you prefer, you can uncomment the transformation below:
+      //
+      // data.meals = data.meals.map(dayMeal => ({
+      //   day: dayMeal.day,
+      //   breakfast: dayMeal.breakfast.split(",").map(item => item.trim()).filter(Boolean),
+      //   lunch: dayMeal.lunch.split(",").map(item => item.trim()).filter(Boolean),
+      //   eveningSnacks: dayMeal.eveningSnacks.split(",").map(item => item.trim()).filter(Boolean),
+      //   dinner: dayMeal.dinner.split(",").map(item => item.trim()).filter(Boolean),
+      // }));
+
       const response = await api.post("/api/mess/create", data);
       toast.success("Mess created successfully!", { id: loadingToast });
       reset();
@@ -93,462 +150,347 @@ const MessForm = () => {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">Create New Mess</h1>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Basic Information */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Mess Name*
-              </label>
-              <input
-                {...register("name", { required: "Mess name is required" })}
-                className="w-full p-2 border rounded"
-                placeholder="Enter mess name"
-              />
-              {errors.name && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.name.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Hostel*
-              </label>
-              <select
-                {...register("hostel", { required: "Hostel is required" })}
-                className="w-full p-2 border rounded"
-              >
-                <option value="">Select a hostel</option>
-                {hostels.map((hostel) => (
-                  <option key={hostel._id} value={hostel._id}>
-                    {hostel.name}
-                  </option>
-                ))}
-              </select>
-              {errors.hostel && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.hostel.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Location
-              </label>
-              <input
-                {...register("location")}
-                className="w-full p-2 border rounded"
-                placeholder="Enter mess location"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Capacity
-              </label>
-              <input
-                type="number"
-                {...register("capacity", { min: 1 })}
-                className="w-full p-2 border rounded"
-                placeholder="Enter mess capacity"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Workers */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Mess Workers</h2>
-
-          {workerFields.map((field, index) => (
-            <div
-              key={field.id}
-              className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 pb-4 border-b"
-            >
+    <div>
+      <AdminHeader />
+      <div className="container mx-auto p-4 bg-gray-900 min-h-screen text-white">
+        <h1 className="text-2xl font-bold mb-6">Create New Mess</h1>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {/* Basic Information */}
+          <div className="bg-gray-800 p-6 rounded-lg shadow-md border border-gray-700">
+            <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Worker Name
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Mess Name*
                 </label>
                 <input
-                  {...register(`workers.${index}.name`)}
-                  className="w-full p-2 border rounded"
-                  placeholder="Enter worker name"
+                  {...register("name", { required: "Mess name is required" })}
+                  className="w-full p-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Enter mess name"
                 />
-              </div>
-
-              <div className="flex items-end">
-                <div className="flex-grow">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Mobile Number
-                  </label>
-                  <input
-                    {...register(`workers.${index}.mobileNumber`)}
-                    className="w-full p-2 border rounded"
-                    placeholder="Enter mobile number"
-                  />
-                </div>
-
-                {index > 0 && (
-                  <button
-                    type="button"
-                    className="ml-2 p-2 bg-red-500 text-white rounded-md"
-                    onClick={() => removeWorker(index)}
-                  >
-                    Remove
-                  </button>
+                {errors.name && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.name.message}
+                  </p>
                 )}
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Hostel*
+                </label>
+                <select
+                  {...register("hostel", { required: "Hostel is required" })}
+                  className="w-full p-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option value="">Select a hostel</option>
+                  {hostels.map((hostel) => (
+                    <option key={hostel._id} value={hostel._id}>
+                      {hostel.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.hostel && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.hostel.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Location
+                </label>
+                <input
+                  {...register("location")}
+                  className="w-full p-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Enter mess location"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Capacity
+                </label>
+                <input
+                  type="number"
+                  {...register("capacity", { min: 1 })}
+                  className="w-full p-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Enter mess capacity"
+                />
+              </div>
             </div>
-          ))}
+          </div>
 
-          <button
-            type="button"
-            className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md"
-            onClick={() => appendWorker({ name: "", mobileNumber: "" })}
-          >
-            Add Worker
-          </button>
-        </div>
-
-        {/* Weekly Food Menu */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Weekly Food Menu</h2>
-
-          <div className="space-y-6">
-            {[
-              "Monday",
-              "Tuesday",
-              "Wednesday",
-              "Thursday",
-              "Friday",
-              "Saturday",
-              "Sunday",
-            ].map((day, dayIndex) => (
-              <div key={day} className="border-b pb-4 mb-4 last:border-b-0">
-                <h3 className="text-lg font-medium mb-3">{day}</h3>
-
-                {/* Breakfast */}
-                <div className="mb-4">
-                  <h4 className="text-md font-medium mb-2">Breakfast</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Items
-                      </label>
-                      <Controller
-                        name={`meals.${dayIndex}.breakfast.items`}
-                        control={control}
-                        render={({ field }) => (
-                          <input
-                            className="w-full p-2 border rounded"
-                            placeholder="Enter items separated by commas"
-                            value={field.value.join(", ")}
-                            onChange={(e) => {
-                              const items = e.target.value
-                                .split(",")
-                                .map((item) => item.trim());
-                              field.onChange(items);
-                            }}
-                          />
-                        )}
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-2">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Hour
-                        </label>
-                        <input
-                          type="number"
-                          min="1"
-                          max="12"
-                          {...register(
-                            `meals.${dayIndex}.breakfast.timing.hour`,
-                            { min: 1, max: 12 }
-                          )}
-                          className="w-full p-2 border rounded"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Minute
-                        </label>
-                        <input
-                          type="number"
-                          min="0"
-                          max="59"
-                          {...register(
-                            `meals.${dayIndex}.breakfast.timing.minute`,
-                            { min: 0, max: 59 }
-                          )}
-                          className="w-full p-2 border rounded"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          AM/PM
-                        </label>
-                        <select
-                          {...register(
-                            `meals.${dayIndex}.breakfast.timing.am_pm`
-                          )}
-                          className="w-full p-2 border rounded"
-                        >
-                          <option value="am">AM</option>
-                          <option value="pm">PM</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Lunch */}
-                <div className="mb-4">
-                  <h4 className="text-md font-medium mb-2">Lunch</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Items
-                      </label>
-                      <Controller
-                        name={`meals.${dayIndex}.lunch.items`}
-                        control={control}
-                        render={({ field }) => (
-                          <input
-                            className="w-full p-2 border rounded"
-                            placeholder="Enter items separated by commas"
-                            value={field.value.join(", ")}
-                            onChange={(e) => {
-                              const items = e.target.value
-                                .split(",")
-                                .map((item) => item.trim());
-                              field.onChange(items);
-                            }}
-                          />
-                        )}
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-2">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Hour
-                        </label>
-                        <input
-                          type="number"
-                          min="1"
-                          max="12"
-                          {...register(`meals.${dayIndex}.lunch.timing.hour`, {
-                            min: 1,
-                            max: 12,
-                          })}
-                          className="w-full p-2 border rounded"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Minute
-                        </label>
-                        <input
-                          type="number"
-                          min="0"
-                          max="59"
-                          {...register(
-                            `meals.${dayIndex}.lunch.timing.minute`,
-                            { min: 0, max: 59 }
-                          )}
-                          className="w-full p-2 border rounded"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          AM/PM
-                        </label>
-                        <select
-                          {...register(`meals.${dayIndex}.lunch.timing.am_pm`)}
-                          className="w-full p-2 border rounded"
-                        >
-                          <option value="am">AM</option>
-                          <option value="pm">PM</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Evening Snacks */}
-                <div className="mb-4">
-                  <h4 className="text-md font-medium mb-2">Evening Snacks</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Items
-                      </label>
-                      <Controller
-                        name={`meals.${dayIndex}.eveningSnacks.items`}
-                        control={control}
-                        render={({ field }) => (
-                          <input
-                            className="w-full p-2 border rounded"
-                            placeholder="Enter items separated by commas"
-                            value={field.value.join(", ")}
-                            onChange={(e) => {
-                              const items = e.target.value
-                                .split(",")
-                                .map((item) => item.trim());
-                              field.onChange(items);
-                            }}
-                          />
-                        )}
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-2">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Hour
-                        </label>
-                        <input
-                          type="number"
-                          min="1"
-                          max="12"
-                          {...register(
-                            `meals.${dayIndex}.eveningSnacks.timing.hour`,
-                            { min: 1, max: 12 }
-                          )}
-                          className="w-full p-2 border rounded"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Minute
-                        </label>
-                        <input
-                          type="number"
-                          min="0"
-                          max="59"
-                          {...register(
-                            `meals.${dayIndex}.eveningSnacks.timing.minute`,
-                            { min: 0, max: 59 }
-                          )}
-                          className="w-full p-2 border rounded"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          AM/PM
-                        </label>
-                        <select
-                          {...register(
-                            `meals.${dayIndex}.eveningSnacks.timing.am_pm`
-                          )}
-                          className="w-full p-2 border rounded"
-                        >
-                          <option value="am">AM</option>
-                          <option value="pm">PM</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Dinner */}
+          {/* Workers Section */}
+          <div className="bg-gray-800 p-6 rounded-lg shadow-md border border-gray-700">
+            <h2 className="text-xl font-semibold mb-4">Mess Workers</h2>
+            {workerFields.map((field, index) => (
+              <div
+                key={field.id}
+                className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 pb-4 border-b border-gray-700"
+              >
                 <div>
-                  <h4 className="text-md font-medium mb-2">Dinner</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Items
-                      </label>
-                      <Controller
-                        name={`meals.${dayIndex}.dinner.items`}
-                        control={control}
-                        render={({ field }) => (
-                          <input
-                            className="w-full p-2 border rounded"
-                            placeholder="Enter items separated by commas"
-                            value={field.value.join(", ")}
-                            onChange={(e) => {
-                              const items = e.target.value
-                                .split(",")
-                                .map((item) => item.trim());
-                              field.onChange(items);
-                            }}
-                          />
-                        )}
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-2">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Hour
-                        </label>
-                        <input
-                          type="number"
-                          min="1"
-                          max="12"
-                          {...register(`meals.${dayIndex}.dinner.timing.hour`, {
-                            min: 1,
-                            max: 12,
-                          })}
-                          className="w-full p-2 border rounded"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Minute
-                        </label>
-                        <input
-                          type="number"
-                          min="0"
-                          max="59"
-                          {...register(
-                            `meals.${dayIndex}.dinner.timing.minute`,
-                            { min: 0, max: 59 }
-                          )}
-                          className="w-full p-2 border rounded"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          AM/PM
-                        </label>
-                        <select
-                          {...register(`meals.${dayIndex}.dinner.timing.am_pm`)}
-                          className="w-full p-2 border rounded"
-                        >
-                          <option value="am">AM</option>
-                          <option value="pm">PM</option>
-                        </select>
-                      </div>
-                    </div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Worker Name
+                  </label>
+                  <input
+                    {...register(`workers.${index}.name`)}
+                    className="w-full p-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="Enter worker name"
+                  />
+                  {errors.workers?.[index]?.name && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.workers[index].name.message}
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-end">
+                  <div className="flex-grow">
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                      Mobile Number
+                    </label>
+                    <input
+                      {...register(`workers.${index}.mobileNumber`)}
+                      className="w-full p-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      placeholder="Enter mobile number"
+                    />
+                    {errors.workers?.[index]?.mobileNumber && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.workers[index].mobileNumber.message}
+                      </p>
+                    )}
                   </div>
+                  {index > 0 && (
+                    <button
+                      type="button"
+                      className="ml-2 p-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                      onClick={() => removeWorker(index)}
+                    >
+                      Remove
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
+            <button
+              type="button"
+              className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+              onClick={() => appendWorker({ name: "", mobileNumber: "" })}
+            >
+              Add Worker
+            </button>
           </div>
-        </div>
 
-        <div className="flex justify-end">
-          <button
-            type="submit"
-            className="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-300"
-            disabled={loading}
-          >
-            {loading ? "Creating..." : "Create Mess"}
-          </button>
-        </div>
-      </form>
+          {/* Meal Timings Section */}
+          <div className="bg-gray-800 p-6 rounded-lg shadow-md border border-gray-700">
+            <h2 className="text-xl font-semibold mb-4">Meal Timings</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Breakfast Timing */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Breakfast Timing
+                </label>
+                <div className="flex space-x-2">
+                  <input
+                    type="number"
+                    {...register("mealTimings.breakfast.hour", {
+                      min: 1,
+                      max: 12,
+                    })}
+                    className="w-1/3 p-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white"
+                    placeholder="Hour"
+                  />
+                  <input
+                    type="number"
+                    {...register("mealTimings.breakfast.minute", {
+                      min: 0,
+                      max: 59,
+                    })}
+                    className="w-1/3 p-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white"
+                    placeholder="Minute"
+                  />
+                  <select
+                    {...register("mealTimings.breakfast.am_pm")}
+                    className="w-1/3 p-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white"
+                  >
+                    <option value="am">AM</option>
+                    <option value="pm">PM</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Lunch Timing */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Lunch Timing
+                </label>
+                <div className="flex space-x-2">
+                  <input
+                    type="number"
+                    {...register("mealTimings.lunch.hour", { min: 1, max: 12 })}
+                    className="w-1/3 p-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white"
+                    placeholder="Hour"
+                  />
+                  <input
+                    type="number"
+                    {...register("mealTimings.lunch.minute", {
+                      min: 0,
+                      max: 59,
+                    })}
+                    className="w-1/3 p-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white"
+                    placeholder="Minute"
+                  />
+                  <select
+                    {...register("mealTimings.lunch.am_pm")}
+                    className="w-1/3 p-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white"
+                  >
+                    <option value="am">AM</option>
+                    <option value="pm">PM</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Evening Snacks Timing */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Evening Snacks Timing
+                </label>
+                <div className="flex space-x-2">
+                  <input
+                    type="number"
+                    {...register("mealTimings.eveningSnacks.hour", {
+                      min: 1,
+                      max: 12,
+                    })}
+                    className="w-1/3 p-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white"
+                    placeholder="Hour"
+                  />
+                  <input
+                    type="number"
+                    {...register("mealTimings.eveningSnacks.minute", {
+                      min: 0,
+                      max: 59,
+                    })}
+                    className="w-1/3 p-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white"
+                    placeholder="Minute"
+                  />
+                  <select
+                    {...register("mealTimings.eveningSnacks.am_pm")}
+                    className="w-1/3 p-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white"
+                  >
+                    <option value="am">AM</option>
+                    <option value="pm">PM</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Dinner Timing */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Dinner Timing
+                </label>
+                <div className="flex space-x-2">
+                  <input
+                    type="number"
+                    {...register("mealTimings.dinner.hour", {
+                      min: 1,
+                      max: 12,
+                    })}
+                    className="w-1/3 p-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white"
+                    placeholder="Hour"
+                  />
+                  <input
+                    type="number"
+                    {...register("mealTimings.dinner.minute", {
+                      min: 0,
+                      max: 59,
+                    })}
+                    className="w-1/3 p-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white"
+                    placeholder="Minute"
+                  />
+                  <select
+                    {...register("mealTimings.dinner.am_pm")}
+                    className="w-1/3 p-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white"
+                  >
+                    <option value="am">AM</option>
+                    <option value="pm">PM</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Weekly Food Menu Section */}
+          <div className="bg-gray-800 p-6 rounded-lg shadow-md border border-gray-700">
+            <h2 className="text-xl font-semibold mb-4">Weekly Food Menu</h2>
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead>
+                  <tr className="bg-gray-700">
+                    <th className="px-4 py-2 text-left">Day</th>
+                    <th className="px-4 py-2 text-left">Breakfast</th>
+                    <th className="px-4 py-2 text-left">Lunch</th>
+                    <th className="px-4 py-2 text-left">Evening Snacks</th>
+                    <th className="px-4 py-2 text-left">Dinner</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    "Monday",
+                    "Tuesday",
+                    "Wednesday",
+                    "Thursday",
+                    "Friday",
+                    "Saturday",
+                    "Sunday",
+                  ].map((day, index) => (
+                    <tr key={day} className="border-b border-gray-700">
+                      <td className="px-4 py-2">{day}</td>
+                      <td className="px-4 py-2">
+                        <input
+                          {...register(`meals.${index}.breakfast`)}
+                          className="w-full p-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white"
+                          placeholder="Items separated by commas"
+                        />
+                      </td>
+                      <td className="px-4 py-2">
+                        <input
+                          {...register(`meals.${index}.lunch`)}
+                          className="w-full p-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white"
+                          placeholder="Items separated by commas"
+                        />
+                      </td>
+                      <td className="px-4 py-2">
+                        <input
+                          {...register(`meals.${index}.eveningSnacks`)}
+                          className="w-full p-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white"
+                          placeholder="Items separated by commas"
+                        />
+                      </td>
+                      <td className="px-4 py-2">
+                        <input
+                          {...register(`meals.${index}.dinner`)}
+                          className="w-full p-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white"
+                          placeholder="Items separated by commas"
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              className="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-300"
+              disabled={loading}
+            >
+              {loading ? "Creating..." : "Create Mess"}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

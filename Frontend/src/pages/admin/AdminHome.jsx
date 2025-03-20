@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../../utils/axiosRequest";
-import Header from "../../components/Header";
+import AdminHeader from "../../components/AdminHeader";
 
 const AdminHome = () => {
   const [college, setCollege] = useState(null);
@@ -27,7 +27,7 @@ const AdminHome = () => {
           // If college exists, fetch its hostels
           try {
             const hostelsResponse = await api.post(
-              `/api/hostel/fetchAllHostels/${collegeResponse.data.college._id}`
+              `/api/hostel/fetchAllHostels`
             );
             console.log("Hostels response:", hostelsResponse);
             setHostels(hostelsResponse.data.hostels || []);
@@ -64,52 +64,61 @@ const AdminHome = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-xl font-semibold">Loading...</div>
+      <div>
+        <AdminHeader />
+        <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+          <div className="text-xl font-semibold">Loading...</div>
+        </div>
       </div>
     );
   }
 
   return (
     <div>
-      <Header />
-      <div className="min-h-screen bg-gray-100">
+      <AdminHeader />
+      <div className="min-h-screen bg-gray-900 text-white">
         {collegeExists ? (
           <div className="p-8">
-            {/* College Info Card at the top */}
-            <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-              <h1 className="text-3xl font-bold mb-4 text-indigo-700">
+            {/* College Info Card */}
+            <div className="bg-gray-800 rounded-lg shadow-md p-6 mb-8 border border-gray-700">
+              <h1 className="text-3xl font-bold mb-4 text-indigo-400">
                 {college.name}
               </h1>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h2 className="text-xl font-semibold mb-2 text-gray-700">
+                  <h2 className="text-xl font-semibold mb-2 text-gray-300">
                     College Details
                   </h2>
-                  <div className="space-y-2 text-gray-600">
+                  <div className="space-y-2 text-gray-400">
                     <p>
-                      <span className="font-medium">Domain:</span>{" "}
+                      <span className="font-medium text-gray-200">Domain:</span>{" "}
                       {college.domain}
                     </p>
                     <p>
-                      <span className="font-medium">Website:</span>{" "}
+                      <span className="font-medium text-gray-200">
+                        Website:
+                      </span>{" "}
                       {college.website}
                     </p>
                     <p>
-                      <span className="font-medium">Contact Email:</span>{" "}
+                      <span className="font-medium text-gray-200">
+                        Contact Email:
+                      </span>{" "}
                       {college.contactEmail}
                     </p>
                     <p>
-                      <span className="font-medium">Contact Phone:</span>{" "}
+                      <span className="font-medium text-gray-200">
+                        Contact Phone:
+                      </span>{" "}
                       {college.contactPhone}
                     </p>
                   </div>
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold mb-2 text-gray-700">
+                  <h2 className="text-xl font-semibold mb-2 text-gray-300">
                     Address
                   </h2>
-                  <div className="space-y-2 text-gray-600">
+                  <div className="space-y-2 text-gray-400">
                     <p>{college.address.street}</p>
                     <p>
                       {college.address.city}, {college.address.state}
@@ -124,7 +133,7 @@ const AdminHome = () => {
 
             {/* Hostels Section */}
             <div className="mb-6 flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-800">Hostels</h2>
+              <h2 className="text-2xl font-bold text-gray-100">Hostels</h2>
               <Link to="/admin/create-hostel">
                 <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg flex items-center">
                   <svg
@@ -150,18 +159,18 @@ const AdminHome = () => {
                 {hostels.map((hostel) => (
                   <div
                     key={hostel._id}
-                    className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+                    className="bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer border border-gray-700"
                     onClick={() => handleHostelClick(hostel.code)}
                   >
                     <div className="bg-indigo-600 rounded-t-lg h-3"></div>
                     <div className="p-6">
-                      <h3 className="text-xl font-bold mb-2 text-gray-800">
+                      <h3 className="text-xl font-bold mb-2 text-gray-100">
                         {hostel.name}
                       </h3>
-                      <p className="text-gray-600 flex items-center">
+                      <p className="text-gray-400 flex items-center">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 mr-2 text-indigo-500"
+                          className="h-5 w-5 mr-2 text-indigo-400"
                           viewBox="0 0 20 20"
                           fill="currentColor"
                         >
@@ -178,8 +187,8 @@ const AdminHome = () => {
                 ))}
               </div>
             ) : (
-              <div className="bg-white rounded-lg shadow p-8 text-center">
-                <p className="text-gray-600 mb-4">
+              <div className="bg-gray-800 rounded-lg shadow p-8 text-center border border-gray-700">
+                <p className="text-gray-400 mb-4">
                   No hostels found for this college.
                 </p>
                 <Link to="/admin/create-hostel">
@@ -192,8 +201,8 @@ const AdminHome = () => {
 
             {/* Messes Section */}
             <div className="mt-12 mb-6 flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-800">Messes</h2>
-              <Link to="/admin/create-mess">
+              <h2 className="text-2xl font-bold text-gray-100">Messes</h2>
+              <Link to="/admin/mess/create">
                 <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg flex items-center">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -218,18 +227,18 @@ const AdminHome = () => {
                 {messes.map((mess) => (
                   <div
                     key={mess._id}
-                    className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+                    className="bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer border border-gray-700"
                     onClick={() => handleMessClick(mess.code)}
                   >
                     <div className="bg-orange-500 rounded-t-lg h-3"></div>
                     <div className="p-6">
-                      <h3 className="text-xl font-bold mb-2 text-gray-800">
+                      <h3 className="text-xl font-bold mb-2 text-gray-100">
                         {mess.name}
                       </h3>
-                      <p className="text-gray-600 flex items-center">
+                      <p className="text-gray-400 flex items-center">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 mr-2 text-orange-500"
+                          className="h-5 w-5 mr-2 text-orange-400"
                           viewBox="0 0 20 20"
                           fill="currentColor"
                         >
@@ -241,7 +250,7 @@ const AdminHome = () => {
                         <span className="text-sm text-gray-500">
                           Capacity: {mess.capacity}
                         </span>
-                        <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                        <span className="bg-blue-900 text-blue-300 text-xs font-medium px-2.5 py-0.5 rounded">
                           {mess.code}
                         </span>
                       </div>
@@ -250,11 +259,11 @@ const AdminHome = () => {
                 ))}
               </div>
             ) : (
-              <div className="bg-white rounded-lg shadow p-8 text-center">
-                <p className="text-gray-600 mb-4">
+              <div className="bg-gray-800 rounded-lg shadow p-8 text-center border border-gray-700">
+                <p className="text-gray-400 mb-4">
                   No messes found for this college.
                 </p>
-                <Link to="/admin/create-mess">
+                <Link to="/admin/mess/create">
                   <button className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg">
                     Create Your First Mess
                   </button>
@@ -263,20 +272,20 @@ const AdminHome = () => {
             )}
           </div>
         ) : (
-          <div className="min-h-screen flex items-center justify-center">
+          <div className="min-h-screen flex items-center justify-center bg-gray-900">
             {requestPending ? (
               <div className="text-center p-8">
-                <div className="mb-4 text-amber-600 text-xl font-semibold">
+                <div className="mb-4 text-amber-400 text-xl font-semibold">
                   Your college registration request is pending approval
                 </div>
-                <button className="bg-amber-500 text-white px-6 py-3 rounded-lg hover:bg-amber-600 cursor-not-allowed">
+                <button className="bg-amber-600 text-white px-6 py-3 rounded-lg hover:bg-amber-700 cursor-not-allowed">
                   Request Pending
                 </button>
               </div>
             ) : (
               <div className="text-center p-8">
-                <div className="mb-4 text-gray-600">
-                  You need to create a college before adding hostels
+                <div className="mb-4 text-gray-400">
+                  You need to create a college before adding hostels.
                 </div>
                 <Link to="/admin/college/create">
                   <button className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700">

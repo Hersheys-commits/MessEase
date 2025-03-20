@@ -18,6 +18,15 @@ import BookRooms from "./pages/student/BookRooms";
 import HostelDetailPage from "./pages/admin/HostelDetailPage";
 import MessForm from "./pages/admin/MessForm";
 import MessDetails from "./pages/admin/MessDetails";
+import VotingPage from "./pages/student/VotingPage";
+import ElectionResultsPage from "./pages/student/ElectionResultsPage";
+import ApplicationForm from "./pages/student/ApplicationForm";
+import AdminApplicationReview from "./pages/admin/AdminApplicationReview";
+import AdminElectionConfig from "./pages/admin/AdminElectionConfig";
+import AdminElectionResults from "./pages/admin/AdminElectionResults";
+import BookedRooms from "./pages/student/BookedRooms";
+import StudentElectionsPage from "./pages/student/StudentElectionsPage";
+import UpdateProfile from "./pages/student/UpdateProfilePage";
 
 function App() {
   return (
@@ -35,6 +44,32 @@ function App() {
         <Route path="/admin/hostel/:code" element={<HostelDetailPage />} />
         <Route path="/admin/mess/create" element={<MessForm />} />
         <Route path="/admin/mess/:code" element={<MessDetails />} />
+        <Route path="/student/update-profile" element={<UpdateProfile />} />
+
+        {/* Election Routes */}
+        <Route path="/student/election" element={<StudentElectionsPage />} />
+        <Route
+          path="/student/election/:electionId/voting"
+          element={<VotingPage />}
+        />
+        <Route
+          path="/student/election/:electionId/results"
+          element={<ElectionResultsPage />}
+        />
+        <Route
+          path="/student/election/:electionId/form"
+          element={<ApplicationForm />}
+        />
+        <Route
+          path="/admin/election/:electionId/applications"
+          element={<AdminApplicationReview />}
+        />
+        <Route path="/admin/election" element={<AdminElectionConfig />} />
+        <Route
+          path="/admin/election/:electionId/results"
+          element={<AdminElectionResults />}
+        />
+
         <Route path="*" element={<PageNotFound />} />
 
         {/* Protected Routes */}
@@ -60,9 +95,7 @@ function App() {
         </Route>
 
         <Route path="/book-rooms" element={<BookRooms />} />
-
-        {/* Redirect root to student login */}
-        <Route path="/" element={<Login userType="student" />} />
+        <Route path="/see-booking" element={<BookedRooms />} />
       </Routes>
       <Toaster />
     </>

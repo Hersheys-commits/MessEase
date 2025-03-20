@@ -9,6 +9,8 @@ import studentRoutes from "./route/student.route.js";
 import guestRoutes from "./route/guest.route.js";
 import hostelRoutes from "./route/hostel.route.js";
 import messRoutes from "./route/mess.route.js";
+import electionRoutes from "./route/election.route.js";
+
 dotenv.config({ path: "./.env" });
 
 const app = express();
@@ -44,6 +46,7 @@ app.use("/api/student", studentRoutes);
 app.use("/api/hostel", hostelRoutes);
 app.use("/api/guest", guestRoutes);
 app.use("/api/mess", messRoutes);
+app.use("/api/election", electionRoutes);
 
 // Global Error Handling Middleware
 app.use((err, req, res, next) => {

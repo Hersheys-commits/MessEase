@@ -61,10 +61,10 @@ export const createHostel = async (req, res) => {
 
 export const fetchAllHostels = async (req, res) => {
   try {
-    const { collegeId } = req.params;
+    const collegeId = req.user.college;
 
     if (!collegeId) {
-      return res.status(400).json({ message: "College ID is required" });
+      return res.status(430).json({ message: "College ID is required" });
     }
 
     // Find all hostels that belong to the specified college
