@@ -9,7 +9,6 @@ function StudentHome() {
   const [userId, setUserId] = useState("");
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
   useEffect(() => {
     const verifyHostel = async () => {
       try {
