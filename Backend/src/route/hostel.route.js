@@ -3,6 +3,7 @@ import {
   createHostel,
   fetchAllHostels,
   getHostelByCode,
+  getHostelMess,
   getHostelsWithoutMess,
   updateHostel,
 } from "../controller/hostel.controller.js";
@@ -14,5 +15,6 @@ router.post("/fetchAllHostels", verifyJWT, fetchAllHostels);
 router.get("/:code", verifyJWT, getHostelByCode);
 router.put("/update/:code", verifyJWT, updateHostel);
 router.post("/without-mess", verifyJWT, getHostelsWithoutMess);
+router.post("/getHostelMess", verifyJWT, getHostelMess);
 
 export default router;

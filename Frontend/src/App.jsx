@@ -27,6 +27,10 @@ import AdminElectionResults from "./pages/admin/AdminElectionResults";
 import BookedRooms from "./pages/student/BookedRooms";
 import StudentElectionsPage from "./pages/student/StudentElectionsPage";
 import UpdateProfile from "./pages/student/UpdateProfilePage";
+import ProfilePage from "./pages/student/ProfilePage";
+import AdminProfile from "./pages/admin/profile/AdminProfile";
+import UpdateAdminProfile from "./pages/admin/profile/UpdateAdminProfile";
+import UpdateCollege from "./pages/admin/profile/UpdateCollege";
 
 function App() {
   return (
@@ -45,6 +49,10 @@ function App() {
         <Route path="/admin/mess/create" element={<MessForm />} />
         <Route path="/admin/mess/:code" element={<MessDetails />} />
         <Route path="/student/update-profile" element={<UpdateProfile />} />
+        <Route path="/student/profile" element={<ProfilePage />} />
+        <Route path="/admin/profile" element={<AdminProfile />} />
+        <Route path="/admin/update-profile" element={<UpdateAdminProfile />} />
+        <Route path="/admin/update-college" element={<UpdateCollege />} />
 
         {/* Election Routes */}
         <Route path="/student/election" element={<StudentElectionsPage />} />

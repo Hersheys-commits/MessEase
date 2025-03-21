@@ -3,6 +3,10 @@ import College from "../model/college.model.js";
 import User from "../model/user.model.js";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
+import { ApiResponse } from "../util/ApiResponse.js";
+import { ApiError } from "../util/ApiError.js";
+import { asyncHandler } from "../util/asyncHandler.js";
+import { uploadOnCloudinary } from "../util/cloudinary.js";
 
 // Hardcoded developer email
 const developerEmail = "harsh1618sharma@gmail.com";
@@ -169,3 +173,95 @@ export const verifyCollege = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+
+export const getCollege = async (req, res) => {
+  try {
+    const collegeId = req.user.college;
+
+    if (!collegeId) {
+      return res
+        .status(400)
+        .json({ message: "College not assigned to user.", success: false });
+    }
+
+    const college = await College.findById(collegeId);
+
+    if (!college) {
+      return res
+        .status(401)
+        .json({ message: "College doesnt exist with this ID", success: false });
+    }
+
+    return res.status(200).json({
+      message: "college fetched successfully",
+      college,
+      success: true,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Update college details
+export const updateCollegeDetails = asyncHandler(async (req, res) => {
+  const { name, logo, address, contactEmail, contactPhone, website } = req.body;
+
+  const user = await User.findById(req.user?._id);
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  // Check if user is an admin
+  if (user.role !== "admin") {
+    throw new ApiError(
+      403,
+      "Unauthorized access. Only admins can update college details"
+    );
+  }
+
+  if (!user.college) {
+    throw new ApiError(404, "No college associated with this admin");
+  }
+
+  const college = await College.findById(user.college);
+
+  if (!college) {
+    throw new ApiError(404, "College not found");
+  }
+
+  // Handle logo upload if provided
+  if (req.files && req.files.logo) {
+    const logoFile = req.files.logo;
+    const logoUpload = await uploadOnCloudinary(logoFile.path);
+
+    if (logoUpload) {
+      college.logo = logoUpload.url;
+    }
+  } else if (logo) {
+    college.logo = logo;
+  }
+
+  // Update other fields if provided
+  if (name) college.name = name;
+
+  if (address) {
+    college.address = {
+      ...college.address,
+      ...address,
+    };
+  }
+
+  if (contactEmail) college.contactEmail = contactEmail;
+  if (contactPhone) college.contactPhone = contactPhone;
+  if (website) college.website = website;
+
+  await college.save();
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, college, "College details updated successfully")
+    );
+});

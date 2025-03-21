@@ -200,7 +200,7 @@ const UpdateProfile = () => {
                       alt="Profile preview"
                       className="w-full h-full object-cover"
                     />
-                  ) : user.profilePicture ? (
+                  ) : user.profilePicture == "" ? (
                     <img
                       src={user.profilePicture}
                       alt="Profile"

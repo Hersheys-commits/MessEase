@@ -1,5 +1,6 @@
 import Hostel from "../model/hostel.model.js";
 import crypto from "crypto";
+import Mess from "../model/mess.model.js";
 
 export const createHostel = async (req, res) => {
   try {
@@ -220,5 +221,39 @@ export const getHostelsWithoutMess = async (req, res) => {
       message: "Server error while fetching hostels",
       error: error.message,
     });
+  }
+};
+
+export const getHostelMess = async (req, res) => {
+  try {
+    const hostelId = req.user.hostel;
+    if (!hostelId) {
+      return res
+        .status(400)
+        .json({ message: "No hostel assigned", success: false });
+    }
+    const hostel = await Hostel.findById(hostelId);
+    if (!hostel) {
+      return res
+        .status(401)
+        .json({ message: "No hostel found with this ID", success: false });
+    }
+
+    const messId = hostel.mess;
+    let mess;
+    if (messId) {
+      mess = await Mess.findById(messId);
+    }
+
+    return res
+      .status(200)
+      .json({
+        message: "Hostel successfully fetched",
+        success: true,
+        hostel,
+        mess,
+      });
+  } catch (error) {
+    return res.status(500).json({ message: "server error", success: false });
   }
 };

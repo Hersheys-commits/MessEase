@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
 import api from "../../utils/axiosRequest";
@@ -10,7 +9,7 @@ function StudentHome() {
   const [userId, setUserId] = useState("");
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const [userId, setUserId] = useState("");
+
   useEffect(() => {
     const verifyHostel = async () => {
       try {

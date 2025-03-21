@@ -1,11 +1,13 @@
 // controllers/adminController.js
 import User from "../model/user.model.js";
+import College from "../model/college.model.js";
 import { OAuth2Client } from "google-auth-library";
 import { ApiResponse } from "../util/ApiResponse.js";
 import { ApiError } from "../util/ApiError.js";
 import { asyncHandler } from "../util/asyncHandler.js";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
+import { uploadOnCloudinary } from "../util/cloudinary.js";
 
 dotenv.config();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -335,3 +337,69 @@ export const verifyToken = async (req, res) => {
     user: req.user._id,
   });
 };
+
+// Get admin profile
+export const getAdminProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user?._id).select(
+    "-password -refreshToken"
+  );
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  // Get college details if admin has a college association
+  let collegeDetails = null;
+  if (user.college) {
+    collegeDetails = await College.findById(user.college).populate({
+      path: "admins",
+      select: "name email profilePicture",
+    });
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { user, collegeDetails },
+        "Admin profile fetched successfully"
+      )
+    );
+});
+
+// Update admin profile
+export const updateAdminProfile = asyncHandler(async (req, res) => {
+  const { name, phoneNumber, email } = req.body;
+
+  if (!name && !phoneNumber && !email && !req.files?.profilePicture) {
+    throw new ApiError(400, "At least one field is required to update");
+  }
+
+  const user = await User.findById(req.user?._id);
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  // Handle profile picture upload if provided
+  if (req.files && req.files.profilePicture) {
+    const profilePictureFile = req.files.profilePicture;
+    const profilePicture = await uploadOnCloudinary(profilePictureFile.path);
+
+    if (profilePicture) {
+      user.profilePicture = profilePicture.url;
+    }
+  }
+
+  // Update other fields if provided
+  if (name) user.name = name;
+  if (phoneNumber) user.phoneNumber = phoneNumber;
+  if (email) user.email = email;
+
+  await user.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "Admin profile updated successfully"));
+});
