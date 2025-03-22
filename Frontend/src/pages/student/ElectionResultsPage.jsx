@@ -34,6 +34,7 @@ const ElectionResultsPage = () => {
       try {
         // Get election details
         const electionResponse = await api.get(`/api/election/${electionId}`);
+        console.log(electionResponse);
         setElection(electionResponse.data.data);
 
         // Get results
@@ -114,7 +115,7 @@ const ElectionResultsPage = () => {
           <div className="mb-6 p-4 bg-gray-700 rounded-lg border border-gray-600">
             <h2 className="font-semibold text-lg mb-2 text-indigo-300">
               {election.type === "messManager" ? "Mess" : "Hostel"}:{" "}
-              {election.targetId?.name || "N/A"}
+              {election?.name || "N/A"}
             </h2>
             <p className="text-gray-300">
               Results announced on:{" "}

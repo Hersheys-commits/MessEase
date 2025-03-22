@@ -634,9 +634,10 @@ export const getElectionById = async (req, res) => {
   try {
     const { electionId } = req.params;
 
-    const election = await ElectionConfig.findById(electionId)
-      .populate("targetId") // Populate the target (mess or hostel) details
-      .populate("result.winnerId", "name email branch year"); // Populate winner details if exists
+    let election = await ElectionConfig.findById(electionId).populate(
+      "result.winnerId",
+      "name email branch year"
+    ); // Populate winner details if exists
 
     if (!election) {
       return res.status(404).json({
@@ -645,9 +646,26 @@ export const getElectionById = async (req, res) => {
       });
     }
 
+    const targetId = election.targetId;
+    let name;
+
+    const hostel = await Hostel.findById(targetId).select("name");
+    if (hostel) {
+      name = hostel.name;
+    } else {
+      const mess = await Mess.findById(targetId).select("name");
+      if (mess) {
+        name = mess.name;
+      }
+    }
+
+    // Convert Mongoose document to plain object and add `name` field
+    let electionData = election.toObject();
+    electionData.name = name;
+
     return res.status(200).json({
       success: true,
-      data: election,
+      data: electionData,
     });
   } catch (error) {
     return res.status(500).json({
@@ -680,7 +698,7 @@ export const votedOrNot = async (req, res) => {
 export const getStudentElections = async (req, res) => {
   try {
     const { mess: messId, hostel: hostelId } = req.user;
-    console.log("firs323t", req.user);
+
     if (!messId && !hostelId) {
       return res.status(400).json({
         success: false,
@@ -711,11 +729,28 @@ export const getStudentElections = async (req, res) => {
       $and: [{ $or: typeConditions }, statusCondition],
     };
 
-    // Query the database, populate target details, sort, and lean the result for efficiency.
+    // Query elections without populating
     const elections = await ElectionConfig.find(query)
-      .populate("targetId", "name")
       .sort({ updatedAt: -1 })
       .lean();
+
+    // Fetch names for each election
+    for (let election of elections) {
+      let name = null;
+
+      const hostel = await Hostel.findById(election.targetId).select("name");
+      if (hostel) {
+        name = hostel.name;
+      } else {
+        const mess = await Mess.findById(election.targetId).select("name");
+        if (mess) {
+          name = mess.name;
+        }
+      }
+
+      // Add name field to election object
+      election.name = name;
+    }
 
     return res.status(200).json({
       success: true,

@@ -245,14 +245,12 @@ export const getHostelMess = async (req, res) => {
       mess = await Mess.findById(messId);
     }
 
-    return res
-      .status(200)
-      .json({
-        message: "Hostel successfully fetched",
-        success: true,
-        hostel,
-        mess,
-      });
+    return res.status(200).json({
+      message: "Hostel successfully fetched",
+      success: true,
+      hostel,
+      mess,
+    });
   } catch (error) {
     return res.status(500).json({ message: "server error", success: false });
   }

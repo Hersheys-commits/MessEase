@@ -49,12 +49,10 @@ const ProfilePage = () => {
 
         // Fetch college data
         const collegeRes = await api.get("/api/college/getCollege");
-        console.log(collegeRes);
         setCollege(collegeRes.data.college);
 
         // Fetch hostel and mess details for the user's assigned hostel/mess
         const hmRes = await api.post("/api/hostel/getHostelMess");
-        console.log("first", hmRes);
         setHostelMess(hmRes.data);
 
         setLoading(false);

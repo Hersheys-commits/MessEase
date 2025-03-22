@@ -411,3 +411,248 @@ export const uploadProfilePicture = asyncHandler(async (req, res) => {
       new ApiResponse(200, updatedUser, "Profile picture updated successfully")
     );
 });
+
+// Get all students with filtering, sorting, and pagination
+export const getAllStudents = asyncHandler(async (req, res) => {
+  try {
+    const {
+      search,
+      branch,
+      year,
+      hostel,
+      role,
+      blockStatus, // new parameter to filter active/blocked students
+      sortBy = "name",
+      sortOrder = "asc",
+      page = 1,
+      limit = 20,
+    } = req.query;
+
+    // Extract college from authenticated admin user
+    const collegeId = req.user.college;
+
+    // Base query - only get users from admin's college
+    const query = { college: collegeId };
+
+    // Add role filter - if provided, otherwise default to student roles
+    if (role) {
+      // If multiple roles are provided as comma-separated string
+      if (role.includes(",")) {
+        query.role = { $in: role.split(",") };
+      } else {
+        query.role = role;
+      }
+    } else {
+      // Default to showing only student/hostelManager/messManager roles
+      query.role = { $in: ["student", "hostelManager", "messManager"] };
+    }
+
+    // Add branch filter if provided
+    if (branch) {
+      query.branch = branch;
+    }
+
+    // Add year filter if provided
+    if (year) {
+      query.year = parseInt(year);
+    }
+
+    // Add hostel filter if provided
+    if (hostel) {
+      query.hostel = new mongoose.Types.ObjectId(hostel);
+    }
+
+    // Add block status filter if provided
+    if (blockStatus) {
+      if (blockStatus === "active") {
+        query.isBlocked = false;
+      } else if (blockStatus === "blocked") {
+        query.isBlocked = true;
+      }
+    }
+
+    // Add search functionality
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { rollNumber: { $regex: search, $options: "i" } },
+        { room: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    // Determine sort direction
+    const sortDirection = sortOrder === "desc" ? -1 : 1;
+
+    // Prepare sort object
+    const sortOptions = {};
+    sortOptions[sortBy] = sortDirection;
+
+    // Calculate pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    // Execute query with pagination
+    const students = await User.find(query)
+      .populate("hostel", "name") // Only populate name field from hostel
+      .select("-password -refreshToken") // Exclude sensitive fields (block fields remain)
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    // Get total count for pagination info
+    const totalCount = await User.countDocuments(query);
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          students,
+          pagination: {
+            total: totalCount,
+            page: parseInt(page),
+            limit: parseInt(limit),
+            pages: Math.ceil(totalCount / parseInt(limit)),
+          },
+        },
+        "Students fetched successfully"
+      )
+    );
+  } catch (error) {
+    throw new ApiError(500, "Error fetching students: " + error.message);
+  }
+});
+
+// Get available filter options for the admin panel
+export const getFilterOptions = asyncHandler(async (req, res) => {
+  try {
+    const collegeId = req.user.college;
+
+    // Get unique branches
+    const branches = await User.distinct("branch", {
+      college: collegeId,
+      branch: { $ne: null, $ne: "" },
+    });
+
+    // Get unique years
+    const years = await User.distinct("year", {
+      college: collegeId,
+      year: { $ne: null },
+    });
+
+    // Get hostels with names
+    const hostels = await User.aggregate([
+      { $match: { college: collegeId, hostel: { $ne: null } } },
+      { $group: { _id: "$hostel" } },
+      {
+        $lookup: {
+          from: "hostels",
+          localField: "_id",
+          foreignField: "_id",
+          as: "hostelInfo",
+        },
+      },
+      { $unwind: "$hostelInfo" },
+      { $project: { _id: 1, name: "$hostelInfo.name" } },
+    ]);
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          branches,
+          years,
+          hostels,
+          roles: ["student", "hostelManager", "messManager"],
+          blockStatusOptions: ["active", "blocked"], // new filter options for block status
+        },
+        "Filter options fetched successfully"
+      )
+    );
+  } catch (error) {
+    throw new ApiError(500, "Error fetching filter options: " + error.message);
+  }
+});
+
+// Get detailed info about a specific student
+export const getStudentById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const student = await User.findById(id)
+      .populate("college", "name")
+      .populate("hostel", "name")
+      .populate("mess", "name")
+      .select("-password -refreshToken");
+
+    if (!student) {
+      throw new ApiError(404, "Student not found");
+    }
+
+    // Check if admin has access to this student (same college)
+    if (
+      student.college &&
+      req.user.college &&
+      student.college._id.toString() !== req.user.college.toString()
+    ) {
+      throw new ApiError(
+        403,
+        "You don't have permission to access this student"
+      );
+    }
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, student, "Student details fetched successfully")
+      );
+  } catch (error) {
+    throw new ApiError(
+      error.statusCode || 500,
+      error.message || "Error fetching student details"
+    );
+  }
+});
+
+// Block/Unblock a student
+export const toggleBlockStudent = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { isBlocked, blockedUntil } = req.body;
+
+  try {
+    const student = await User.findById(id);
+
+    if (!student) {
+      throw new ApiError(404, "Student not found");
+    }
+
+    // Check if admin has access to this student (same college)
+    if (student.college.toString() !== req.user.college.toString()) {
+      throw new ApiError(
+        403,
+        "You don't have permission to block/unblock this student"
+      );
+    }
+
+    const updates = { isBlocked };
+    if (isBlocked && blockedUntil) {
+      updates.blockedUntil = new Date(blockedUntil);
+    } else if (!isBlocked) {
+      updates.blockedUntil = null;
+    }
+
+    const updatedStudent = await User.findByIdAndUpdate(
+      id,
+      { $set: updates },
+      { new: true }
+    ).select("-password -refreshToken");
+
+    const message = isBlocked
+      ? "Student blocked successfully"
+      : "Student unblocked successfully";
+    return res.status(200).json(new ApiResponse(200, updatedStudent, message));
+  } catch (error) {
+    throw new ApiError(
+      error.statusCode || 500,
+      error.message || "Error toggling student block status"
+    );
+  }
+});

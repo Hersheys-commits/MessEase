@@ -3,6 +3,7 @@ import { useNavigate, NavLink, useLocation } from "react-router-dom";
 import { logout } from "../store/authSlice";
 import api from "../utils/axiosRequest";
 import toast from "react-hot-toast";
+import { FaMoneyBillWave } from "react-icons/fa";
 
 const AdminHeader = () => {
   const dispatch = useDispatch();
@@ -26,6 +27,7 @@ const AdminHeader = () => {
     { title: "Dashboard", path: "/admin/home", icon: "home" },
     { title: "Elections", path: "/admin/election", icon: "vote-yea" },
     { title: "Profile", path: "/admin/profile", icon: "user" },
+    { title: "Fees", path: "/admin/payments", icon: "money" },
   ];
 
   return (
@@ -96,6 +98,7 @@ const AdminHeader = () => {
                 />
               </svg>
             )}
+            {link.icon === "money" && <FaMoneyBillWave className="mr-2" />}
             {link.title}
           </NavLink>
         ))}

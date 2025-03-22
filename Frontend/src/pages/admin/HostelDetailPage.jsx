@@ -157,6 +157,13 @@ const HostelDetailPage = () => {
               >
                 {isEditing ? "Cancel" : "Edit Hostel"}
               </button>
+              {/* New See Students button */}
+              <button
+                onClick={() => navigate(`/admin/students`)}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
+              >
+                See Students
+              </button>
             </div>
           </div>
 

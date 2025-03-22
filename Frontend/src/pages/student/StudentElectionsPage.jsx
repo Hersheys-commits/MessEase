@@ -183,7 +183,7 @@ const ElectionCard = ({ election, status, statusColor, formatDate }) => {
             </span>
           </div>
           <p className="text-sm text-gray-400 mt-1">
-            {election.targetId?.name || "Loading..."}
+            {election?.name || "Loading..."}
           </p>
         </div>
 

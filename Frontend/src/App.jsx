@@ -1,5 +1,5 @@
 // src/App.js (Routes)
-import React from "react";
+import React, { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import Signup from "./pages/auth/Signup";
 import Login from "./pages/auth/Login";
@@ -31,8 +31,25 @@ import ProfilePage from "./pages/student/ProfilePage";
 import AdminProfile from "./pages/admin/profile/AdminProfile";
 import UpdateAdminProfile from "./pages/admin/profile/UpdateAdminProfile";
 import UpdateCollege from "./pages/admin/profile/UpdateCollege";
+import PaymentManagement from "./pages/admin/fees/PaymentManagement";
+import CreateEditPayment from "./pages/admin/fees/CreateEditPayment";
+import PaidUsersList from "./pages/admin/fees/PaidUsersList";
+import FeesPaymentPage from "./pages/student/FeesPaymentPage";
+import StudentProfilePage from "./pages/admin/StudentProfilePage";
+import StudentListPage from "./pages/admin/StudentListPage";
 
 function App() {
+  useEffect(() => {
+    const loadRazorpayScript = async () => {
+      const res = await loadRazorpay();
+      if (!res) {
+        console.error("Razorpay SDK failed to load");
+      }
+    };
+
+    loadRazorpayScript();
+  }, []);
+
   return (
     <>
       <Routes>
@@ -53,7 +70,24 @@ function App() {
         <Route path="/admin/profile" element={<AdminProfile />} />
         <Route path="/admin/update-profile" element={<UpdateAdminProfile />} />
         <Route path="/admin/update-college" element={<UpdateCollege />} />
-
+        <Route path="/admin/students" element={<StudentListPage />} />
+        <Route path="/admin/students/:id" element={<StudentProfilePage />} />
+        // Admin routes
+        <Route path="/admin/payments" element={<PaymentManagement />} />
+        <Route
+          path="/admin/payment/create/:hostelId"
+          element={<CreateEditPayment />}
+        />
+        <Route
+          path="/admin/payment/edit/:paymentId/:hostelId"
+          element={<CreateEditPayment />}
+        />
+        <Route
+          path="/admin/payment/paid-users/:paymentId"
+          element={<PaidUsersList />}
+        />
+        // Student routes
+        <Route path="/student/fees" element={<FeesPaymentPage />} />
         {/* Election Routes */}
         <Route path="/student/election" element={<StudentElectionsPage />} />
         <Route
@@ -77,9 +111,7 @@ function App() {
           path="/admin/election/:electionId/results"
           element={<AdminElectionResults />}
         />
-
         <Route path="*" element={<PageNotFound />} />
-
         {/* Protected Routes */}
         <Route
           path="/admin/home"
@@ -89,7 +121,6 @@ function App() {
             // {/* </ProtectedRoute> */}
           }
         />
-
         <Route
           path="/student/home"
           element={
@@ -101,7 +132,6 @@ function App() {
         <Route path="/available-rooms" element={<AvailableRooms />}>
           {" "}
         </Route>
-
         <Route path="/book-rooms" element={<BookRooms />} />
         <Route path="/see-booking" element={<BookedRooms />} />
       </Routes>
