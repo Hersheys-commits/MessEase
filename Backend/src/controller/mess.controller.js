@@ -44,27 +44,28 @@ export const createMess = async (req, res) => {
     console.log("first");
     // Create weekly food record
     const weeklyFood = new WeeklyFood({
-      mess: savedMess._id,
-      meals: meals.map((meal) => ({
-        day: meal.day,
-        breakfast: {
-          items: meal.breakfast.items.filter((item) => item.trim() !== ""),
-          timing: meal.breakfast.timing,
-        },
-        lunch: {
-          items: meal.lunch.items.filter((item) => item.trim() !== ""),
-          timing: meal.lunch.timing,
-        },
-        eveningSnacks: {
-          items: meal.eveningSnacks.items.filter((item) => item.trim() !== ""),
-          timing: meal.eveningSnacks.timing,
-        },
-        dinner: {
-          items: meal.dinner.items.filter((item) => item.trim() !== ""),
-          timing: meal.dinner.timing,
-        },
-      })),
-    });
+        mess: savedMess._id,
+        meals: meals.map((meal) => ({
+          day: meal.day,
+          breakfast: {
+            items: meal.breakfast.split(",").map(item => item.trim()).filter(item => item !== ""),
+            timing: req.body.mealTimings.breakfast,
+          },
+          lunch: {
+            items: meal.lunch.split(",").map(item => item.trim()).filter(item => item !== ""),
+            timing: req.body.mealTimings.lunch,
+          },
+          eveningSnacks: {
+            items: meal.eveningSnacks.split(",").map(item => item.trim()).filter(item => item !== ""),
+            timing: req.body.mealTimings.eveningSnacks,
+          },
+          dinner: {
+            items: meal.dinner.split(",").map(item => item.trim()).filter(item => item !== ""),
+            timing: req.body.mealTimings.dinner,
+          },
+        })),
+      });
+      
 
     const savedWeeklyFood = await weeklyFood.save({ session });
 
