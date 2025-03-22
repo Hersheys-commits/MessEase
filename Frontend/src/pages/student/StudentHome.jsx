@@ -8,7 +8,9 @@ import hostelService from "../../utils/hostelCheck";
 function StudentHome() {
   const [userId, setUserId] = useState("");
   const [loading, setLoading] = useState(true);
+  const [studentName, setStudentName] = useState("");
   const navigate = useNavigate();
+
   useEffect(() => {
     const verifyHostel = async () => {
       try {
@@ -31,6 +33,10 @@ function StudentHome() {
       try {
         const res = await api.post("/api/student/verify-token");
         setUserId(res.data.user);
+        // Assuming the API returns user details including name
+        if (res.data.name) {
+          setStudentName(res.data.name);
+        }
         setLoading(false);
       } catch (error) {
         console.error("Error verifying token:", error);
@@ -43,42 +49,64 @@ function StudentHome() {
 
   if (loading) {
     return (
-      <div className="bg-gray-900 min-h-screen text-gray-100">
+      <div className="bg-gradient-to-b from-gray-900 to-gray-800 min-h-screen text-gray-100">
         <Header />
         <div className="flex justify-center items-center h-96">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-indigo-500">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="sr-only">Loading...</span>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-gray-900 min-h-screen text-gray-100">
+    <div className="bg-gradient-to-b from-gray-900 to-gray-800 min-h-screen text-gray-100">
       <Header />
-      <div className="max-w-4xl mx-auto p-6">
-        <h1 className="text-3xl font-bold mb-8 text-white">
-          Student Dashboard
-        </h1>
+      <div className="max-w-6xl mx-auto p-6">
+        {/* Welcome Section */}
+        <div className="bg-indigo-900 bg-opacity-30 p-6 rounded-xl shadow-lg border border-indigo-700 mb-8">
+          <h1 className="text-3xl font-bold text-white">
+            Welcome{studentName ? `, ${studentName}` : ""}
+          </h1>
+          <p className="text-indigo-200 mt-2">
+            Access your student resources and manage your campus experience
+          </p>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 hover:border-indigo-500 transition-colors duration-300">
-            <h2 className="text-xl font-semibold mb-4 text-indigo-400">
-              Room Management
-            </h2>
+        {/* Main Dashboard Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {/* Room Management Card */}
+          <div className="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700 hover:border-indigo-500 transition-all duration-300 hover:shadow-indigo-900/20 hover:shadow-xl">
+            <div className="flex items-center mb-4">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-8 w-8 text-indigo-400 mr-3"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+              </svg>
+              <h2 className="text-xl font-semibold text-indigo-400">
+                Room Management
+              </h2>
+            </div>
             <p className="text-gray-300 mb-6">
               View available rooms and manage your bookings
             </p>
-            <div className="flex flex-col space-y-4">
+            <div className="flex flex-col space-y-3">
               <button
                 onClick={() =>
                   navigate("/available-rooms", { state: { userId } })
                 }
-                className="px-4 py-3 bg-indigo-600 text-white rounded-md w-full hover:bg-indigo-700 transition-colors duration-300 flex items-center justify-center"
+                className="px-4 py-3 bg-indigo-600 text-white rounded-lg w-full hover:bg-indigo-700 transition-all duration-300 flex items-center justify-between group"
               >
                 <span>Available Rooms</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 ml-2"
+                  className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300"
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
@@ -91,12 +119,12 @@ function StudentHome() {
               </button>
               <button
                 onClick={() => navigate("/see-booking", { state: { userId } })}
-                className="px-4 py-3 bg-indigo-600 text-white rounded-md w-full hover:bg-indigo-700 transition-colors duration-300 flex items-center justify-center"
+                className="px-4 py-3 bg-indigo-600 text-white rounded-lg w-full hover:bg-indigo-700 transition-all duration-300 flex items-center justify-between group"
               >
                 <span>Your Bookings</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 ml-2"
+                  className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300"
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
@@ -110,22 +138,34 @@ function StudentHome() {
             </div>
           </div>
 
-          <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 hover:border-indigo-500 transition-colors duration-300">
-            <h2 className="text-xl font-semibold mb-4 text-indigo-400">
-              Elections
-            </h2>
+          {/* Elections Card */}
+          <div className="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700 hover:border-indigo-500 transition-all duration-300 hover:shadow-indigo-900/20 hover:shadow-xl">
+            <div className="flex items-center mb-4">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-8 w-8 text-indigo-400 mr-3"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
+                <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z" />
+              </svg>
+              <h2 className="text-xl font-semibold text-indigo-400">
+                Elections
+              </h2>
+            </div>
             <p className="text-gray-300 mb-6">
               Participate in campus elections and view results
             </p>
-            <div className="flex flex-col space-y-4">
+            <div className="flex flex-col space-y-3">
               <button
                 onClick={() => navigate("/student/election")}
-                className="px-4 py-3 bg-indigo-600 text-white rounded-md w-full hover:bg-indigo-700 transition-colors duration-300 flex items-center justify-center"
+                className="px-4 py-3 bg-indigo-600 text-white rounded-lg w-full hover:bg-indigo-700 transition-all duration-300 flex items-center justify-between group"
               >
                 <span>View Elections</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 ml-2"
+                  className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300"
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
@@ -134,25 +174,168 @@ function StudentHome() {
                     d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
                     clipRule="evenodd"
                   />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Fees & Mess Card - NEW */}
+          <div className="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700 hover:border-indigo-500 transition-all duration-300 hover:shadow-indigo-900/20 hover:shadow-xl">
+            <div className="flex items-center mb-4">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-8 w-8 text-indigo-400 mr-3"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <h2 className="text-xl font-semibold text-indigo-400">
+                Payments & Mess
+              </h2>
+            </div>
+            <p className="text-gray-300 mb-6">
+              Manage your fee payments and access mess services
+            </p>
+            <div className="flex flex-col space-y-3">
+              <button
+                onClick={() => navigate("/student/fees")}
+                className="px-4 py-3 bg-green-600 text-white rounded-lg w-full hover:bg-green-700 transition-all duration-300 flex items-center justify-between group"
+              >
+                <span>Pay Fees</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+                  <path
+                    fillRule="evenodd"
+                    d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </button>
+              <button
+                onClick={() => navigate("/student/mess/code")}
+                className="px-4 py-3 bg-amber-600 text-white rounded-lg w-full hover:bg-amber-700 transition-all duration-300 flex items-center justify-between group"
+              >
+                <span>Mess Services</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
                 </svg>
               </button>
             </div>
           </div>
         </div>
 
-        <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
-          <h2 className="text-xl font-semibold mb-4 text-indigo-400">
-            Quick Links
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            <button className="px-4 py-3 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition-colors duration-300">
-              Profile Settings
+        {/* Quick Links Section */}
+        <div className="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700 hover:border-indigo-500 transition-all duration-300">
+          <div className="flex items-center mb-4">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-7 w-7 text-indigo-400 mr-3"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+            </svg>
+            <h2 className="text-xl font-semibold text-indigo-400">
+              Quick Links
+            </h2>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <button className="px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-all duration-300 flex flex-col items-center justify-center group">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6 mb-2 text-indigo-300 group-hover:text-indigo-200"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span>Profile</span>
             </button>
-            <button className="px-4 py-3 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition-colors duration-300">
-              Notifications
+            <button className="px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-all duration-300 flex flex-col items-center justify-center group">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6 mb-2 text-indigo-300 group-hover:text-indigo-200"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+              </svg>
+              <span>Notifications</span>
             </button>
-            <button className="px-4 py-3 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition-colors duration-300">
-              Help Center
+            <button className="px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-all duration-300 flex flex-col items-center justify-center group">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6 mb-2 text-indigo-300 group-hover:text-indigo-200"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span>Help Center</span>
+            </button>
+            <button className="px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-all duration-300 flex flex-col items-center justify-center group">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6 mb-2 text-indigo-300 group-hover:text-indigo-200"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
+              </svg>
+              <span>Academic</span>
+            </button>
+            <button className="px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-all duration-300 flex flex-col items-center justify-center group">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6 mb-2 text-indigo-300 group-hover:text-indigo-200"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span>Calendar</span>
+            </button>
+            <button className="px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-all duration-300 flex flex-col items-center justify-center group">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6 mb-2 text-indigo-300 group-hover:text-indigo-200"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span>Settings</span>
             </button>
           </div>
         </div>

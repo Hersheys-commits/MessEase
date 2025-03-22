@@ -101,7 +101,19 @@ const PaymentManagement = () => {
       </div>
     );
   }
-  if (error) return <div className="text-center p-5 text-red-500">{error}</div>;
+  if (error) {
+    return (
+      <div>
+        <AdminHeader />
+        <div className="min-h-screen bg-gray-900 text-white p-4 flex justify-center items-center">
+          <div className="bg-red-900/50 p-6 rounded-lg border border-red-700 max-w-md w-full">
+            <h2 className="text-xl font-bold text-red-300 mb-2">Error</h2>
+            <p className="text-white">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">

@@ -192,7 +192,6 @@ export const loginAdmin = async (req, res) => {
 
 export const getCollege = async (req, res) => {
   try {
-    console.log("first", req.user);
     const adminId = req.user._id; // Assuming you have middleware that sets `req.user`
 
     // Fetch the admin user with the associated college

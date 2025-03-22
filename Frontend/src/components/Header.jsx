@@ -4,6 +4,8 @@ import { logout } from "../store/authSlice";
 import api from "../utils/axiosRequest";
 import toast from "react-hot-toast";
 import { FaMoneyBillWave } from "react-icons/fa";
+import { Utensils } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const Header = () => {
   const dispatch = useDispatch();
@@ -22,12 +24,27 @@ const Header = () => {
     }
   };
 
+  const [code, setCode] = useState("000");
+
+  useEffect(() => {
+    const fetchCode = async () => {
+      try {
+        const userRes = await api.post("/api/student/verify-token");
+        setCode(userRes.data.code);
+      } catch (error) {
+        console.error("Error fetching code:", error);
+      }
+    };
+    fetchCode();
+  }, []);
+
   // Navigation links with their paths and icons (similar to AdminHeader)
   const navLinks = [
     { title: "Home", path: "/student/home", icon: "home" },
     { title: "Elections", path: "/student/election", icon: "vote-yea" },
     { title: "Profile", path: "/student/profile", icon: "user" },
     { title: "Fees", path: "/student/fees", icon: "money" },
+    { title: "Mess", path: `/student/mess/${code}`, icon: "mess" },
   ];
 
   return (
@@ -99,7 +116,14 @@ const Header = () => {
               </svg>
             )}
             {link.icon === "money" && <FaMoneyBillWave className="mr-2" />}
-            {link.title}
+            {link.icon === "mess" && code != "000" && (
+              <Utensils className=" h-4" />
+            )}
+            {link.icon === "mess"
+              ? code !== "000"
+                ? link.title
+                : null
+              : link.title}
           </NavLink>
         ))}
       </nav>

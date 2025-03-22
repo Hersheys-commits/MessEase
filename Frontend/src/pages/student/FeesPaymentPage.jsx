@@ -2,10 +2,12 @@ import React, { useState, useEffect } from "react";
 import api from "../../utils/axiosRequest";
 import { toast } from "react-hot-toast";
 import {
-  FaMoneyBillWave,
-  FaCheckCircle,
   FaInfoCircle,
+  FaCheckCircle,
   FaDownload,
+  FaMoneyBillWave,
+  FaCalendarAlt,
+  FaLock,
 } from "react-icons/fa";
 import Header from "../../components/Header";
 import { jsPDF } from "jspdf";
@@ -349,20 +351,42 @@ const FeesPaymentPage = () => {
       </div>
     );
   }
-  if (error) return <div className="text-center p-5 text-red-500">{error}</div>;
+  if (error) {
+    return (
+      <div>
+        <Header />
+        <div className="min-h-screen bg-gray-900 text-white p-4 flex justify-center items-center">
+          <div className="bg-red-900/50 p-6 rounded-lg border border-red-700 max-w-md w-full">
+            <h2 className="text-xl font-bold text-red-300 mb-2">Error</h2>
+            <p className="text-white">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // No payment enabled for hostel
   if (!paymentData?.paymentExists) {
     return (
-      <div className="min-h-screen bg-gray-900 text-gray-100">
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-gray-100">
         <Header />
         <div className="container mx-auto p-6 max-w-2xl">
-          <div className="bg-gray-800 shadow-md rounded-lg p-8 text-center border border-gray-700">
-            <FaInfoCircle className="mx-auto text-blue-500 text-5xl mb-4" />
-            <h1 className="text-2xl font-bold mb-3">No Payment Required</h1>
-            <p className="text-gray-400 mb-6">
+          <div className="bg-gray-800 shadow-xl rounded-xl p-10 text-center border border-gray-700 transform transition-all hover:shadow-blue-900/20">
+            <div className="bg-blue-500/10 p-6 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-6">
+              <FaInfoCircle className="text-blue-500 text-4xl" />
+            </div>
+            <h1 className="text-3xl font-bold mb-4 text-blue-100">
+              No Payment Required
+            </h1>
+            <p className="text-gray-400 text-lg mb-6">
               No payment is currently enabled for your hostel/mess.
             </p>
+            <button
+              onClick={() => window.history.back()}
+              className="mt-2 px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors duration-300"
+            >
+              Return to Dashboard
+            </button>
           </div>
         </div>
       </div>
@@ -372,38 +396,54 @@ const FeesPaymentPage = () => {
   // Already paid
   if (paymentData.hasPaid) {
     return (
-      <div className="min-h-screen bg-gray-900 text-gray-100">
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-gray-100">
         <Header />
         <div className="container mx-auto p-6 max-w-2xl">
-          <div className="bg-gray-800 shadow-md rounded-lg p-8 text-center border border-gray-700">
-            <FaCheckCircle className="mx-auto text-green-500 text-5xl mb-4" />
-            <h1 className="text-2xl font-bold mb-3">Payment Successful</h1>
-            <p className="text-gray-400 mb-6">
-              You have successfully paid your{" "}
-              {paymentData.payment.title.toLowerCase()}.
-            </p>
-            <div className="bg-gray-700 p-4 rounded-lg mb-4 text-left">
-              <p className="font-medium text-gray-200">
-                Amount Paid:{" "}
-                <span className="font-normal">
-                  ₹{paymentData.payment.amount}
-                </span>
-              </p>
-              {paymentData.payment.dueDate && (
-                <p className="font-medium text-gray-200">
-                  Due Date:{" "}
-                  <span className="font-normal">
-                    {new Date(paymentData.payment.dueDate).toLocaleDateString()}
-                  </span>
-                </p>
-              )}
+          <div className="bg-gray-800 shadow-xl rounded-xl p-10 text-center border border-gray-700">
+            <div className="bg-green-500/10 p-6 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-6">
+              <FaCheckCircle className="text-green-500 text-4xl" />
             </div>
-            <button
-              onClick={downloadReceipt}
-              className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded flex items-center justify-center transition-colors duration-300"
-            >
-              <FaDownload className="mr-2" /> Download Receipt
-            </button>
+            <h1 className="text-3xl font-bold mb-3 text-green-100">
+              Payment Successful
+            </h1>
+            <p className="text-gray-400 text-lg mb-8">
+              You have successfully paid your{" "}
+              <span className="text-white font-medium">
+                {paymentData.payment.title.toLowerCase()}
+              </span>
+              .
+            </p>
+
+            <div className="bg-gradient-to-r from-gray-700 to-gray-800 p-6 rounded-xl mb-6 text-left shadow-inner">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-gray-400 text-sm mb-1">Amount Paid</p>
+                  <p className="text-xl font-bold text-white">
+                    ₹{paymentData.payment.amount}
+                  </p>
+                </div>
+
+                {paymentData.payment.dueDate && (
+                  <div>
+                    <p className="text-gray-400 text-sm mb-1">Payment Date</p>
+                    <p className="text-xl font-bold text-white">
+                      {new Date(
+                        paymentData.payment.dueDate
+                      ).toLocaleDateString()}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-center">
+              <button
+                onClick={downloadReceipt}
+                className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center justify-center transition-all duration-300 transform hover:scale-105 shadow-lg"
+              >
+                <FaDownload className="mr-2" /> Download Receipt
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -412,57 +452,103 @@ const FeesPaymentPage = () => {
 
   // Payment required
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-gray-100">
       <Header />
       <div className="container mx-auto p-6 max-w-2xl">
-        <div className="bg-gray-800 shadow-md rounded-lg p-8 border border-gray-700">
-          <h1 className="text-2xl font-bold mb-6 text-center">
-            {paymentData.payment.title}
-          </h1>
+        <div className="bg-gray-800 shadow-xl rounded-xl overflow-hidden border border-gray-700">
+          {/* Header section */}
+          <div className="bg-gradient-to-r from-blue-900 to-blue-800 p-8 text-center">
+            <h1 className="text-3xl font-bold mb-3 text-white">
+              {paymentData.payment.title}
+            </h1>
+            {paymentData.payment.description && (
+              <p className="text-blue-100 max-w-md mx-auto">
+                {paymentData.payment.description}
+              </p>
+            )}
+          </div>
 
-          {paymentData.payment.description && (
-            <div className="mb-6">
-              <p className="text-gray-400">{paymentData.payment.description}</p>
-            </div>
-          )}
-
-          <div className="bg-blue-900 p-6 rounded-lg mb-6">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-sm text-blue-300">Amount Due</p>
-                <p className="text-3xl font-bold">
-                  ₹{paymentData.payment.amount}
-                </p>
-              </div>
-              {paymentData.payment.dueDate && (
-                <div className="text-right">
-                  <p className="text-sm text-blue-300">Due By</p>
-                  <p className="text-lg font-medium">
-                    {new Date(paymentData.payment.dueDate).toLocaleDateString()}
+          {/* Payment details */}
+          <div className="p-8">
+            <div className="bg-gradient-to-r from-blue-900 to-indigo-900 p-6 rounded-xl mb-8 shadow-lg">
+              <div className="flex flex-col md:flex-row justify-between items-center">
+                <div className="text-center md:text-left mb-4 md:mb-0">
+                  <p className="text-sm text-blue-300 font-medium">
+                    Amount Due
+                  </p>
+                  <p className="text-4xl font-bold text-white">
+                    ₹{paymentData.payment.amount}
                   </p>
                 </div>
-              )}
+
+                {paymentData.payment.dueDate && (
+                  <div className="bg-blue-800/40 px-6 py-4 rounded-lg flex items-center">
+                    <FaCalendarAlt className="text-blue-300 mr-3 text-xl" />
+                    <div>
+                      <p className="text-sm text-blue-300">Due By</p>
+                      <p className="text-xl font-medium text-white">
+                        {new Date(
+                          paymentData.payment.dueDate
+                        ).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
 
-          <div className="mb-6 text-sm text-gray-500">
-            <p>• This is a secure payment processed by Razorpay</p>
-            <p>• You will receive a payment confirmation once completed</p>
-          </div>
+            {/* Security info */}
+            <div className="bg-gray-700/30 p-5 rounded-xl mb-6">
+              <div className="flex items-start space-x-3">
+                <div className="text-blue-400 mt-1">
+                  <FaLock />
+                </div>
+                <div>
+                  <p className="text-white font-medium mb-2">
+                    Secure Payment Information
+                  </p>
+                  <ul className="text-sm text-gray-400 space-y-2">
+                    <li className="flex items-center">
+                      <span className="mr-2">•</span> This is a secure payment
+                      processed by Razorpay
+                    </li>
+                    <li className="flex items-center">
+                      <span className="mr-2">•</span> You will receive a payment
+                      confirmation once completed
+                    </li>
+                    <li className="flex items-center">
+                      <span className="mr-2">•</span> Your payment details are
+                      encrypted and secure
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
 
-          <button
-            onClick={handlePayment}
-            disabled={paymentProcessing}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg flex justify-center items-center transition-colors"
-          >
-            {paymentProcessing ? (
-              "Processing..."
-            ) : (
-              <>
-                <FaMoneyBillWave className="mr-2" /> Pay Now
-              </>
-            )}
-          </button>
+            {/* Pay button */}
+            <button
+              onClick={handlePayment}
+              disabled={paymentProcessing}
+              className={`w-full ${
+                paymentProcessing
+                  ? "bg-blue-700"
+                  : "bg-blue-600 hover:bg-blue-700"
+              } text-white font-bold py-4 px-6 rounded-xl flex justify-center items-center transition-all duration-300 shadow-lg ${
+                !paymentProcessing && "transform hover:translate-y-[-2px]"
+              }`}
+            >
+              {paymentProcessing ? (
+                <div className="flex items-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white mr-3"></div>
+                  Processing...
+                </div>
+              ) : (
+                <>
+                  <FaMoneyBillWave className="mr-2 text-xl" /> Pay Now
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>

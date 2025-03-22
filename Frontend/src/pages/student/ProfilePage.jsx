@@ -1,6 +1,6 @@
-// src/pages/student/ProfilePage.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import {
   FaUser,
   FaPhone,
@@ -9,6 +9,7 @@ import {
   FaHome,
   FaEdit,
   FaDoorOpen,
+  FaEnvelope,
 } from "react-icons/fa";
 import api from "../../utils/axiosRequest";
 import Header from "../../components/Header";
@@ -69,94 +70,135 @@ const ProfilePage = () => {
     return (
       <div>
         <Header />
-        <div className="flex justify-center items-center min-h-screen bg-gray-900">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="flex justify-center items-center min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
+          <div className="flex flex-col items-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+            <p className="mt-4 text-blue-400 font-medium">
+              Loading your profile...
+            </p>
+          </div>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="bg-gray-900 min-h-screen text-white">
-      <Header />
-      <div className="max-w-3xl mx-auto p-6">
-        <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden flex flex-col md:flex-row">
-          {/* Profile Picture Section */}
-          <div className="md:w-1/3 flex justify-center items-center p-6">
-            {user.profilePicture == "" ? (
-              <img
-                src={user.profilePicture}
-                alt="Profile"
-                className="w-40 h-40 rounded-full object-cover border-4 border-blue-500"
-              />
-            ) : (
-              <div className="w-40 h-40 flex items-center justify-center rounded-full bg-gray-700 border-4 border-blue-500">
-                <FaUser size={80} className="text-gray-400" />
-              </div>
-            )}
-          </div>
+  // Format user data for display cards
+  const personalInfo = [
+    {
+      icon: <FaUser />,
+      label: "Roll Number",
+      value: user.rollNumber || "Not set",
+    },
+    { icon: <FaPhone />, label: "Phone", value: user.phoneNumber || "Not set" },
+    { icon: <FaEnvelope />, label: "Email", value: user.email || "Not set" },
+  ];
 
-          {/* Profile Details Section */}
-          <div className="md:w-2/3 p-6">
-            <h2 className="text-3xl font-bold mb-4">{user.name}</h2>
-            <div className="space-y-3 text-lg">
-              {user.rollNumber && (
-                <div className="flex items-center">
-                  <FaUser className="mr-2 text-blue-400" />
-                  <span>Roll Number: {user.rollNumber}</span>
-                </div>
-              )}
-              {college && (
-                <div className="flex items-center">
-                  <FaBuilding className="mr-2 text-blue-400" />
-                  <span>College: {college.name}</span>
-                </div>
-              )}
-              {hostelMess && hostelMess.mess && (
-                <div className="flex items-center">
-                  <FaHome className="mr-2 text-blue-400" />
-                  <span>Mess: {hostelMess.mess.name}</span>
-                </div>
-              )}
-              {hostelMess && hostelMess.hostel && (
-                <div className="flex items-center">
-                  <FaBuilding className="mr-2 text-blue-400" />
-                  <span>Hostel: {hostelMess.hostel.name}</span>
-                </div>
-              )}
-              <div className="flex items-center">
-                <FaGraduationCap className="mr-2 text-blue-400" />
-                <span>
-                  {user.branch ? user.branch : "Branch not set"} -{" "}
-                  {user.year ? `${user.year} Year` : "Year not set"}
-                </span>
-              </div>
-              {user.room && (
-                <div className="flex items-center">
-                  <FaDoorOpen className="mr-2 text-blue-400" />
-                  <span>Room: {user.room}</span>
-                </div>
-              )}
-              {user.phoneNumber && (
-                <div className="flex items-center">
-                  <FaPhone className="mr-2 text-blue-400" />
-                  <span>Phone: {user.phoneNumber}</span>
+  const academicInfo = [
+    {
+      icon: <FaBuilding />,
+      label: "College",
+      value: college ? college.name : "Not set",
+    },
+    {
+      icon: <FaGraduationCap />,
+      label: "Branch",
+      value: user.branch || "Not set",
+    },
+    {
+      icon: <FaGraduationCap />,
+      label: "Year",
+      value: user.year ? `${user.year} Year` : "Not set",
+    },
+  ];
+
+  const accommodationInfo = [
+    {
+      icon: <FaBuilding />,
+      label: "Hostel",
+      value: hostelMess?.hostel?.name || "Not assigned",
+    },
+    {
+      icon: <FaHome />,
+      label: "Mess",
+      value: hostelMess?.mess?.name || "Not assigned",
+    },
+    { icon: <FaDoorOpen />, label: "Room", value: user.room || "Not assigned" },
+  ];
+
+  return (
+    <div className="bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 min-h-screen text-white">
+      <Header />
+
+      <div className="max-w-5xl mx-auto p-6">
+        {/* Profile header with backdrop */}
+        <div className="relative mb-8">
+          <div className="absolute inset-0 bg-blue-600 opacity-10 rounded-lg"></div>
+          <div className="relative z-10 p-8 flex flex-col md:flex-row items-center">
+            {/* Profile picture */}
+            <div className="mb-6 md:mb-0 md:mr-8">
+              {user.profilePicture ? (
+                <img
+                  src={user.profilePicture}
+                  alt="Profile"
+                  className="w-36 h-36 rounded-full object-cover border-4 border-blue-500 shadow-lg"
+                />
+              ) : (
+                <div className="w-36 h-36 flex items-center justify-center rounded-full bg-gradient-to-br from-gray-700 to-gray-800 border-4 border-blue-500 shadow-lg">
+                  <FaUser size={70} className="text-blue-400" />
                 </div>
               )}
             </div>
-            <div className="mt-6">
+
+            {/* Profile title */}
+            <div className="text-center md:text-left">
+              <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-blue-600">
+                {user.name}
+              </h1>
+              <p className="text-lg text-gray-300 mt-2">Student</p>
               <button
                 onClick={() => navigate("/student/update-profile")}
-                className="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors duration-300"
+                className="mt-4 px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-105 shadow-lg"
               >
                 <FaEdit className="mr-2" /> Update Profile
               </button>
             </div>
           </div>
         </div>
+
+        {/* Information cards grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Personal Information Card */}
+          <InfoCard title="Personal Information" items={personalInfo} />
+
+          {/* Academic Information Card */}
+          <InfoCard title="Academic Information" items={academicInfo} />
+
+          {/* Accommodation Information Card */}
+          <InfoCard title="Accommodation" items={accommodationInfo} />
+        </div>
       </div>
     </div>
   );
 };
+
+// Reusable Info Card Component
+const InfoCard = ({ title, items }) => (
+  <div className="bg-gray-800 bg-opacity-60 backdrop-blur-sm rounded-xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-700">
+    <div className="p-4 bg-gradient-to-r from-blue-900 to-blue-800 border-b border-gray-700">
+      <h2 className="text-xl font-semibold text-white">{title}</h2>
+    </div>
+    <div className="p-5 space-y-4">
+      {items.map((item, index) => (
+        <div key={index} className="flex items-center space-x-3">
+          <div className="text-blue-400 w-6">{item.icon}</div>
+          <div className="flex-1">
+            <p className="text-gray-400 text-sm">{item.label}</p>
+            <p className="text-white font-medium">{item.value}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
 
 export default ProfilePage;

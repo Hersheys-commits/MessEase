@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import api from "../../utils/axiosRequest.js";
+import { Star, ArrowLeft, Clock } from "lucide-react";
 import AdminHeader from "../../components/AdminHeader.jsx";
 
 const MessDetails = () => {
   const { code } = useParams();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [messData, setMessData] = useState(null);
   const [weeklyFoodData, setWeeklyFoodData] = useState(null);
   const [editingMess, setEditingMess] = useState(false);
   const [editingFood, setEditingFood] = useState(false);
+  const [selectedDay, setSelectedDay] = useState("Monday");
 
   const {
     register,
@@ -32,6 +35,7 @@ const MessDetails = () => {
       try {
         setLoading(true);
         const response = await api.get(`/api/mess/${code}`);
+        console.log(response);
         setMessData(response.data.data.mess);
         setWeeklyFoodData(response.data.data.weeklyFood);
         setLoading(false);
@@ -163,12 +167,41 @@ const MessDetails = () => {
     setValue(`workers[${workerCount}].mobileNumber`, "");
   };
 
+  const formatTime = (timing) => {
+    if (!timing) return "N/A";
+    const minute = timing.minute.toString().padStart(2, "0");
+    return `${timing.hour}:${minute} ${timing.am_pm}`;
+  };
+
+  // Generate random ratings for demonstration
+  const getRating = (day, mealType) => {
+    // Find the meal object for the specified day
+    const mealObj = weeklyFoodData.meals.find((meal) => meal.day === day);
+    if (
+      mealObj &&
+      mealObj[mealType] &&
+      typeof mealObj[mealType].averageRating === "number"
+    ) {
+      return mealObj[mealType].averageRating.toFixed(1);
+    }
+    return "-1.0";
+  };
+
+  // Function to generate class for rating colors
+  const getRatingColor = (rating) => {
+    const numRating = parseFloat(rating);
+    if (numRating >= 4) return "bg-green-900/50 border-green-800";
+    if (numRating >= 3) return "bg-yellow-900/50 border-yellow-800";
+    if (numRating >= 0.001) return "bg-red-900/50 border-red-800";
+    return "bg-blue-900/50 border-blue-800";
+  };
+
   if (loading) {
     return (
       <div>
         <AdminHeader />
         <div className="min-h-screen flex items-center justify-center bg-gray-900">
-          <div className="text-xl font-semibold text-white">Loading...</div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
         </div>
       </div>
     );
@@ -177,8 +210,11 @@ const MessDetails = () => {
     return (
       <div>
         <AdminHeader />
-        <div className="min-h-screen flex items-center justify-center bg-gray-900">
-          <div className="text-xl font-semibold text-white">{error}</div>
+        <div className="min-h-screen bg-gray-900 text-white p-4 flex justify-center items-center">
+          <div className="bg-red-900/50 p-6 rounded-lg border border-red-700 max-w-md w-full">
+            <h2 className="text-xl font-bold text-red-300 mb-2">Error</h2>
+            <p className="text-white">{error}</p>
+          </div>
         </div>
       </div>
     );
@@ -205,180 +241,278 @@ const MessDetails = () => {
     <div className="bg-gray-900 min-h-screen text-white">
       <AdminHeader />
       <div className="container mx-auto p-6">
-        <h1 className="text-3xl font-bold mb-8">Mess Details</h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold">Mess Administration</h1>
+          <Link
+            onClick={() => {
+              navigate(-1);
+            }}
+            className="flex items-center text-blue-400 hover:text-blue-200"
+          >
+            <ArrowLeft size={18} className="mr-1" />
+            <span>Back to Previous Page</span>
+          </Link>
+        </div>
 
         {/* Mess Details Section */}
-        <div className="mb-8 p-6 bg-gray-800 border border-gray-700 rounded-lg shadow-md">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-semibold">General Information</h2>
-            <button
-              onClick={() => setEditingMess(!editingMess)}
-              className={`px-4 py-2 rounded ${
-                editingMess ? "bg-red-500" : "bg-blue-500"
-              } text-white transition duration-300`}
-            >
-              {editingMess ? "Cancel" : "Update Mess Details"}
-            </button>
+        <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden mb-6 border border-gray-700">
+          <div className="bg-blue-800 p-4">
+            <h1 className="text-2xl font-bold">{messData.name}</h1>
+            <p className="text-blue-100">Mess Details & Configuration</p>
           </div>
 
-          {editingMess ? (
-            <form onSubmit={handleSubmit(onSubmitMess)} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold">General Information</h2>
+              <button
+                onClick={() => setEditingMess(!editingMess)}
+                className={`px-4 py-2 rounded ${
+                  editingMess ? "bg-red-500" : "bg-blue-500"
+                } text-white transition duration-300`}
+              >
+                {editingMess ? "Cancel" : "Update Mess Details"}
+              </button>
+            </div>
+
+            {editingMess ? (
+              <form onSubmit={handleSubmit(onSubmitMess)} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block mb-1">Mess Name</label>
+                    <input
+                      {...register("name", { required: "Name is required" })}
+                      className="w-full p-2 bg-gray-700 border border-gray-600 rounded focus:ring-2 focus:ring-blue-500"
+                    />
+                    {errors.name && (
+                      <p className="text-red-400 text-sm mt-1">
+                        {errors.name.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block mb-1">Location</label>
+                    <input
+                      {...register("location")}
+                      className="w-full p-2 bg-gray-700 border border-gray-600 rounded focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-1">Capacity</label>
+                    <input
+                      type="number"
+                      {...register("capacity", {
+                        valueAsNumber: true,
+                        min: { value: 1, message: "Capacity must be positive" },
+                      })}
+                      className="w-full p-2 bg-gray-700 border border-gray-600 rounded focus:ring-2 focus:ring-blue-500"
+                    />
+                    {errors.capacity && (
+                      <p className="text-red-400 text-sm mt-1">
+                        {errors.capacity.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block mb-1">Mess Code</label>
+                    <input
+                      value={messData.code}
+                      disabled
+                      className="w-full p-2 bg-gray-600 border border-gray-600 rounded cursor-not-allowed"
+                    />
+                  </div>
+                  <div>
+                    <label className="block mb-1">Hostel</label>
+                    <input
+                      value={messData.hostel.name}
+                      disabled
+                      className="w-full p-2 bg-gray-600 border border-gray-600 rounded cursor-not-allowed"
+                    />
+                  </div>
+                </div>
+
                 <div>
-                  <label className="block mb-1">Mess Name</label>
-                  <input
-                    {...register("name", { required: "Name is required" })}
+                  <label className="block mb-1">Notice</label>
+                  <textarea
+                    {...register("notice")}
                     className="w-full p-2 bg-gray-700 border border-gray-600 rounded focus:ring-2 focus:ring-blue-500"
-                  />
-                  {errors.name && (
-                    <p className="text-red-400 text-sm mt-1">
-                      {errors.name.message}
-                    </p>
-                  )}
+                    rows="3"
+                  ></textarea>
                 </div>
 
                 <div>
-                  <label className="block mb-1">Location</label>
-                  <input
-                    {...register("location")}
-                    className="w-full p-2 bg-gray-700 border border-gray-600 rounded focus:ring-2 focus:ring-blue-500"
-                  />
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="block font-medium">Workers</label>
+                    <button
+                      type="button"
+                      onClick={addWorker}
+                      className="px-2 py-1 bg-green-500 text-white rounded text-sm transition duration-200 hover:bg-green-600"
+                    >
+                      Add Worker
+                    </button>
+                  </div>
+
+                  {messData.workers &&
+                    messData.workers.map((worker, index) => (
+                      <div key={index} className="grid grid-cols-2 gap-4 mb-2">
+                        <div>
+                          <input
+                            {...register(`workers[${index}].name`)}
+                            placeholder="Worker Name"
+                            className="w-full p-2 bg-gray-700 border border-gray-600 rounded focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <input
+                            {...register(`workers[${index}].mobileNumber`)}
+                            placeholder="Mobile Number"
+                            className="w-full p-2 bg-gray-700 border border-gray-600 rounded focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                      </div>
+                    ))}
                 </div>
 
-                <div>
-                  <label className="block mb-1">Capacity</label>
-                  <input
-                    type="number"
-                    {...register("capacity", {
-                      valueAsNumber: true,
-                      min: { value: 1, message: "Capacity must be positive" },
-                    })}
-                    className="w-full p-2 bg-gray-700 border border-gray-600 rounded focus:ring-2 focus:ring-blue-500"
-                  />
-                  {errors.capacity && (
-                    <p className="text-red-400 text-sm mt-1">
-                      {errors.capacity.message}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block mb-1">Mess Code</label>
-                  <input
-                    value={messData.code}
-                    disabled
-                    className="w-full p-2 bg-gray-600 border border-gray-600 rounded cursor-not-allowed"
-                  />
-                </div>
-                <div>
-                  <label className="block mb-1">Hostel</label>
-                  <input
-                    value={messData.hostel.name}
-                    disabled
-                    className="w-full p-2 bg-gray-600 border border-gray-600 rounded cursor-not-allowed"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block mb-1">Notice</label>
-                <textarea
-                  {...register("notice")}
-                  className="w-full p-2 bg-gray-700 border border-gray-600 rounded focus:ring-2 focus:ring-blue-500"
-                  rows="3"
-                ></textarea>
-              </div>
-
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <label className="block font-medium">Workers</label>
+                <div className="flex justify-end">
                   <button
-                    type="button"
-                    onClick={addWorker}
-                    className="px-2 py-1 bg-green-500 text-white rounded text-sm transition duration-200 hover:bg-green-600"
+                    type="submit"
+                    className="px-4 py-2 bg-green-500 text-white rounded transition duration-200 hover:bg-green-600"
                   >
-                    Add Worker
+                    Save Changes
                   </button>
                 </div>
-
-                {messData.workers &&
-                  messData.workers.map((worker, index) => (
-                    <div key={index} className="grid grid-cols-2 gap-4 mb-2">
-                      <div>
-                        <input
-                          {...register(`workers[${index}].name`)}
-                          placeholder="Worker Name"
-                          className="w-full p-2 bg-gray-700 border border-gray-600 rounded focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <input
-                          {...register(`workers[${index}].mobileNumber`)}
-                          placeholder="Mobile Number"
-                          className="w-full p-2 bg-gray-700 border border-gray-600 rounded focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
+              </form>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-gray-800 border border-gray-700 rounded-lg">
+                <div>
+                  <p className="font-semibold text-gray-300">Mess Name:</p>
+                  <p className="text-lg">{messData?.name}</p>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-300">Mess Code:</p>
+                  <p className="text-lg">{messData?.code}</p>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-300">Hostel:</p>
+                  <p className="text-lg">{messData?.hostel.name}</p>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-300">Location:</p>
+                  <p className="text-lg">
+                    {messData?.location || "Not specified"}
+                  </p>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-300">Capacity:</p>
+                  <p className="text-lg">{messData?.capacity}</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="font-semibold text-gray-300">Notice:</p>
+                  <p className="text-lg">
+                    {messData?.notice || "No notice available"}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <p className="font-semibold text-gray-300 mb-2">Workers:</p>
+                  {messData?.workers && messData.workers.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {messData.workers.map((worker, index) => (
+                        <div
+                          key={index}
+                          className="bg-gray-700 p-3 rounded border border-gray-600"
+                        >
+                          <p className="font-medium">{worker.name}</p>
+                          <p className="text-gray-300">{worker.mobileNumber}</p>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  ) : (
+                    <p>No workers assigned</p>
+                  )}
+                </div>
               </div>
+            )}
+          </div>
+        </div>
 
-              <div className="flex justify-end">
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-green-500 text-white rounded transition duration-200 hover:bg-green-600"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </form>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p className="font-semibold">Mess Name:</p>
-                <p>{messData?.name}</p>
-              </div>
-              <div>
-                <p className="font-semibold">Mess Code:</p>
-                <p>{messData?.code}</p>
-              </div>
-              <div>
-                <p className="font-semibold">Hostel:</p>
-                <p>{messData?.hostel.name}</p>
-              </div>
-              <div>
-                <p className="font-semibold">Location:</p>
-                <p>{messData?.location || "Not specified"}</p>
-              </div>
-              <div>
-                <p className="font-semibold">Capacity:</p>
-                <p>{messData?.capacity}</p>
-              </div>
-              <div className="col-span-2">
-                <p className="font-semibold">Notice:</p>
-                <p>{messData?.notice || "No notice available"}</p>
-              </div>
-              <div className="col-span-2">
-                <p className="font-semibold mb-2">Workers:</p>
-                {messData?.workers && messData.workers.length > 0 ? (
-                  <ul className="space-y-1">
-                    {messData.workers.map((worker, index) => (
-                      <li key={index}>
-                        {worker.name} - {worker.mobileNumber}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p>No workers assigned</p>
-                )}
-              </div>
+        {/* Daily Food View Section */}
+        <div className="bg-gray-800 rounded-lg shadow-lg p-4 border border-gray-700 mb-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold">
+              Meal Details for {selectedDay}
+            </h2>
+            <div className="flex items-center">
+              <label htmlFor="daySelector" className="mr-2">
+                View items for:
+              </label>
+              <select
+                id="daySelector"
+                value={selectedDay}
+                onChange={(e) => setSelectedDay(e.target.value)}
+                className="bg-gray-700 border border-gray-600 rounded px-2 py-1 text-sm"
+              >
+                {days.map((day) => (
+                  <option key={day} value={day}>
+                    {day}
+                  </option>
+                ))}
+              </select>
             </div>
-          )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {mealTypes.map((mealType) => {
+              const dayData = weeklyFoodData?.meals.find(
+                (d) => d.day === selectedDay
+              );
+              const meal = dayData?.[mealType];
+              const mealRating = getRating(selectedDay, mealType);
+              const formattedMealType =
+                mealType === "eveningSnacks"
+                  ? "Evening Snacks"
+                  : mealType.charAt(0).toUpperCase() + mealType.slice(1);
+
+              return (
+                <div
+                  key={mealType}
+                  className={`p-4 rounded-lg border ${getRatingColor(mealRating)}`}
+                >
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className="font-bold">{formattedMealType}</h3>
+                    <div className="flex items-center">
+                      <Star size={16} className="text-yellow-400 mr-1" />
+                      <span>{mealRating}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center mb-3">
+                    <Clock size={14} className="text-gray-300 mr-2" />
+                    <span>{formatTime(meal?.timing)}</span>
+                  </div>
+
+                  <div className="mb-3">
+                    <h4 className="text-sm font-medium mb-1">Menu:</h4>
+                    <ul className="list-disc pl-5 text-sm space-y-1">
+                      {meal?.items?.map((item, idx) => (
+                        <li key={idx}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Weekly Food Schedule Section */}
-        <div className="mb-8 p-6 bg-gray-800 border border-gray-700 rounded-lg shadow-md">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-semibold">Weekly Food Schedule</h2>
+        <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden mb-6 border border-gray-700">
+          <div className="bg-blue-800 p-4 flex justify-between items-center">
+            <div>
+              <h2 className="text-2xl font-bold">Weekly Food Schedule</h2>
+              <p className="text-blue-100">Complete weekly meal timetable</p>
+            </div>
             <button
               onClick={() => setEditingFood(!editingFood)}
               className={`px-4 py-2 rounded transition duration-300 ${
@@ -392,7 +526,7 @@ const MessDetails = () => {
           {editingFood ? (
             <form
               onSubmit={handleSubmitFood(onSubmitFood)}
-              className="space-y-4"
+              className="space-y-4 p-4"
             >
               {days.map((day, dayIndex) => (
                 <div key={day} className="mb-6 border-b border-gray-700 pb-4">
@@ -407,14 +541,24 @@ const MessDetails = () => {
                     const mealData = weeklyFoodData?.meals.find(
                       (m) => m.day === day
                     )?.[mealType];
+                    const mealRating = getRating(day, mealType);
 
                     return (
-                      <div key={`${day}-${mealType}`} className="mb-4">
-                        <h4 className="font-medium mb-2">
-                          {mealLabels[mealType]}
-                        </h4>
+                      <div
+                        key={`${day}-${mealType}`}
+                        className={`mb-4 p-3 rounded-lg border ${getRatingColor(mealRating)}`}
+                      >
+                        <div className="flex justify-between items-center">
+                          <h4 className="font-medium">
+                            {mealLabels[mealType]}
+                          </h4>
+                          <div className="flex items-center bg-gray-700 px-2 py-1 rounded">
+                            <Star size={14} className="text-yellow-400 mr-1" />
+                            <span className="text-sm">{mealRating}</span>
+                          </div>
+                        </div>
 
-                        <div className="mb-2">
+                        <div className="mb-2 mt-3">
                           <label className="block text-sm mb-1">
                             Items (comma separated)
                           </label>
@@ -512,20 +656,36 @@ const MessDetails = () => {
                         <td className="py-2 px-4 border font-medium">{day}</td>
                         {mealTypes.map((mealType) => {
                           const mealData = dayData?.[mealType];
+                          const mealRating = getRating(day, mealType);
                           return (
                             <td
                               key={`${day}-${mealType}`}
-                              className="py-2 px-4 border"
+                              className="py-2 px-3 border"
                             >
-                              <div>
-                                <p className="font-medium">
-                                  {mealData?.timing?.hour || "-"}:
-                                  {String(
-                                    mealData?.timing?.minute || "00"
-                                  ).padStart(2, "0")}
-                                  {mealData?.timing?.am_pm || ""}
-                                </p>
-                                <ul className="text-sm list-disc list-inside">
+                              <div
+                                className={`p-2 rounded border ${getRatingColor(mealRating)}`}
+                              >
+                                <div className="flex justify-between items-center mb-2">
+                                  <div className="flex items-center">
+                                    <Clock
+                                      size={14}
+                                      className="text-gray-300 mr-1"
+                                    />
+                                    <span className="text-sm">
+                                      {formatTime(mealData?.timing)}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <Star
+                                      size={14}
+                                      className="text-yellow-400 mr-1"
+                                    />
+                                    <span className="text-sm">
+                                      {mealRating}
+                                    </span>
+                                  </div>
+                                </div>
+                                <ul className="list-disc pl-5 text-sm space-y-1">
                                   {mealData?.items?.map((item, i) => (
                                     <li key={i}>{item}</li>
                                   )) || <li>No items</li>}

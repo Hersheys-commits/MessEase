@@ -37,6 +37,8 @@ import PaidUsersList from "./pages/admin/fees/PaidUsersList";
 import FeesPaymentPage from "./pages/student/FeesPaymentPage";
 import StudentProfilePage from "./pages/admin/StudentProfilePage";
 import StudentListPage from "./pages/admin/StudentListPage";
+import MessDetailsStudent from "./pages/student/MessDetailsStudent";
+import MessTimeTable from "./pages/student/MessTimeTable";
 
 function App() {
   useEffect(() => {
@@ -65,13 +67,21 @@ function App() {
         <Route path="/admin/hostel/:code" element={<HostelDetailPage />} />
         <Route path="/admin/mess/create" element={<MessForm />} />
         <Route path="/admin/mess/:code" element={<MessDetails />} />
-        <Route path="/student/update-profile" element={<UpdateProfile />} />
-        <Route path="/student/profile" element={<ProfilePage />} />
         <Route path="/admin/profile" element={<AdminProfile />} />
         <Route path="/admin/update-profile" element={<UpdateAdminProfile />} />
         <Route path="/admin/update-college" element={<UpdateCollege />} />
         <Route path="/admin/students" element={<StudentListPage />} />
         <Route path="/admin/students/:id" element={<StudentProfilePage />} />
+        <Route path="/student/update-profile" element={<UpdateProfile />} />
+        <Route path="/student/profile" element={<ProfilePage />} />
+        <Route
+          path="/student/mess/:messCode"
+          element={<MessDetailsStudent />}
+        />
+        <Route
+          path="/student/mess/:messCode/time-table"
+          element={<MessTimeTable />}
+        />
         // Admin routes
         <Route path="/admin/payments" element={<PaymentManagement />} />
         <Route

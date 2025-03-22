@@ -13,7 +13,6 @@ export const createHostel = async (req, res) => {
       workers,
       collegeId,
     } = req.body;
-    console.log(req.body);
 
     // Get the collegeId from either the request body or session
     const college = collegeId || req.user?.college;
@@ -49,7 +48,6 @@ export const createHostel = async (req, res) => {
       admins: req.user?._id ? [req.user._id] : [], // Add current user as admin if available
     });
 
-    console.log("Hostel created:", hostel);
     return res.status(201).json({
       message: "Hostel created successfully",
       hostel: hostel,

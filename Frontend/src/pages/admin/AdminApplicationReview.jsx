@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../../utils/axiosRequest";
 import { useParams, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import ApplicationDetailModal from "../../components/admin/ApplicationDetailModal";
 import AdminHeader from "../../components/AdminHeader";
 
@@ -67,11 +67,16 @@ const AdminApplicationReview = () => {
     setSubmitting(true);
 
     try {
-      await api.patch(`/api/election/admin/${electionId}/select-candidates`, {
-        applicationIds: selectedApplications,
-      });
-
-      toast.success("Candidates selected successfully");
+      const res = await api.patch(
+        `/api/election/admin/${electionId}/select-candidates`,
+        {
+          applicationIds: selectedApplications,
+        }
+      );
+      //   console.log(res)
+      if (res?.data?.phase) {
+        toast.success(`${res.data.message}`);
+      } else toast.success("Candidates selected successfully");
       navigate(`/admin/election`);
     } catch (error) {
       toast.error(

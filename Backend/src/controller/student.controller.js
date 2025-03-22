@@ -268,7 +268,6 @@ export const googleAuth = async (req, res) => {
  */
 export const logout = async (req, res) => {
   try {
-    // console.log("user",req);
     await User.findByIdAndUpdate(
       req.user._id,
       { $unset: { refreshToken: 1 } },
@@ -292,9 +291,18 @@ export const logout = async (req, res) => {
 };
 
 export const verifyToken = async (req, res) => {
+  const hostelCode = await Hostel.findById(req.user.hostel).select("code");
+  if (!hostelCode?.code) {
+    return res.status(250).json({
+      user: req.user._id,
+      userInfo: req.user,
+    });
+  }
+
   return res.status(200).json({
     user: req.user._id,
     userInfo: req.user,
+    code: hostelCode?.code,
   });
 };
 

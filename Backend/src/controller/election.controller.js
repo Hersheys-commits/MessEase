@@ -150,12 +150,12 @@ export const selectCandidates = async (req, res) => {
 
     // Application phase should be closed
     if (election.applicationPhase.isOpen) {
-      return res.status(407).json({
+      return res.status(200).json({
         success: false,
+        phase: true,
         message: "Close application phase before selecting candidates",
       });
     }
-
     // Validate all applicationIds
     const applications = await Application.find({
       _id: { $in: applicationIds },
@@ -292,8 +292,12 @@ const calculateResults = async (electionId) => {
   // Update election with winner
   if (winnerIdString) {
     const winnerId = new mongoose.Types.ObjectId(winnerIdString);
+    const winner = await User.findById(winnerId).select(
+      "name branch year email"
+    );
+    const winnerWithVoteCount = { ...winner, voteCount: maxVotes };
     await ElectionConfig.findByIdAndUpdate(electionId, {
-      "result.winnerId": winnerId,
+      "result.winnerId": winnerWithVoteCount,
       "result.announcedAt": new Date(),
     });
 
@@ -577,6 +581,7 @@ export const getElectionResults = async (req, res) => {
       "result.winnerId",
       "name email branch year"
     );
+    // console.log(election)
 
     if (!election) {
       return res.status(404).json({
