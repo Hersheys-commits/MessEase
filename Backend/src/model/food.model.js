@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 import mongoose from "mongoose";
 
+=======
+>>>>>>> eb6774fd623166eb2135baa6f095250fa0a4ab2f
 const WeeklyFoodSchema = new mongoose.Schema({
     mess: { type: mongoose.Schema.Types.ObjectId, ref: 'Mess', required: true },
     weekStartDate: { type: Date, required: true, unique: true }, // Monday, Tuesday , ...... , Sunday
@@ -14,8 +17,12 @@ const WeeklyFoodSchema = new mongoose.Schema({
       eveningSnacks: { type: String, required: true }, 
       dinner: { type: String, required: true }
     }],
+<<<<<<< HEAD
   },{
     timestamps: true,
+=======
+    createdAt: { type: Date, default: Date.now }
+>>>>>>> eb6774fd623166eb2135baa6f095250fa0a4ab2f
   });
 
 

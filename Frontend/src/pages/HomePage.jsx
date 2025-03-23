@@ -15,6 +15,7 @@ const HomePage = () => {
   };
 
   return (
+<<<<<<< HEAD
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
       <div className="bg-white p-8 rounded-lg shadow-lg max-w-lg w-full text-center">
         <h1 className="text-3xl font-semibold mb-6">Welcome to Our Platform</h1>
@@ -35,6 +36,14 @@ const HomePage = () => {
             College Student
           </button>
         </div>
+=======
+    <div>
+      <Header/>
+      <div>
+        Homepage
+        {/* //  hostel  mess  */}
+        {/* intermediate page */}
+>>>>>>> eb6774fd623166eb2135baa6f095250fa0a4ab2f
       </div>
     </div>
   );

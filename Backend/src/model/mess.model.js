@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import  mongoose,{ Schema } from "mongoose";
 
 const MessSchema = new Schema({
@@ -32,6 +33,20 @@ const MessSchema = new Schema({
     }], 
   },{
     timestamps:true,
+=======
+const MessSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+        hostel: { type: mongoose.Schema.Types.ObjectId, ref: 'Hostel', required: true },
+        admins: [{
+      permissions: [{
+        type: String,
+        // enum: ['manageMenu', 'trackAttendance', 'viewPayments', 'handleComplaints']
+        enum:['manageMenu', 'manageMess', 'manageComplaints']
+      }]
+    }],
+    foodRecords: [{ type: mongoose.Schema.Types.ObjectId, ref: 'WeeklyFood' }], // Stores weekly food records
+    createdAt: { type: Date, default: Date.now }
+>>>>>>> eb6774fd623166eb2135baa6f095250fa0a4ab2f
   });
   
 

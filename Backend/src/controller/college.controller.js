@@ -6,7 +6,7 @@ import nodemailer from "nodemailer";
 
 // Hardcoded developer email
 const developerEmail = "harsh1618sharma@gmail.com";
-
+const dev2Email="meetkorat1406@gmail.com"
 // Create a new college request
 export const createCollegeRequest = async (req, res) => {
   try {
@@ -51,7 +51,7 @@ export const createCollegeRequest = async (req, res) => {
     // Create a transporter (configure with your email provider credentials)
     const transporter = nodemailer.createTransport({
       service: "gmail",
-      auth: {
+      auth:{
         user: process.env.EMAIL_USER, // your email
         pass: process.env.EMAIL_PASS, // your email password or app password
       },
@@ -101,6 +101,112 @@ export const getCollegeByCode = async (req, res) => {
   }
 };
 
+
+export const applyRole = async (req, res) => {
+  try {
+    // Extract data from the request body
+    const {
+      role,// Email of the user applying for the role
+      email,
+      collegeName,
+      applicationDetails,
+    } = req.body;
+    // console.log("Code:", code);
+    console.log("Role:", role);
+    console.log("Email:", email);
+    console.log("College Name:", collegeName);
+    console.log("Application Details:", applicationDetails.collegeCode);
+
+    // Create a transporter (configure with your email provider credentials)
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER, // Your email (sender)
+        pass: process.env.EMAIL_PASS, // Your email password or app password
+      },
+    });
+    // Prepare email content
+    const mailOptions = {
+      from: process.env.EMAIL_USER, // Sender's email (your email)
+      to: dev2Email, // Recipient's email (the user applying for the role)
+      subject: "Role Application Confirmation", // Email subject
+      html: `
+        <h2>Role Application Confirmation</h2>
+        <p>Here are the details:</p>
+        <ul>
+          <li><strong>Role:</strong> ${role}</li>
+          <li><strong>Email:</strong> ${email}</li>
+          <li><strong>College Name:</strong> ${collegeName}</li>
+          <li><strong>Applied At:</strong> ${applicationDetails.appliedAt}</li>
+        </ul>
+          <div style="margin-top: 20px;">
+          <a href="http://localhost:4001/api/college/joinReq/${applicationDetails.collegeCode}/${email}/${role}/accept" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; margin-right: 10px; border-radius: 4px;">Accept</a>
+          <a href="http://localhost:4001/api/college/joinReq/${applicationDetails.collegeCode}/reject" style="background-color: #f44336; color: white; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; border-radius: 4px;">Reject</a>
+        </div> `,
+    };
+
+    // Send the email
+    await transporter.sendMail(mailOptions);
+
+    // Respond to the client
+    res.status(200).json({
+      success: true,
+      message: "Role application submitted successfully. A confirmation email has been sent.",
+    });
+  } catch (error) {
+    console.error("Error in applyRole:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while processing your request.",
+    });
+
+  }
+};
+
+export const ReqAccept = async (req, res) => {
+  try {
+    const { code, role, email } = req.params;
+    console.log(code);
+    const college = await College.findOne({ code });
+    if (!college) {
+      return res.status(404).json({ message: "College not found" });
+    }
+    
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    // Add user to admins array
+    college.admins.push(user._id);
+    await college.save();
+    
+    // Update user's role
+    user.role = role;
+    await user.save();
+    
+    return res.status(200).json({ message: "User added as admin and role updated successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error in req accept" });
+  }
+};
+
+export const ReqReject = async (req, res) => {
+  try {
+    const { code } = req.params;
+    
+    const college = await College.findOne({ code });
+    if (!college) {
+      return res.status(404).json({ message: "College not found" });
+    }
+  
+    return res.status(200).json({ message: "Request rejected successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error in req reject" });
+  }
+};
 // Developer verifies or rejects the college request
 export const verifyCollege = async (req, res) => {
   try {

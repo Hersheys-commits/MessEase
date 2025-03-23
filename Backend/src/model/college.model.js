@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 
 const collegeSchema = new Schema({
-    status:{
+   status:{
         type: String,
         enum: ['verified','unverified'],
         default: 'unverified',
@@ -32,6 +32,7 @@ const collegeSchema = new Schema({
     contactEmail: String,
     contactPhone: String,
     website: String,
+<<<<<<< HEAD
     hostel: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Hostel'
@@ -39,7 +40,17 @@ const collegeSchema = new Schema({
     admins: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+=======
+    hostels: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Hostel'
+>>>>>>> eb6774fd623166eb2135baa6f095250fa0a4ab2f
     }],
+    admins: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User' 
+    } 
+    ],
   },{
     timestamps: true,
   });
