@@ -1,25 +1,35 @@
 import mongoose, { Schema } from "mongoose";
 
+<<<<<<< HEAD
 const collegeSchema = new Schema({
    status:{
         type: String,
         enum: ['verified','unverified'],
         default: 'unverified',
         required: true,
+=======
+const collegeSchema = new Schema(
+  {
+    status: {
+      type: String,
+      enum: ["verified", "unverified"],
+      default: "unverified",
+      required: true,
+>>>>>>> newBranch
     },
     name: {
       type: String,
-      required: true
+      required: true,
     },
     code: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
     },
     domain: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
     },
     logo: String,
     address: {
@@ -27,11 +37,12 @@ const collegeSchema = new Schema({
       city: String,
       state: String,
       pincode: String,
-      country: String
+      country: String,
     },
     contactEmail: String,
     contactPhone: String,
     website: String,
+<<<<<<< HEAD
 <<<<<<< HEAD
     hostel: [{
       type: mongoose.Schema.Types.ObjectId,
@@ -52,11 +63,26 @@ const collegeSchema = new Schema({
     } 
     ],
   },{
+=======
+    hostel: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Hostel",
+      },
+    ],
+    admins: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+  },
+  {
+>>>>>>> newBranch
     timestamps: true,
-  });
-
+  }
+);
 
 const College = mongoose.model("College", collegeSchema);
-  
+
 export default College;
-  

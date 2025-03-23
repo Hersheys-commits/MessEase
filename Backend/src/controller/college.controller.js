@@ -1,12 +1,17 @@
 // controllers/collegeController.js
 import College from "../model/college.model.js";
-import User from "../model/user.model.js"
+import User from "../model/user.model.js";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
+import { ApiResponse } from "../util/ApiResponse.js";
+import { ApiError } from "../util/ApiError.js";
+import { asyncHandler } from "../util/asyncHandler.js";
+import { uploadOnCloudinary } from "../util/cloudinary.js";
 
 // Hardcoded developer email
 const developerEmail = "harsh1618sharma@gmail.com";
-const dev2Email="meetkorat1406@gmail.com"
+const dev2Email = "meetkorat1406@gmail.com";
+
 // Create a new college request
 export const createCollegeRequest = async (req, res) => {
   try {
@@ -19,15 +24,15 @@ export const createCollegeRequest = async (req, res) => {
       contactPhone,
       address, // expects an object: { street, city, state, pincode, country }
     } = req.body;
-    
+
     // Find the admin user by email and ensure the role is admin
-    const adminUser = await User.findOne({_id: req.user._id});
+    const adminUser = await User.findOne({ _id: req.user._id });
     if (!adminUser) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
     // Generate a unique code for the college
     const code = crypto.randomBytes(3).toString("hex");
-    
+
     // Create new college object with status "unverified"
     const newCollege = new College({
       name,
@@ -38,15 +43,13 @@ export const createCollegeRequest = async (req, res) => {
       contactEmail,
       contactPhone,
       address,
-      admins:[adminUser._id],
+      admins: [adminUser._id],
     });
 
     await newCollege.save();
 
-
-    adminUser.college=newCollege._id;
-    await adminUser.save()
-
+    adminUser.college = newCollege._id;
+    await adminUser.save();
 
     // Create a transporter (configure with your email provider credentials)
     const transporter = nodemailer.createTransport({
@@ -57,21 +60,181 @@ export const createCollegeRequest = async (req, res) => {
       },
     });
 
-    // Prepare email content for the developer
+    // Format the address nicely
+    const formattedAddress = `${address.street}, ${address.city}, ${address.state}, ${address.pincode}, ${address.country}`;
+
+    // Get current date for the email
+    const currentDate = new Date().toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
+    // Prepare email content with styled buttons
     const mailOptions = {
       from: process.env.EMAIL_USER,
-      to: developerEmail,
-      subject: "New College Request Verification",
+      to: developerEmail, // Use environment variable for developer email
+      subject: `New College Verification Request: ${name}`,
       html: `
-        <h2>New College Request</h2>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Domain:</strong> ${domain}</p>
-        <p><strong>Admin Post:</strong> ${adminPost}</p>
-        <p><strong>Website:</strong> ${website}</p>
-        <p><strong>Contact Email:</strong> ${contactEmail}</p>
-        <p><strong>Contact Phone:</strong> ${contactPhone}</p>
-        <p><strong>Address:</strong> ${address.street}, ${address.city}, ${address.state}, ${address.pincode}, ${address.country}</p>
-        <p>To verify or reject this college request, click <a href="http://localhost:5173/college/verify/${code}">here</a>.</p>
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>College Verification Request</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              line-height: 1.6;
+              color: #333;
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 20px;
+            }
+            .email-container {
+              border: 1px solid #e0e0e0;
+              border-radius: 8px;
+              overflow: hidden;
+            }
+            .email-header {
+              background-color: #3949ab;
+              color: white;
+              padding: 20px;
+              text-align: center;
+            }
+            .email-body {
+              padding: 20px;
+              background-color: #f9f9f9;
+            }
+            .college-info {
+              background-color: white;
+              border: 1px solid #e0e0e0;
+              border-radius: 6px;
+              padding: 15px;
+              margin-bottom: 20px;
+            }
+            .info-row {
+              margin-bottom: 10px;
+              border-bottom: 1px solid #f0f0f0;
+              padding-bottom: 10px;
+            }
+            .info-row:last-child {
+              border-bottom: none;
+              margin-bottom: 0;
+              padding-bottom: 0;
+            }
+            .label {
+              font-weight: bold;
+              color: #555;
+            }
+            .value {
+              color: #333;
+            }
+            .action-buttons {
+              display: table;
+              width: 100%;
+              margin: 20px 0;
+              table-layout: fixed;
+            }
+            .button-cell {
+              display: table-cell;
+              padding: 10px;
+              text-align: center;
+            }
+            .button {
+              display: inline-block;
+              padding: 12px 24px;
+              text-decoration: none;
+              border-radius: 4px;
+              font-weight: bold;
+              cursor: pointer;
+              text-align: center;
+            }
+            .verify-button {
+              background-color: #4CAF50;
+              color: white;
+            }
+            .reject-button {
+              background-color: #F44336;
+              color: white;
+            }
+            .footer {
+              text-align: center;
+              font-size: 12px;
+              color: #777;
+              padding: 20px;
+              border-top: 1px solid #e0e0e0;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="email-container">
+            <div class="email-header">
+              <h2>New College Verification Request</h2>
+              <p>Submitted on ${currentDate}</p>
+            </div>
+            
+            <div class="email-body">
+              <p>A new college has requested verification on your platform. Please review the details below:</p>
+              
+              <div class="college-info">
+                <div class="info-row">
+                  <div class="label">College Name:</div>
+                  <div class="value">${name}</div>
+                </div>
+                <div class="info-row">
+                  <div class="label">Domain:</div>
+                  <div class="value">${domain}</div>
+                </div>
+                <div class="info-row">
+                  <div class="label">Admin Position:</div>
+                  <div class="value">${adminPost}</div>
+                </div>
+                <div class="info-row">
+                  <div class="label">Website:</div>
+                  <div class="value"><a href="${website}" target="_blank">${website}</a></div>
+                </div>
+                <div class="info-row">
+                  <div class="label">Contact Email:</div>
+                  <div class="value">${contactEmail}</div>
+                </div>
+                <div class="info-row">
+                  <div class="label">Contact Phone:</div>
+                  <div class="value">${contactPhone}</div>
+                </div>
+                <div class="info-row">
+                  <div class="label">Address:</div>
+                  <div class="value">${formattedAddress}</div>
+                </div>
+                <div class="info-row">
+                  <div class="label">College Code:</div>
+                  <div class="value">${code}</div>
+                </div>
+              </div>
+              
+              <p>Please verify or reject this college request:</p>
+              
+              <div class="action-buttons">
+                <div class="button-cell">
+                  <a href="http://localhost:4001/api/college/verification/${newCollege.code}/verify" class="button verify-button">VERIFY</a>
+                </div>
+                <div class="button-cell">
+                  <a href="http://localhost:4001/api/college/verification/${newCollege.code}/reject" class="button reject-button">REJECT</a>
+                </div>
+              </div>
+              
+              <p>If the buttons above don't work, you can use these links:</p>
+              <p>Verify: <a href="http://localhost:4001/api/college/verification/${newCollege.code}/verify">http://localhost:4001/api/college/verification/${newCollege.code}/verify</a></p>
+              <p>Reject: <a href="http://localhost:4001/api/college/verification/${newCollege.code}/reject">http://localhost:4001/api/college/verification/${newCollege.code}/reject</a></p>
+            </div>
+            
+            <div class="footer">
+              <p>This is an automated message. Please do not reply to this email.</p>
+              <p>&copy; ${new Date().getFullYear()} College Management System. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
       `,
     };
 
@@ -210,8 +373,7 @@ export const ReqReject = async (req, res) => {
 // Developer verifies or rejects the college request
 export const verifyCollege = async (req, res) => {
   try {
-    const { code } = req.params;
-    const { decision } = req.body; // decision: "verify" or "reject"
+    const { code, decision } = req.params;
 
     const college = await College.findOne({ code });
     if (!college) {
@@ -242,7 +404,9 @@ export const verifyCollege = async (req, res) => {
 
       await transporter.sendMail(mailOptions);
 
-      return res.status(200).json({ message: "College verified successfully." });
+      return res
+        .status(200)
+        .json({ message: "College verified successfully." });
     } else if (decision === "reject") {
       // Delete the college request
       await College.deleteOne({ code });
@@ -264,7 +428,9 @@ export const verifyCollege = async (req, res) => {
 
       await transporter.sendMail(mailOptions);
 
-      return res.status(200).json({ message: "College request rejected and deleted." });
+      return res
+        .status(200)
+        .json({ message: "College request rejected and deleted." });
     } else {
       return res.status(400).json({ message: "Invalid decision" });
     }
@@ -274,3 +440,94 @@ export const verifyCollege = async (req, res) => {
   }
 };
 
+export const getCollege = async (req, res) => {
+  try {
+    const collegeId = req.user.college;
+
+    if (!collegeId) {
+      return res
+        .status(400)
+        .json({ message: "College not assigned to user.", success: false });
+    }
+
+    const college = await College.findById(collegeId);
+
+    if (!college) {
+      return res
+        .status(401)
+        .json({ message: "College doesnt exist with this ID", success: false });
+    }
+
+    return res.status(200).json({
+      message: "college fetched successfully",
+      college,
+      success: true,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Update college details
+export const updateCollegeDetails = asyncHandler(async (req, res) => {
+  const { name, logo, address, contactEmail, contactPhone, website } = req.body;
+
+  const user = await User.findById(req.user?._id);
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  // Check if user is an admin
+  if (user.role !== "admin") {
+    throw new ApiError(
+      403,
+      "Unauthorized access. Only admins can update college details"
+    );
+  }
+
+  if (!user.college) {
+    throw new ApiError(404, "No college associated with this admin");
+  }
+
+  const college = await College.findById(user.college);
+
+  if (!college) {
+    throw new ApiError(404, "College not found");
+  }
+
+  // Handle logo upload if provided
+  if (req.files && req.files.logo) {
+    const logoFile = req.files.logo;
+    const logoUpload = await uploadOnCloudinary(logoFile.path);
+
+    if (logoUpload) {
+      college.logo = logoUpload.url;
+    }
+  } else if (logo) {
+    college.logo = logo;
+  }
+
+  // Update other fields if provided
+  if (name) college.name = name;
+
+  if (address) {
+    college.address = {
+      ...college.address,
+      ...address,
+    };
+  }
+
+  if (contactEmail) college.contactEmail = contactEmail;
+  if (contactPhone) college.contactPhone = contactPhone;
+  if (website) college.website = website;
+
+  await college.save();
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, college, "College details updated successfully")
+    );
+});

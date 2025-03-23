@@ -49,7 +49,9 @@ const CollegeVerifyPage = () => {
   if (!college) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gray-100">
-        <div className="text-xl text-gray-600">No college found with this verification code.</div>
+        <div className="text-xl text-gray-600">
+          No college found with this verification code.
+        </div>
       </div>
     );
   }
@@ -58,7 +60,9 @@ const CollegeVerifyPage = () => {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-blue-50 via-indigo-100 to-blue-200 p-6">
       <Toaster />
       <div className="max-w-3xl w-full bg-white p-8 rounded-lg shadow-lg border border-gray-200">
-        <h2 className="text-3xl font-semibold text-center text-gray-800 mb-6">College Verification</h2>
+        <h2 className="text-3xl font-semibold text-center text-gray-800 mb-6">
+          College Verification
+        </h2>
         <div className="space-y-4">
           <p className="text-lg text-gray-700">
             <strong className="font-medium">Name:</strong> {college.name}
@@ -67,16 +71,22 @@ const CollegeVerifyPage = () => {
             <strong className="font-medium">Domain:</strong> {college.domain}
           </p>
           <p className="text-lg text-gray-700">
-            <strong className="font-medium">Website:</strong> {college.website || "N/A"}
+            <strong className="font-medium">Website:</strong>{" "}
+            {college.website || "N/A"}
           </p>
           <p className="text-lg text-gray-700">
-            <strong className="font-medium">Contact Email:</strong> {college.contactEmail}
+            <strong className="font-medium">Contact Email:</strong>{" "}
+            {college.contactEmail}
           </p>
           <p className="text-lg text-gray-700">
-            <strong className="font-medium">Contact Phone:</strong> {college.contactPhone}
+            <strong className="font-medium">Contact Phone:</strong>{" "}
+            {college.contactPhone}
           </p>
           <p className="text-lg text-gray-700">
-            <strong className="font-medium">Address:</strong> {college.address.street}, {college.address.city}, {college.address.state}, {college.address.pincode}, {college.address.country}
+            <strong className="font-medium">Address:</strong>{" "}
+            {college.address.street}, {college.address.city},{" "}
+            {college.address.state}, {college.address.pincode},{" "}
+            {college.address.country}
           </p>
         </div>
 

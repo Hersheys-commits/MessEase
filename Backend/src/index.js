@@ -6,6 +6,17 @@ import connectDB from "./db/index.js"; // MongoDB connection
 import adminRoutes from "./route/admin.route.js";
 import collegeRoutes from "./route/college.route.js";
 import studentRoutes from "./route/student.route.js";
+import guestRoutes from "./route/guest.route.js";
+import hostelRoutes from "./route/hostel.route.js";
+import messRoutes from "./route/mess.route.js";
+import electionRoutes from "./route/election.route.js";
+import paymentRoutes from "./route/payment.route.js";
+import RazorPay from "razorpay";
+
+export const instance = new RazorPay({
+  key_id: process.env.RAZORPAY_API_KEY,
+  key_secret: process.env.RAZORPAY_API_SECRET,
+});
 
 dotenv.config({ path: "./.env" });
 
@@ -24,8 +35,6 @@ app.use(
   })
 );
 
-
-
 // MongoDB Connection
 connectDB()
   .then(() => {
@@ -40,7 +49,12 @@ connectDB()
 // Use routes
 app.use("/api/admin", adminRoutes);
 app.use("/api/college", collegeRoutes);
-app.use("/api/student",studentRoutes);
+app.use("/api/student", studentRoutes);
+app.use("/api/hostel", hostelRoutes);
+app.use("/api/guest", guestRoutes);
+app.use("/api/mess", messRoutes);
+app.use("/api/election", electionRoutes);
+app.use("/api/payment", paymentRoutes);
 
 // Global Error Handling Middleware
 app.use((err, req, res, next) => {

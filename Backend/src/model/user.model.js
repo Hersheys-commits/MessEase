@@ -2,7 +2,8 @@ import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-const userSchema = new Schema({
+const userSchema = new Schema(
+  {
     email: {
       type: String,
       required: true,
@@ -10,6 +11,9 @@ const userSchema = new Schema({
       lowercase: true,
       trim: true,
       index: true,
+    },
+    rollNumber: {
+      type: String,
     },
     password: {
       type: String,
@@ -19,51 +23,71 @@ const userSchema = new Schema({
       trim: true,
     },
     googleId: {
-        type: String,
-        unique: true,
-        sparse: true, // This makes the index ignore documents where googleId is not set
+      type: String,
+      unique: true,
+      sparse: true, // This makes the index ignore documents where googleId is not set
     },
     role: {
       type: String,
+<<<<<<< HEAD
 <<<<<<< HEAD
       enum: ['student', 'messManager','hostelManager', 'accountant', 'professor', 'chiefWarden', 'developer', 'admin'],
 =======
       enum: ['student', 'messManager', 'accountant', 'developer', 'admin'],
 >>>>>>> eb6774fd623166eb2135baa6f095250fa0a4ab2f
       required: true
+=======
+      enum: [
+        "student",
+        "messManager",
+        "hostelManager",
+        "accountant",
+        "professor",
+        "chiefWarden",
+        "developer",
+        "admin",
+      ],
+      required: true,
+>>>>>>> newBranch
     },
     profilePicture: {
       type: String,
     },
     college: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'College'
+      ref: "College",
     },
-    mess:{
-        type: mongoose.Schema.Types.ObjectId,
-      ref: 'Mess'
+    mess: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Mess",
+    },
+    branch: {
+      type: String,
+    },
+    year: {
+      type: Number,
     },
     hostel: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Hostel'
+      ref: "Hostel",
     },
-    room:{
-        type: String,
-        default: null,
+    room: {
+      type: String,
+      default: null,
     },
     isBlocked: {
       type: Boolean,
-      default: false
+      default: false,
     },
     refreshToken: {
-        type: String,
+      type: String,
     },
     blockedUntil: {
       type: Date,
-      default: null
+      default: null,
     },
     phoneNumber: String,
-    lastLogin: Date
+    lastLogin: Date,
   },
   {
     timestamps: true,
@@ -71,22 +95,21 @@ const userSchema = new Schema({
 );
 
 // // Middleware to update the updatedAt field on every save.
-userSchema.pre('save', async function(next) {
+userSchema.pre("save", async function (next) {
   this.updatedAt = Date.now();
   if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 10);
   next();
 });
 
-
 userSchema.methods.isPasswordCorrect = async function (password) {
-    return await bcrypt.compare(password, this.password);
+  return await bcrypt.compare(password, this.password);
 };
 
 userSchema.methods.generateAccessToken = function () {
   return jwt.sign(
     {
-      _id: this._id,  // Correct syntax for MongoDB document ID
+      _id: this._id, // Correct syntax for MongoDB document ID
       email: this.email,
       username: this.username,
       fullName: this.fullName,
@@ -97,17 +120,16 @@ userSchema.methods.generateAccessToken = function () {
 };
 
 userSchema.methods.generateRefreshToken = function () {
-    return jwt.sign(
-        {
-            _id: this._id,
-        },
-        process.env.REFRESH_TOKEN_SECRET,
-        {
-            expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
-        }
-    );
+  return jwt.sign(
+    {
+      _id: this._id,
+    },
+    process.env.REFRESH_TOKEN_SECRET,
+    {
+      expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
+    }
+  );
 };
-
 
 const User = mongoose.model("User", userSchema);
 
