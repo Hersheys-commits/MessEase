@@ -26,6 +26,7 @@ const AdminElectionConfig = () => {
           api.post("/api/mess/fetchAllMesses"),
           api.get("/api/election/admin/elections"),
         ]);
+        console.log("ghrhrsh", configsRes);
 
         setHostels(hostelsRes.data.hostels);
         setMesses(messesRes.data.data);
@@ -354,7 +355,7 @@ const AdminElectionConfig = () => {
                           {config.type === "messManager"
                             ? "Mess Manager"
                             : "Hostel Manager"}
-                          : {config.targetId?.name || "N/A"}
+                          : {config?.name || "N/A"}
                         </h3>
                         <p className="text-sm text-gray-400 mt-1">
                           Created: {new Date(config.createdAt).toLocaleString()}

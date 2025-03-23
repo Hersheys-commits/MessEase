@@ -27,6 +27,7 @@ const AdminElectionResults = () => {
         const resultsResponse = await api.get(
           `/api/election/${electionId}/results`
         );
+        console.log(resultsResponse);
         setResults(resultsResponse.data.data);
         setLoading(false);
       } catch (error) {
@@ -40,7 +41,6 @@ const AdminElectionResults = () => {
     fetchResults();
   }, [electionId]);
 
-  const getWinner = () => results.find((result) => result.isWinner);
   const getTotalVotes = () =>
     results.reduce((sum, result) => sum + result.voteCount, 0);
 
@@ -116,7 +116,7 @@ const AdminElectionResults = () => {
     );
   }
 
-  const winner = getWinner();
+  const winner = election?.result?.winnerId;
   const totalVotes = getTotalVotes();
 
   return (
@@ -180,11 +180,11 @@ const AdminElectionResults = () => {
                 </p>
                 <p className="text-gray-300">
                   <span className="font-semibold text-white">Target:</span>{" "}
-                  {election.targetId?.name || "N/A"}
+                  {election?.name || "N/A"}
                 </p>
                 <p className="text-gray-300">
                   <span className="font-semibold text-white">College:</span>{" "}
-                  {election.college?.name || "N/A"}
+                  {election?.collegeName || "N/A"}
                 </p>
                 <p className="text-gray-300">
                   <span className="font-semibold text-white">Created:</span>{" "}
@@ -307,24 +307,18 @@ const AdminElectionResults = () => {
             <div className="bg-black bg-opacity-20 p-4 rounded-lg">
               <div className="text-center">
                 <h4 className="text-xl font-semibold text-white mb-2">
-                  {winner.candidate.name}
+                  {winner.name}
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3">
                   <p className="text-gray-200">
-                    <span className="font-semibold">Email:</span>{" "}
-                    {winner.candidate.email}
+                    <span className="font-semibold">Email:</span> {winner.email}
                   </p>
                   <p className="text-gray-200">
                     <span className="font-semibold">Branch:</span>{" "}
-                    {winner.candidate.branch}
+                    {winner.branch}
                   </p>
                   <p className="text-gray-200">
-                    <span className="font-semibold">Year:</span>{" "}
-                    {winner.candidate.year}
-                  </p>
-                  <p className="text-gray-200">
-                    <span className="font-semibold">Status:</span>{" "}
-                    {winner.applicationStatus || "N/A"}
+                    <span className="font-semibold">Year:</span> {winner.year}
                   </p>
                 </div>
                 <div className="mt-4 bg-green-800 py-2 px-4 rounded-lg inline-block">
@@ -369,7 +363,6 @@ const AdminElectionResults = () => {
                   <th className="px-4 py-3 text-left">Year</th>
                   <th className="px-4 py-3 text-right">Votes</th>
                   <th className="px-4 py-3 text-right">Percentage</th>
-                  <th className="px-4 py-3 text-left">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-700">
@@ -427,11 +420,6 @@ const AdminElectionResults = () => {
                           {((result.voteCount / totalVotes) * 100).toFixed(1)}%
                         </span>
                       </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="px-2 py-1 text-xs rounded-md bg-blue-900 text-blue-200">
-                        {result.applicationStatus || "N/A"}
-                      </span>
                     </td>
                   </tr>
                 ))}

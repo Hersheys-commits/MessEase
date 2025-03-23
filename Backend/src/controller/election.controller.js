@@ -3,6 +3,7 @@ import User from "../model/user.model.js";
 import Hostel from "../model/hostel.model.js";
 import Mess from "../model/mess.model.js";
 import mongoose from "mongoose";
+import College from "../model/college.model.js";
 
 // ADMIN CONTROLLERS
 
@@ -12,10 +13,37 @@ export const getAllElectionConfigs = async (req, res) => {
     const electionConfigs = await ElectionConfig.find()
       .populate("targetId")
       .sort({ createdAt: -1 });
+    // Map through each config to add the name property
+    const configsWithNames = await Promise.all(
+      electionConfigs.map(async (config) => {
+        // Convert to plain object so we can modify it
+        const configObj = config.toObject();
+        // Check if targetId exists for this config
+        if (configObj.targetId && configObj.targetId._id) {
+          try {
+            let name = null;
+            name = await Hostel.findById(configObj.targetId._id).select("name");
+            if (!name) {
+              name = await Mess.findById(configObj.targetId._id).select("name");
+            }
+            if (name && name.name) {
+              configObj.name = name.name;
+            }
+          } catch (err) {
+            console.error(
+              `Error finding name for targetId ${configObj.targetId._id}:`,
+              err
+            );
+          }
+        }
+
+        return configObj;
+      })
+    );
 
     return res.status(200).json({
       success: true,
-      data: electionConfigs,
+      data: configsWithNames,
     });
   } catch (error) {
     return res.status(500).json({
@@ -650,6 +678,7 @@ export const getElectionById = async (req, res) => {
         message: "Election not found",
       });
     }
+    const college = await College.findById(election.college).select("name");
 
     const targetId = election.targetId;
     let name;
@@ -667,6 +696,7 @@ export const getElectionById = async (req, res) => {
     // Convert Mongoose document to plain object and add `name` field
     let electionData = election.toObject();
     electionData.name = name;
+    electionData.collegeName = college.name;
 
     return res.status(200).json({
       success: true,

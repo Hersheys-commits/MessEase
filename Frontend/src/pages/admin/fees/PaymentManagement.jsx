@@ -10,6 +10,7 @@ import {
   FaEdit,
   FaPlus,
   FaTrash,
+  FaSearch,
 } from "react-icons/fa";
 
 const PaymentManagement = () => {
@@ -116,30 +117,98 @@ const PaymentManagement = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-gray-100">
       <AdminHeader />
       <div className="container mx-auto p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Hostel Fee Payment Management</h1>
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-white">
+              Hostel Fee Management
+            </h1>
+            <p className="text-gray-400 mt-1">
+              Manage payment configurations for all hostels
+            </p>
+          </div>
+
+          {/* Search & Filter */}
+          <div className="flex gap-4 w-full md:w-auto">
+            <div className="relative flex-grow md:flex-grow-0">
+              <input
+                type="text"
+                placeholder="Search hostels..."
+                className="w-full md:w-64 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 pl-10"
+              />
+              <FaSearch className="absolute left-3 top-3 text-gray-500" />
+            </div>
+            <select className="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="all">All Status</option>
+              <option value="enabled">Enabled</option>
+              <option value="disabled">Disabled</option>
+              <option value="not-configured">Not Configured</option>
+            </select>
+          </div>
         </div>
 
-        <div className="bg-gray-800 shadow-md rounded-lg overflow-hidden border border-gray-700">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <div className="bg-gradient-to-r from-indigo-900 to-indigo-800 p-6 rounded-xl shadow-lg border border-indigo-700">
+            <h3 className="text-indigo-300 text-sm font-semibold uppercase">
+              Active Payments
+            </h3>
+            <p className="text-3xl font-bold mt-2">
+              {
+                hostels.filter((h) => {
+                  const payment = findPaymentForHostel(h._id);
+                  return payment && payment.isActive;
+                }).length
+              }
+            </p>
+          </div>
+          <div className="bg-gradient-to-r from-green-900 to-green-800 p-6 rounded-xl shadow-lg border border-green-700">
+            <h3 className="text-green-300 text-sm font-semibold uppercase">
+              Total Collection
+            </h3>
+            <p className="text-3xl font-bold mt-2">
+              ₹
+              {hostels
+                .reduce((sum, h) => {
+                  const payment = findPaymentForHostel(h._id);
+                  return (
+                    sum + (payment && payment.isActive ? payment.amount : 0)
+                  );
+                }, 0)
+                .toLocaleString()}
+            </p>
+          </div>
+          <div className="bg-gradient-to-r from-red-900 to-red-800 p-6 rounded-xl shadow-lg border border-red-700">
+            <h3 className="text-red-300 text-sm font-semibold uppercase">
+              Pending Configuration
+            </h3>
+            <p className="text-3xl font-bold mt-2">
+              {hostels.filter((h) => !findPaymentForHostel(h._id)).length}
+            </p>
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="bg-gray-800 shadow-xl rounded-xl overflow-hidden border border-gray-700">
           <table className="min-w-full divide-y divide-gray-700">
-            <thead className="bg-gray-700">
+            <thead className="bg-gray-900">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                   Hostel Name
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                   Payment Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                   Amount
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                   Due Date
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-4 text-center text-xs font-medium text-gray-300 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -149,44 +218,72 @@ const PaymentManagement = () => {
                 const payment = findPaymentForHostel(hostel._id);
 
                 return (
-                  <tr key={hostel._id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                  <tr
+                    key={hostel._id}
+                    className="hover:bg-gray-750 transition duration-150"
+                  >
+                    <td className="px-6 py-5 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-200">
                         {hostel.name}
                       </div>
+                      <div className="text-xs text-gray-400">
+                        Code: {hostel.code}
+                      </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-5 whitespace-nowrap">
                       {payment ? (
                         <span
-                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${payment.isActive ? "bg-green-900 text-green-300" : "bg-red-900 text-red-300"}`}
+                          className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            payment.isActive
+                              ? "bg-green-900/60 text-green-300 border border-green-600"
+                              : "bg-red-900/60 text-red-300 border border-red-600"
+                          }`}
                         >
                           {payment.isActive ? "Enabled" : "Disabled"}
                         </span>
                       ) : (
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-600 text-gray-300">
+                        <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-700/60 text-gray-300 border border-gray-600">
                           Not Configured
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-200">
-                        {payment ? `₹${payment.amount}` : "-"}
+                    <td className="px-6 py-5 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-200">
+                        {payment ? `₹${payment.amount.toLocaleString()}` : "-"}
                       </div>
+                      {payment && payment.amount && (
+                        <div className="text-xs text-gray-400">
+                          per semester
+                        </div>
+                      )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-200">
-                        {payment && payment.dueDate
-                          ? new Date(payment.dueDate).toLocaleDateString()
-                          : "-"}
-                      </div>
+                    <td className="px-6 py-5 whitespace-nowrap">
+                      {payment && payment.dueDate ? (
+                        <>
+                          <div className="text-sm font-medium text-gray-200">
+                            {new Date(payment.dueDate).toLocaleDateString()}
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            {new Date() > new Date(payment.dueDate)
+                              ? "Overdue"
+                              : `${Math.ceil((new Date(payment.dueDate) - new Date()) / (1000 * 60 * 60 * 24))} days left`}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-sm text-gray-400">-</div>
+                      )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-2">
+                    <td className="px-6 py-5 whitespace-nowrap text-sm font-medium">
+                      <div className="flex justify-center space-x-3">
                         {payment ? (
                           <>
                             <button
                               onClick={() => togglePaymentStatus(payment._id)}
-                              className={`p-1 rounded ${payment.isActive ? "text-green-400 hover:text-green-200" : "text-red-400 hover:text-red-200"}`}
+                              className={`p-2 rounded-full ${
+                                payment.isActive
+                                  ? "bg-green-900/30 text-green-400 hover:bg-green-900/50"
+                                  : "bg-red-900/30 text-red-400 hover:bg-red-900/50"
+                              }`}
                               title={
                                 payment.isActive
                                   ? "Disable Payment"
@@ -194,40 +291,40 @@ const PaymentManagement = () => {
                               }
                             >
                               {payment.isActive ? (
-                                <FaToggleOn size={20} />
+                                <FaToggleOn size={18} />
                               ) : (
-                                <FaToggleOff size={20} />
+                                <FaToggleOff size={18} />
                               )}
                             </button>
                             <Link
                               to={`/admin/payment/edit/${payment._id}/${hostel.code}`}
-                              className="text-indigo-400 hover:text-indigo-200 p-1 rounded"
+                              className="p-2 rounded-full bg-indigo-900/30 text-indigo-400 hover:bg-indigo-900/50"
                               title="Edit Payment"
                             >
-                              <FaEdit size={18} />
+                              <FaEdit size={16} />
                             </Link>
                             <Link
                               to={`/admin/payment/paid-users/${payment._id}`}
-                              className="text-blue-400 hover:text-blue-200 p-1 rounded"
+                              className="p-2 rounded-full bg-blue-900/30 text-blue-400 hover:bg-blue-900/50"
                               title="View Paid Users"
                             >
-                              <FaEye size={18} />
+                              <FaEye size={16} />
                             </Link>
                             <button
                               onClick={() => deletePayment(payment._id)}
-                              className="text-red-400 hover:text-red-200 p-1 rounded"
+                              className="p-2 rounded-full bg-red-900/30 text-red-400 hover:bg-red-900/50"
                               title="Delete Payment"
                             >
-                              <FaTrash size={18} />
+                              <FaTrash size={16} />
                             </button>
                           </>
                         ) : (
                           <Link
                             to={`/admin/payment/create/${hostel.code}`}
-                            className="text-green-400 hover:text-green-200 p-1 rounded"
+                            className="p-2 rounded-full bg-green-900/30 text-green-400 hover:bg-green-900/50"
                             title="Create Payment"
                           >
-                            <FaPlus size={18} />
+                            <FaPlus size={16} />
                           </Link>
                         )}
                       </div>
@@ -237,6 +334,15 @@ const PaymentManagement = () => {
               })}
             </tbody>
           </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="mt-6 flex justify-between items-center">
+          <div className="text-sm text-gray-400">
+            Showing{" "}
+            <span className="font-medium text-white">{hostels.length}</span>{" "}
+            hostels
+          </div>
         </div>
       </div>
     </div>
