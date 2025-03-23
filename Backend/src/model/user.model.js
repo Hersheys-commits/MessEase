@@ -29,14 +29,6 @@ const userSchema = new Schema(
     },
     role: {
       type: String,
-<<<<<<< HEAD
-<<<<<<< HEAD
-      enum: ['student', 'messManager','hostelManager', 'accountant', 'professor', 'chiefWarden', 'developer', 'admin'],
-=======
-      enum: ['student', 'messManager', 'accountant', 'developer', 'admin'],
->>>>>>> eb6774fd623166eb2135baa6f095250fa0a4ab2f
-      required: true
-=======
       enum: [
         "student",
         "messManager",
@@ -48,7 +40,6 @@ const userSchema = new Schema(
         "admin",
       ],
       required: true,
->>>>>>> newBranch
     },
     profilePicture: {
       type: String,

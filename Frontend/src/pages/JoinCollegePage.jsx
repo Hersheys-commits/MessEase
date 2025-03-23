@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import api from '../utils/axiosRequest'; // Import your custom axios instance
 
-export const JoinCollegePage = () => {
+const JoinCollegePage = () => {
   // State to store college details
   const [collegeCode, setCollegeCode] = useState('');
   const [collegeDetails, setCollegeDetails] = useState(null);
@@ -312,3 +312,5 @@ export const JoinCollegePage = () => {
     </div>
   );
 };
+
+export default JoinCollegePage;

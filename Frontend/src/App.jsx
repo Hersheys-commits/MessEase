@@ -4,10 +4,8 @@ import { Routes, Route } from "react-router-dom";
 import Signup from "./pages/auth/Signup";
 import Login from "./pages/auth/Login";
 import CollegeVerifyPage from "./pages/CollegeVerifyPage";
-import { JoinCollegePage } from './pages/JoinCollegePage';
 import CreateCollegePage from "./pages/admin/CreateCollegePage";
 import PageNotFound from "./pages/PageNotFound";
-import ProtectedRoute from "./components/ProtectedRoute";
 import { Toaster } from "react-hot-toast";
 // Import your actual components here
 import StudentHome from "./pages/student/StudentHome";
@@ -40,6 +38,7 @@ import StudentProfilePage from "./pages/admin/StudentProfilePage";
 import StudentListPage from "./pages/admin/StudentListPage";
 import MessDetailsStudent from "./pages/student/MessDetailsStudent";
 import MessTimeTable from "./pages/student/MessTimeTable";
+import JoinCollegePage from "./pages/JoinCollegePage";
 
 function App() {
   useEffect(() => {
@@ -112,11 +111,7 @@ function App() {
         <Route
           path="/student/election/:electionId/form"
           element={<ApplicationForm />}
-          />
-                <Route
-                  path="/admin/college/join"
-                  element={<JoinCollegePage/>}
-              />
+        />
         <Route
           path="/admin/election/:electionId/applications"
           element={<AdminApplicationReview />}
@@ -126,6 +121,9 @@ function App() {
           path="/admin/election/:electionId/results"
           element={<AdminElectionResults />}
         />
+
+        <Route path="/admin/college/join" element={<JoinCollegePage />}/>
+
         <Route path="*" element={<PageNotFound />} />
         {/* Protected Routes */}
         <Route

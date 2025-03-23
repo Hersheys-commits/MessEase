@@ -1,13 +1,5 @@
 import mongoose, { Schema } from "mongoose";
 
-<<<<<<< HEAD
-const collegeSchema = new Schema({
-   status:{
-        type: String,
-        enum: ['verified','unverified'],
-        default: 'unverified',
-        required: true,
-=======
 const collegeSchema = new Schema(
   {
     status: {
@@ -15,7 +7,6 @@ const collegeSchema = new Schema(
       enum: ["verified", "unverified"],
       default: "unverified",
       required: true,
->>>>>>> newBranch
     },
     name: {
       type: String,
@@ -42,28 +33,6 @@ const collegeSchema = new Schema(
     contactEmail: String,
     contactPhone: String,
     website: String,
-<<<<<<< HEAD
-<<<<<<< HEAD
-    hostel: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Hostel'
-    }],
-    admins: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-=======
-    hostels: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Hostel'
->>>>>>> eb6774fd623166eb2135baa6f095250fa0a4ab2f
-    }],
-    admins: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User' 
-    } 
-    ],
-  },{
-=======
     hostel: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -78,7 +47,6 @@ const collegeSchema = new Schema(
     ],
   },
   {
->>>>>>> newBranch
     timestamps: true,
   }
 );
