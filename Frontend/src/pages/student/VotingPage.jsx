@@ -143,8 +143,9 @@ const VotingPage = () => {
             <div className="mb-6 p-4 bg-gray-750 rounded border border-gray-700">
               <h2 className="font-semibold text-lg mb-2 text-blue-300">
                 {election.type === "messManager" ? "Mess" : "Hostel"}:{" "}
-                {election.targetId?.name || "N/A"}
+                {election?.name || "N/A"}
               </h2>
+              <p className="text-gray-400">Collge: {election?.collegeName}</p>
               <p className="text-gray-400">
                 Voting is open until:{" "}
                 {election.votingPhase.openedAt

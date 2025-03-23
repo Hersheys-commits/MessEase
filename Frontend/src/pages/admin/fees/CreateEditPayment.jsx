@@ -172,7 +172,7 @@ const CreateEditPayment = () => {
             <form onSubmit={handleSubmit}>
               <div className="mb-5">
                 <label
-                  className="block text-gray-300 text-sm font-bold mb-2 flex items-center"
+                  className="block text-gray-300 text-sm font-bold mb-2 items-center"
                   htmlFor="title"
                 >
                   <svg
@@ -205,7 +205,7 @@ const CreateEditPayment = () => {
 
               <div className="mb-5">
                 <label
-                  className="block text-gray-300 text-sm font-bold mb-2 flex items-center"
+                  className="block text-gray-300 text-sm font-bold mb-2 items-center"
                   htmlFor="amount"
                 >
                   <svg
@@ -244,7 +244,7 @@ const CreateEditPayment = () => {
 
               <div className="mb-5">
                 <label
-                  className="block text-gray-300 text-sm font-bold mb-2 flex items-center"
+                  className="block text-gray-300 text-sm font-bold mb-2 items-center"
                   htmlFor="description"
                 >
                   <svg
@@ -280,7 +280,7 @@ const CreateEditPayment = () => {
 
               <div className="mb-5">
                 <label
-                  className="block text-gray-300 text-sm font-bold mb-2 flex items-center"
+                  className="block text-gray-300 text-sm font-bold mb-2 items-center"
                   htmlFor="dueDate"
                 >
                   <svg
