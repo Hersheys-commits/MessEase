@@ -10,7 +10,8 @@ import College from "../model/college.model.js";
 // Get all election configurations
 export const getAllElectionConfigs = async (req, res) => {
   try {
-    const electionConfigs = await ElectionConfig.find()
+    const collegeId = req.user.college;
+    const electionConfigs = await ElectionConfig.find({ college: collegeId })
       .populate("targetId")
       .sort({ createdAt: -1 });
     // Map through each config to add the name property

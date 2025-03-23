@@ -6,6 +6,9 @@ import {
   getCollegeByCode,
   updateCollegeDetails,
   verifyCollege,
+  applyRole,
+  ReqAccept,
+  ReqReject,
 } from "../controller/college.controller.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
 import { upload } from "../middleware/multer.middleware.js";
@@ -20,12 +23,15 @@ router.post("/create", verifyJWT, createCollegeRequest);
 router.get("/verification/:code", getCollegeByCode);
 
 // Endpoint for developer to verify or reject the college request
-router.post("/verification/:code", verifyCollege);
+router.get("/verification/:code/:decision", verifyCollege);
 router.patch(
   "/update-college",
   verifyJWT,
   upload.single("logo"),
   updateCollegeDetails
 );
+router.post("/apply-role",verifyJWT,applyRole);
+router.get("/joinReq/:code/:email/:role/accept",ReqAccept);
+router.get("/joinReq/:code/reject",ReqReject);
 
 export default router;
