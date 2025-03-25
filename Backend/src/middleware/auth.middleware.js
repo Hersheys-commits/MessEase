@@ -33,7 +33,7 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
     req.user = user;
     // console.log("success jwt verify")
     next();
-  } catch (error) {
-    throw new ApiError(404, error?.message || "Invalid access token");
+  }catch (error) {
+      throw new ApiError(404, error?.message || "Invalid access token");
   }
 });
