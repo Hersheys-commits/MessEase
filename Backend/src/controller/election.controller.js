@@ -60,7 +60,6 @@ export const createElectionConfig = async (req, res) => {
   try {
     const { type, targetId, questions } = req.body;
     const college = req.user.college;
-
     // Validate target exists (mess or hostel)
     let targetExists;
     if (type === "messManager") {
@@ -91,6 +90,7 @@ export const createElectionConfig = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "An active election already exists for this target",
+        castAlready: true,
       });
     }
 

@@ -8,6 +8,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { OAuth2Client } from "google-auth-library";
 import Hostel from "../model/hostel.model.js";
+import Mess from "../model/mess.model.js";
 
 dotenv.config();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);

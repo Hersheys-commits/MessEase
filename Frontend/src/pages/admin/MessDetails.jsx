@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import api from "../../utils/axiosRequest.js";
 import { Star, ArrowLeft, Clock } from "lucide-react";
 import AdminHeader from "../../components/AdminHeader.jsx";
+import toast from "react-hot-toast";
 
 const MessDetails = () => {
   const { code } = useParams();
@@ -40,6 +41,9 @@ const MessDetails = () => {
         setWeeklyFoodData(response.data.data.weeklyFood);
         setLoading(false);
       } catch (err) {
+        toast.error(
+          err.response?.data?.message || "Failed to fetch mess details"
+        );
         setError(err.response?.data?.message || "Failed to fetch mess details");
         setLoading(false);
       }
@@ -142,9 +146,11 @@ const MessDetails = () => {
       const response = await api.put(`/api/mess/${code}`, data);
       setMessData(response.data.data);
       setEditingMess(false);
-      alert("Mess details updated successfully");
+      toast.success("Mess details updated successfully");
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to update mess details");
+      toast.error(
+        err.response?.data?.message || "Failed to update mess details"
+      );
     }
   };
 
@@ -154,9 +160,11 @@ const MessDetails = () => {
       const response = await api.put(`/api/mess/${code}/food`, data);
       setWeeklyFoodData(response.data.data);
       setEditingFood(false);
-      alert("Food details updated successfully");
+      toast.success("Food details updated successfully");
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to update food details");
+      toast.error(
+        err.response?.data?.message || "Failed to update food details"
+      );
     }
   };
 

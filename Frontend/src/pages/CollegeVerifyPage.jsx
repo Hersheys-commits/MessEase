@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../utils/axiosRequest";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 const CollegeVerifyPage = () => {
   const { code } = useParams();
@@ -58,7 +58,6 @@ const CollegeVerifyPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-blue-50 via-indigo-100 to-blue-200 p-6">
-      <Toaster />
       <div className="max-w-3xl w-full bg-white p-8 rounded-lg shadow-lg border border-gray-200">
         <h2 className="text-3xl font-semibold text-center text-gray-800 mb-6">
           College Verification

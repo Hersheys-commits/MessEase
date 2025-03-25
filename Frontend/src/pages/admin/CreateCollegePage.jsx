@@ -2,7 +2,7 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import api from "../../utils/axiosRequest";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import AdminHeader from "../../components/AdminHeader";
 
@@ -30,7 +30,6 @@ const CreateCollegePage = () => {
     <div>
       <AdminHeader />
       <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
-        <Toaster />
         <div className="max-w-xl w-full bg-gray-800 p-8 rounded shadow-lg border border-gray-700">
           <h2 className="text-2xl font-bold mb-6 text-center text-indigo-300">
             Create College

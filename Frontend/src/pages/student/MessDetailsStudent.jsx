@@ -12,7 +12,7 @@ import {
   Utensils,
 } from "lucide-react";
 import Header from "../../components/Header";
-import { toast, Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import hostelService from "../../utils/hostelCheck";
 
 const MessDetailsStudent = () => {
@@ -26,6 +26,16 @@ const MessDetailsStudent = () => {
     const verifyHostel = async () => {
       try {
         const data = await hostelService.checkHostelAssignment();
+        if (
+          !(
+            data.data.user.role === "student" ||
+            data.data.user.role === "messManager" ||
+            data.data.user.role === "hostelManager"
+          )
+        ) {
+          toast.error("You are not authorized to access this page.");
+          navigate("/admin/home");
+        }
         if (data.data.user.role === "student" && !data.data.user.hostel) {
           toast.error("Hostel must be assigned.");
           navigate("/student/update-profile");
@@ -143,28 +153,6 @@ const MessDetailsStudent = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       <Header />
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          style: {
-            background: "#1F2937",
-            color: "#F9FAFB",
-            border: "1px solid #374151",
-          },
-          success: {
-            iconTheme: {
-              primary: "#10B981",
-              secondary: "#F9FAFB",
-            },
-          },
-          error: {
-            iconTheme: {
-              primary: "#EF4444",
-              secondary: "#F9FAFB",
-            },
-          },
-        }}
-      />
 
       <div className="w-full px-4 py-8">
         {/* Hero Section */}

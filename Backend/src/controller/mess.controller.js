@@ -269,7 +269,7 @@ export const getAllMessesInCollege = asyncHandler(async (req, res) => {
   try {
     // Get the college ID from the authenticated user
     const collegeId = req.user.college;
-    console.log("first",req.user)
+    console.log("first", req.user);
 
     if (!collegeId) {
       throw new ApiError(400, "College ID not found in user data");

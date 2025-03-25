@@ -17,7 +17,7 @@ const router = express.Router();
 
 router.get("/getCollege", verifyJWT, getCollege);
 // Endpoint for admin to create a new college request
-router.post("/create", verifyJWT,createCollegeRequest);
+router.post("/create", verifyJWT, createCollegeRequest);
 
 //Endpoint for admin to join a college
 router.post("/join", verifyJWT);
@@ -33,8 +33,8 @@ router.patch(
   upload.single("logo"),
   updateCollegeDetails
 );
-router.post("/apply-role",verifyJWT,applyRole);
-router.get("/joinReq/:code/:email/:role/accept",ReqAccept);
-router.get("/joinReq/:code/reject",ReqReject);
+router.post("/apply-role", verifyJWT, applyRole);
+router.get("/joinReq/:code/:email/:role/accept", ReqAccept);
+router.get("/joinReq/:code/reject", ReqReject);
 
 export default router;

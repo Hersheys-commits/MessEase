@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
-import { toast } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import api from "../../utils/axiosRequest";
 import AdminHeader from "../../components/AdminHeader";

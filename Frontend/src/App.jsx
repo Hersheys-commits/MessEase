@@ -6,6 +6,7 @@ import Login from "./pages/auth/Login";
 import CollegeVerifyPage from "./pages/CollegeVerifyPage";
 import CreateCollegePage from "./pages/admin/CreateCollegePage";
 import PageNotFound from "./pages/PageNotFound";
+import { CustomToaster } from "./utils/toast";
 import { Toaster } from "react-hot-toast";
 // Import your actual components here
 import StudentHome from "./pages/student/StudentHome";
@@ -121,9 +122,7 @@ function App() {
           path="/admin/election/:electionId/results"
           element={<AdminElectionResults />}
         />
-
-        <Route path="/admin/college/join" element={<JoinCollegePage />}/>
-
+        <Route path="/admin/college/join" element={<JoinCollegePage />} />
         <Route path="*" element={<PageNotFound />} />
         {/* Protected Routes */}
         <Route
@@ -148,7 +147,10 @@ function App() {
         <Route path="/book-rooms" element={<BookRooms />} />
         <Route path="/see-booking" element={<BookedRooms />} />
       </Routes>
-      <Toaster />
+      {/* <Toaster
+        position="top-right"
+      /> */}
+      <CustomToaster />
     </>
   );
 }

@@ -14,6 +14,16 @@ const StudentElectionsPage = () => {
     const verifyHostel = async () => {
       try {
         const data = await hostelService.checkHostelAssignment();
+        if (
+          !(
+            data.data.user.role === "student" ||
+            data.data.user.role === "messManager" ||
+            data.data.user.role === "hostelManager"
+          )
+        ) {
+          toast.error("You are not authorized to access this page.");
+          navigate("/admin/home");
+        }
         if (data.data.user.role === "student" && !data.data.user.hostel) {
           navigate("/student/update-profile");
         }

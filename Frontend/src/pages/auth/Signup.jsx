@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import AuthForm from "../../components/auth/AuthForm";
 import OTPVerification from "../../components/auth/OTPVerification";
 import GoogleAuthButton from "../../components/auth/GoogleAuthButton";
-import { Toaster } from "react-hot-toast";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import api from "../../utils/axiosRequest";
 import toast from "react-hot-toast";
@@ -94,7 +93,6 @@ const Signup = ({ userType = "student" }) => {
 
   return (
     <div className={pageStyle}>
-      <Toaster />
       <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
         <div className="bg-gray-800 p-6 md:p-8 rounded-lg shadow-xl border border-gray-700 w-full max-w-sm">
           <h2 className="text-2xl font-bold mb-4 text-center text-blue-400">
