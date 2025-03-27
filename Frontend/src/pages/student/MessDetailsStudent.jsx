@@ -170,10 +170,13 @@ const MessDetailsStudent = () => {
         {/* Hero Section */}
         <div className="relative w-full bg-gradient-to-r from-blue-900 to-indigo-900 rounded-xl overflow-hidden mb-8">
           <div className="absolute inset-0 bg-black/20"></div>
-          <div className="relative p-8 md:p-10">
+          <div className="relative p-8 md:p-10 ">
             <h1 className="text-3xl md:text-4xl font-bold mb-2">
               {messData?.mess.name}
             </h1>
+            <Link className="text-blue-200 ml-[95%] hover:underline" to={`/student/mess/${messCode}/complaints`}>
+              complaints
+            </Link>
             <div className="flex items-center text-blue-200">
               <MapPin size={18} className="mr-2" />
               <span>{messData?.mess.location || "Location not specified"}</span>

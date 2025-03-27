@@ -39,6 +39,7 @@ import StudentListPage from "./pages/admin/StudentListPage";
 import MessDetailsStudent from "./pages/student/MessDetailsStudent";
 import MessTimeTable from "./pages/student/MessTimeTable";
 import JoinCollegePage from "./pages/JoinCollegePage";
+import MessComplaints from "./pages/student/MessComplaints.jsx";
 
 function App() {
   useEffect(() => {
@@ -77,6 +78,10 @@ function App() {
         <Route
           path="/student/mess/:messCode"
           element={<MessDetailsStudent />}
+        />
+        <Route
+          path="/student/mess/:messCode/complaints"
+          element={<MessComplaints />}
         />
         <Route
           path="/student/mess/:messCode/time-table"
