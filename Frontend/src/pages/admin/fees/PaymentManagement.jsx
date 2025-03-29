@@ -32,9 +32,9 @@ const PaymentManagement = () => {
         setHostels(hostelsResponse.data.hostels || []);
         setPayments(paymentsResponse.data.data || []);
       } catch (err) {
-        setError("Failed to load data");
+        setError(err.response?.data?.message || "Failed to load data");
         console.error(err);
-        toast.error("Failed to load data");
+        toast.error(err.response?.data?.message || "Failed to load data");
       } finally {
         setLoading(false);
       }
@@ -102,6 +102,7 @@ const PaymentManagement = () => {
       </div>
     );
   }
+
   if (error) {
     return (
       <div>

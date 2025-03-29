@@ -7,6 +7,13 @@ import { ApiResponse } from "../util/ApiResponse.js";
 import { ApiError } from "../util/ApiError.js";
 import { asyncHandler } from "../util/asyncHandler.js";
 import { uploadOnCloudinary } from "../util/cloudinary.js";
+import { v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // Hardcoded developer email
 const developerEmail = "harsh1618sharma@gmail.com";
@@ -472,7 +479,7 @@ export const getCollege = async (req, res) => {
 
 // Update college details
 export const updateCollegeDetails = asyncHandler(async (req, res) => {
-  const { name, logo, address, contactEmail, contactPhone, website } = req.body;
+  const { name, address, contactEmail, contactPhone, website } = req.body;
 
   const user = await User.findById(req.user?._id);
 
@@ -499,15 +506,40 @@ export const updateCollegeDetails = asyncHandler(async (req, res) => {
   }
 
   // Handle logo upload if provided
-  if (req.files && req.files.logo) {
-    const logoFile = req.files.logo;
-    const logoUpload = await uploadOnCloudinary(logoFile.path);
+  const logoFile = req.file;
 
-    if (logoUpload) {
-      college.logo = logoUpload.url;
+  if (logoFile) {
+    // Add file type validation
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
+    if (!allowedTypes.includes(logoFile.mimetype)) {
+      fs.unlinkSync(logoFile.path); // Delete the invalid file
+      throw new ApiError(
+        400,
+        "Invalid file type. Only JPEG, PNG and GIF are allowed"
+      );
     }
-  } else if (logo) {
-    college.logo = logo;
+
+    // Delete old logo if exists
+    if (college.logo) {
+      try {
+        const oldLogoUrl = college.logo;
+        const publicId = oldLogoUrl.split("/").pop().split(".")[0];
+        await cloudinary.uploader.destroy(publicId);
+        console.log("Old logo deleted successfully"); // Debug log
+      } catch (error) {
+        console.error("Error deleting old logo:", error); // Debug log
+        // Continue anyway since we want to update the logo
+      }
+    }
+
+    // Upload new logo
+    const cloudinaryResponse = await uploadOnCloudinary(logoFile.path);
+
+    if (!cloudinaryResponse?.url) {
+      throw new ApiError(400, "Error while uploading logo");
+    }
+
+    college.logo = cloudinaryResponse.url;
   }
 
   // Update other fields if provided

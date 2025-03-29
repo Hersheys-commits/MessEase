@@ -73,9 +73,18 @@ const Login = ({ userType = "student" }) => {
             darkMode={true}
           />
           <div className="flex justify-between items-center mt-4 text-sm text-gray-400">
-            <Link to="/forgot-password" className="hover:text-blue-400">
-              Forgot Password?
-            </Link>
+            {userType === "admin" ? (
+              <Link to="/admin/forgot-password" className="hover:text-blue-400">
+                Forgot Password?
+              </Link>
+            ) : (
+              <Link
+                to="/student/forgot-password"
+                className="hover:text-blue-400"
+              >
+                Forgot Password?
+              </Link>
+            )}
             {userType === "admin" ? (
               <Link to="/admin/signup" className="hover:text-blue-400">
                 Don't have an account? Sign Up

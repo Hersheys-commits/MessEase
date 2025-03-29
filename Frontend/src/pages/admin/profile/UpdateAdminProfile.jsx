@@ -190,9 +190,8 @@ const UpdateAdminProfile = () => {
                     type="email"
                     name="email"
                     value={formData.email}
-                    onChange={handleChange}
-                    className="bg-gray-700 border border-gray-600 rounded-md py-3 pl-10 pr-3 w-full text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter your email"
+                    className="bg-gray-800 border border-gray-600 rounded-md py-3 pl-10 pr-3 w-full text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    disabled
                   />
                 </div>
               </div>

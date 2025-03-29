@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import AdminHeader from "../../components/AdminHeader";
 
 const AdminElectionConfig = () => {
+  const [college, setCollege] = useState(true);
   const [hostels, setHostels] = useState([]);
   const [messes, setMesses] = useState([]);
   const [electionConfigs, setElectionConfigs] = useState([]);
@@ -49,6 +50,10 @@ const AdminElectionConfig = () => {
 
         setLoading(false);
       } catch (error) {
+        console.log(error.response);
+        if (!error.response.data.college) {
+          setCollege(false);
+        }
         toast.error(error.response?.data?.message || "Failed to fetch data");
         setLoading(false);
       }
@@ -132,6 +137,27 @@ const AdminElectionConfig = () => {
       );
     }
   };
+
+  if (college === false) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
+        <AdminHeader />
+        <div className="flex justify-center items-center h-96">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold mb-8 text-blue-400">
+              College not found
+            </h1>
+            <p className="text-lg">
+              College details are required to configure elections.
+            </p>
+            <p className="text-lg mt-2">
+              Please create a college first to proceed.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 // Set storage configuration
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "./public/uploads/profiles/");
+    cb(null, "./public/uploads");
   },
   filename: function (req, file, cb) {
     const uniqueFilename = `${uuidv4()}${path.extname(file.originalname)}`;
@@ -19,7 +19,9 @@ const fileFilter = (req, file, cb) => {
   if (
     file.mimetype === "image/jpeg" ||
     file.mimetype === "image/jpg" ||
-    file.mimetype === "image/png"
+    file.mimetype === "image/png" ||
+    file.mimetype === "image/webp" ||
+    file.mimetype === "image/gif"
   ) {
     cb(null, true);
   } else {
@@ -37,6 +39,6 @@ export const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB in bytes
+    fileSize: 20 * 1024 * 1024, // 20MB in bytes
   },
 });

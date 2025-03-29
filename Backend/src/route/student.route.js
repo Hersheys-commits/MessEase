@@ -10,6 +10,8 @@ import {
   checkHostelAssignment,
   updateUserProfile,
   uploadProfilePicture,
+  changePassword,
+  forgotPassword,
 } from "../controller/student.controller.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
 import { upload } from "../middleware/multer.middleware.js";
@@ -18,6 +20,8 @@ const router = express.Router();
 
 router.post("/signup", registerStudent);
 router.post("/verify-otp", verifyStudentOTP);
+router.post("/forgot-password", forgotPassword);
+router.post("/change-password", changePassword);
 router.post("/login", loginStudent);
 router.post("/google", googleAuth);
 router.post("/logout", verifyJWT, logout);

@@ -40,6 +40,7 @@ import StudentListPage from "./pages/admin/StudentListPage";
 import MessDetailsStudent from "./pages/student/MessDetailsStudent";
 import MessTimeTable from "./pages/student/MessTimeTable";
 import JoinCollegePage from "./pages/JoinCollegePage";
+import ForgotPassword from "./pages/auth/ForgotPassword";
 
 function App() {
   useEffect(() => {
@@ -62,6 +63,14 @@ function App() {
         <Route path="/admin/login" element={<Login userType="admin" />} />
         <Route path="/student/signup" element={<Signup userType="student" />} />
         <Route path="/student/login" element={<Login userType="student" />} />
+        <Route
+          path="/admin/forgot-password"
+          element={<ForgotPassword userType="admin" />}
+        />
+        <Route
+          path="/student/forgot-password"
+          element={<ForgotPassword userType="student" />}
+        />
         <Route path="/college/verify/:code" element={<CollegeVerifyPage />} />
         <Route path="/admin/college/create" element={<CreateCollegePage />} />
         <Route path="/admin/create-hostel" element={<HostelForm />} />

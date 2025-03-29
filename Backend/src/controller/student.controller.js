@@ -9,9 +9,17 @@ import dotenv from "dotenv";
 import { OAuth2Client } from "google-auth-library";
 import Hostel from "../model/hostel.model.js";
 import Mess from "../model/mess.model.js";
+import { v2 as cloudinary } from "cloudinary";
+import { uploadOnCloudinary } from "../util/cloudinary.js";
 
 dotenv.config();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 const otpStore = new Map();
 
@@ -30,30 +38,7 @@ const transporter = nodemailer.createTransport({
 });
 
 export const registerStudent = async (req, res) => {
-  const { email, password, name } = req.body;
-
-  //from here//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  //   const newUser = new User({ email, password, name, role: "student" });
-  //   await newUser.save();
-
-  //   const accessToken = newUser.generateAccessToken();
-  //   const refreshToken = newUser.generateRefreshToken();
-
-  //   const options = {
-  //     httpOnly: true,
-  //     secure: process.env.NODE_ENV === "production",
-  //     sameSite: "none",
-  //     path: "/",
-  //     maxAge: 24 * 60 * 60 * 1000,
-  //   };
-
-  //   res
-  //     .status(201)
-  //     .cookie("accessToken", accessToken, options)
-  //     .cookie("refreshToken", refreshToken, options)
-  //     .json({ message: "Signup successful", accessToken, refreshToken });
-
-  //to here///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  const { email, name } = req.body;
 
   const domain = email.split("@")[1];
   const college = await College.findOne({ domain });
@@ -64,8 +49,22 @@ export const registerStudent = async (req, res) => {
   if (existingUser)
     return res.status(400).json({ message: "User already exists." });
 
+  // Generate OTP
   const otp = Math.floor(100000 + Math.random() * 900000);
-  otpStore.set(email, otp);
+  // Store OTP with expiration timestamp (current time + 10 minutes)
+  const expirationTime = Date.now() + 10 * 60 * 1000; // 10 minutes in milliseconds
+  otpStore.set(email, { otp, expirationTime });
+
+  // Set up automatic deletion after 10 minutes
+  setTimeout(
+    () => {
+      // Only delete if it's the same OTP (user might have requested another one)
+      if (otpStore.has(email) && otpStore.get(email).otp === otp) {
+        otpStore.delete(email);
+      }
+    },
+    10 * 60 * 1000
+  );
 
   const mailOptions = {
     from: process.env.EMAIL_USER,
@@ -104,8 +103,27 @@ export const verifyStudentOTP = async (req, res) => {
   const domain = email.split("@")[1];
   const findCollege = await College.findOne({ domain });
 
-  if (otpStore.get(email) != otp)
+  // Check if OTP exists
+  if (!otpStore.has(email)) {
+    return res
+      .status(400)
+      .json({ message: "OTP expired or invalid. Try again." });
+  }
+
+  const storedOtpData = otpStore.get(email);
+
+  // Check if OTP is expired
+  if (Date.now() > storedOtpData.expirationTime) {
+    otpStore.delete(email); // Clean up expired OTP
+    return res.status(400).json({ message: "OTP expired. Try again." });
+  }
+
+  // Check if OTP matches
+  if (storedOtpData.otp != otp) {
     return res.status(400).json({ message: "Invalid OTP." });
+  }
+
+  // OTP is valid, delete it
   otpStore.delete(email);
 
   const newUser = new User({
@@ -133,6 +151,105 @@ export const verifyStudentOTP = async (req, res) => {
     .cookie("accessToken", accessToken, options)
     .cookie("refreshToken", refreshToken, options)
     .json({ message: "Signup successful", accessToken, refreshToken });
+};
+
+export const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  const domain = email.split("@")[1];
+  const college = await College.findOne({ domain });
+  if (!college)
+    return res.status(400).json({ message: "College domain doesn't exist." });
+
+  const existingUser = await User.findOne({ email });
+  if (!existingUser)
+    return res.status(400).json({ message: "User doesn't exists." });
+
+  const otp = Math.floor(100000 + Math.random() * 900000);
+  // Store OTP with expiration timestamp (current time + 10 minutes)
+  const expirationTime = Date.now() + 10 * 60 * 1000; // 10 minutes in milliseconds
+  otpStore.set(email, { otp, expirationTime });
+
+  // Set up automatic deletion after 10 minutes
+  setTimeout(
+    () => {
+      // Only delete if it's the same OTP (user might have requested another one)
+      if (otpStore.has(email) && otpStore.get(email).otp === otp) {
+        otpStore.delete(email);
+      }
+    },
+    10 * 60 * 1000
+  );
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: "OTP Verification for Password Reset",
+    html: `
+        <h2>Your OTP Verification Code</h2>
+        <p>Hello ${existingUser?.name || "User"},</p>
+        <p>Your OTP for account verification is: <strong>${otp}</strong></p>
+        <p>This code will expire in 10 minutes.</p>
+        <p>If you did not request this code, please ignore this email.</p>
+    `,
+  };
+
+  try {
+    await transporter.verify();
+    console.log("SMTP connection verified successfully");
+  } catch (error) {
+    console.error("SMTP verification failed:", error);
+  }
+
+  try {
+    await transporter.sendMail(mailOptions);
+    return res.status(200).json({ message: "OTP sent to email." });
+  } catch (error) {
+    console.error("Email error details:", error);
+    return res
+      .status(500)
+      .json({ message: "Failed to send OTP email", error: error.message });
+  }
+};
+
+export const changePassword = async (req, res) => {
+  try {
+    const { email, password, otp } = req.body;
+
+    // Check if OTP exists
+    if (!otpStore.has(email)) {
+      return res
+        .status(400)
+        .json({ message: "OTP expired or invalid. Try again." });
+    }
+
+    const storedOtpData = otpStore.get(email);
+
+    // Check if OTP is expired
+    if (Date.now() > storedOtpData.expirationTime) {
+      otpStore.delete(email); // Clean up expired OTP
+      return res.status(400).json({ message: "OTP expired. Try again." });
+    }
+
+    // Check if OTP matches
+    if (storedOtpData.otp != otp) {
+      return res.status(400).json({ message: "Invalid OTP." });
+    }
+
+    // OTP is valid, delete it
+    otpStore.delete(email);
+
+    const existingUser = await User.findOne({ email });
+    if (!existingUser)
+      return res.status(400).json({ message: "User doesn't exists." });
+
+    existingUser.password = password;
+    await existingUser.save();
+
+    return res.status(200).json({ message: "Password changed successfully." });
+  } catch (error) {
+    return res.status(400).json({ message: "Server Error." });
+  }
 };
 
 export const loginStudent = async (req, res) => {
@@ -399,26 +516,59 @@ export const uploadProfilePicture = asyncHandler(async (req, res) => {
   // Assuming the file is saved and the path/URL is returned
   const profilePicturePath = profilePictureFile.path;
 
-  // Update the user with the new profile picture
-  const updatedUser = await User.findByIdAndUpdate(
-    req.user?._id,
-    {
-      $set: {
-        profilePicture: profilePicturePath,
-      },
-    },
-    { new: true }
-  ).select("-password -refreshToken");
-
-  if (!updatedUser) {
-    throw new ApiError(404, "User not found");
+  // Add file type validation
+  const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
+  if (!allowedTypes.includes(req.file.mimetype)) {
+    fs.unlinkSync(profilePicturePath); // Delete the invalid file
+    throw new ApiError(
+      400,
+      "Invalid file type. Only JPEG, PNG and GIF are allowed"
+    );
   }
 
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(200, updatedUser, "Profile picture updated successfully")
-    );
+  const user = await User.findById(req.user?._id);
+  if (!user) {
+    throw new ApiError(404, "User not found"); // Add user check
+  }
+
+  if (user.profilePicture) {
+    try {
+      const oldAvatarUrl = user.profilePicture;
+      const publicId = oldAvatarUrl.split("/").pop().split(".")[0];
+      await cloudinary.uploader.destroy(publicId);
+      console.log("Old avatar deleted successfully"); // Debug log
+    } catch (error) {
+      console.error("Error deleting old avatar:", error); // Debug log
+      // Continue anyway since we want to update the avatar
+    }
+  }
+
+  try {
+    const cloudinaryResponse = await uploadOnCloudinary(profilePicturePath);
+
+    if (!cloudinaryResponse?.url) {
+      throw new ApiError(400, "Error while uploading avatar");
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user?._id,
+      {
+        $set: {
+          profilePicture: cloudinaryResponse.url,
+        },
+      },
+      { new: true }
+    ).select("-password");
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, updatedUser, "Avatar image updated successfully")
+      );
+  } catch (error) {
+    console.error("Error in avatar update:", error); // Debug log
+    throw new ApiError(400, `Avatar update failed: ${error.message}`);
+  }
 });
 
 // Get all students with filtering, sorting, and pagination

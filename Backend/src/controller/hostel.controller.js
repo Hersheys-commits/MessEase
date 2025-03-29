@@ -63,7 +63,9 @@ export const fetchAllHostels = async (req, res) => {
     const collegeId = req.user.college;
 
     if (!collegeId) {
-      return res.status(430).json({ message: "College ID is required" });
+      return res
+        .status(430)
+        .json({ message: "College ID is required", college: false });
     }
 
     // Find all hostels that belong to the specified college

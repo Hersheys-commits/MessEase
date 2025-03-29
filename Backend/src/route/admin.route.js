@@ -10,6 +10,8 @@ import {
   verifyToken,
   getAdminProfile,
   updateAdminProfile,
+  forgotPassword,
+  changePassword,
 } from "../controller/admin.controller.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
 import { upload } from "../middleware/multer.middleware.js";
@@ -23,6 +25,8 @@ const router = express.Router();
 
 router.post("/register", registerAdmin);
 router.post("/verify-otp", verifyAdminOTP);
+router.post("/forgot-password", forgotPassword);
+router.post("/change-password", changePassword);
 router.post("/login", loginAdmin);
 router.post("/college", verifyJWT, getCollege);
 router.post("/google", googleAuth);
