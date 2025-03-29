@@ -2,7 +2,6 @@ import mongoose,{Schema} from "mongoose";
 
 const ComplaintStatus = {
     PENDING: 'Pending',
-    IN_PROGRESS: 'In Progress',
     RESOLVED: 'Resolved',
     CLOSED: 'Closed'
 };

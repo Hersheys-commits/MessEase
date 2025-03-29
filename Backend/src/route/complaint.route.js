@@ -2,8 +2,11 @@ import express from 'express';
 import { verifyJWT } from '../middleware/auth.middleware.js';
 import { createComplaint } from '../controller/complaint.controller.js';
 import { upload } from '../middleware/multer.middleware.js';
+import { getComplaints } from '../controller/complaint.controller.js';
+import { updateComplaint } from '../controller/complaint.controller.js';
 const router = express.Router();
 
 router.post('/createcomplaint', verifyJWT, upload.array('images', 5), createComplaint);
-
+router.get('/getcomplaints/:code', verifyJWT, getComplaints);
+router.post('/updatecomplaint/:id/:status', verifyJWT,updateComplaint);
 export default router;

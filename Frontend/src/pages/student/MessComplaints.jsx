@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState,useRef, use } from 'react';
 import api from '../../utils/axiosRequest';
+import { useParams } from 'react-router-dom';
 
 const MessComplaints = () => {
   const [description, setDescription] = useState('');
@@ -17,8 +18,31 @@ const MessComplaints = () => {
   ];
   
   const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    setImages(files);
+    const newFiles = Array.from(e.target.files);
+    
+    // Filter out duplicates by name and size
+    setImages(prevImages => {
+      const updatedImages = [...prevImages];
+      
+      newFiles.forEach(newFile => {
+        const isDuplicate = prevImages.some(
+          existingFile => 
+            existingFile.name === newFile.name && 
+            existingFile.size === newFile.size
+        );
+        
+        if (!isDuplicate) {
+          updatedImages.push(newFile);
+        }
+      });
+      
+      return updatedImages;
+    });
+    
+    // Reset the input value to allow selecting same files again
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -66,13 +90,15 @@ const MessComplaints = () => {
       setIsSubmitting(false);
     }
   };
-
+  const code=useParams();
   return (
     <div className="bg-[#0A0A1A] min-h-screen p-6">
       <div className="max-w-md mx-auto bg-[#1A1A2E] shadow-2xl rounded-lg border border-[#2A2A4A] p-8">
         <h2 className="text-2xl font-bold mb-6 text-center text-white">
           Mess Complaints
         </h2>
+
+        
 
         {error && (
           <div className="bg-red-600 text-white p-3 rounded mb-4">
@@ -134,10 +160,28 @@ const MessComplaints = () => {
                 hover:file:bg-purple-600"
             />
             {images.length > 0 && (
-              <div className="mt-2 text-sm text-gray-400">
-                {images.length} image(s) selected
-              </div>
-            )}
+  <div className="mt-4">
+    <p className="text-gray-300 mb-2">Selected Images:</p>
+    <div className="grid grid-cols-3 gap-2">
+      {images.map((image, index) => (
+        <div key={index} className="relative group">
+          <img
+            src={URL.createObjectURL(image)}
+            alt={`Preview ${index + 1}`}
+            className="w-full h-24 object-cover rounded border border-gray-600"
+          />
+          <button
+            type="button"
+            onClick={() => removeImage(index)}
+            className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            ×
+          </button>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
           </div>
 
           <button 

@@ -40,6 +40,7 @@ import MessDetailsStudent from "./pages/student/MessDetailsStudent";
 import MessTimeTable from "./pages/student/MessTimeTable";
 import JoinCollegePage from "./pages/JoinCollegePage";
 import MessComplaints from "./pages/student/MessComplaints.jsx";
+import HostelComplaintsPage from "./pages/admin/HostelComplaints.jsx";
 
 function App() {
   useEffect(() => {
@@ -66,6 +67,7 @@ function App() {
         <Route path="/admin/college/create" element={<CreateCollegePage />} />
         <Route path="/admin/create-hostel" element={<HostelForm />} />
         <Route path="/admin/hostel/:code" element={<HostelDetailPage />} />
+        <Route path="/admin/hostel/complaints/:code" element={<HostelComplaintsPage />} />
         <Route path="/admin/mess/create" element={<MessForm />} />
         <Route path="/admin/mess/:code" element={<MessDetails />} />
         <Route path="/admin/profile" element={<AdminProfile />} />
