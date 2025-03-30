@@ -2,13 +2,20 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaRegEdit, FaPlusCircle } from "react-icons/fa";
 import api from "../../../utils/axiosRequest";
-import { toast } from "react-hot-toast";
+import toast from "react-hot-toast";
 import AdminHeader from "../../../components/AdminHeader";
+import useAdminAuth from "../../../hooks/useAdminAuth";
 
 const CreateEditPayment = () => {
   const { hostelId, paymentId } = useParams();
   const navigate = useNavigate();
   const isEditMode = Boolean(paymentId);
+  const { loadingAdmin, isAdmin, isVerified } = useAdminAuth();
+
+  if (!isVerified) {
+    toast.error("Your College is not verified yet. Authorized access denied.");
+    navigate("/admin/home");
+  }
 
   const [formData, setFormData] = useState({
     amount: "",
@@ -93,7 +100,7 @@ const CreateEditPayment = () => {
     }
   };
 
-  if (loading) {
+  if (loading || loadingAdmin) {
     return (
       <div className="min-h-screen bg-gray-900 text-gray-100">
         <AdminHeader />

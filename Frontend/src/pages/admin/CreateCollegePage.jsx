@@ -5,6 +5,7 @@ import api from "../../utils/axiosRequest";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import AdminHeader from "../../components/AdminHeader";
+import useAdminAuth from "../../hooks/useAdminAuth";
 
 const CreateCollegePage = () => {
   const {
@@ -13,6 +14,7 @@ const CreateCollegePage = () => {
     formState: { errors },
   } = useForm();
   const navigate = useNavigate();
+  const { loadingAdmin, isAdmin } = useAdminAuth();
 
   const onSubmit = async (data) => {
     try {
@@ -20,11 +22,23 @@ const CreateCollegePage = () => {
       toast.success("College request submitted. Await verification.");
       navigate("/admin/home"); // Redirect back to Admin Home
     } catch (error) {
+      console.log(error.response);
       toast.error(
         error.response?.data?.message || "Error creating college request"
       );
     }
   };
+
+  if (loadingAdmin) {
+    return (
+      <div>
+        <AdminHeader />
+        <div className="min-h-screen bg-gray-900 flex justify-center items-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>

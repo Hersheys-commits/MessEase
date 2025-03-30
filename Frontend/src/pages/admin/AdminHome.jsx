@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../../utils/axiosRequest";
 import AdminHeader from "../../components/AdminHeader";
+import useAdminAuth from "../../hooks/useAdminAuth";
 
 const AdminHome = () => {
   const [college, setCollege] = useState(null);
@@ -12,6 +13,7 @@ const AdminHome = () => {
   const navigate = useNavigate();
   const [collegeExists, setCollegeExists] = useState(false);
   const [requestPending, setRequestPending] = useState(false);
+  const { loadingAdmin, isAdmin } = useAdminAuth();
 
   useEffect(() => {
     const fetchCollegeAndHostels = async () => {
@@ -66,7 +68,7 @@ const AdminHome = () => {
     navigate("/admin/students");
   };
 
-  if (loading) {
+  if (loading || loadingAdmin) {
     return (
       <div className="bg-gray-900 min-h-screen text-gray-100">
         <AdminHeader />
@@ -593,11 +595,18 @@ const AdminHome = () => {
                   You need to create a college before adding hostels, messes, or
                   students.
                 </p>
-                <Link to="/admin/college/create">
-                  <button className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 shadow-lg hover:shadow-green-500/20 transition-all">
-                    Create College
-                  </button>
-                </Link>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Link to="/admin/college/create">
+                    <button className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 shadow-lg hover:shadow-green-500/20 transition-all w-full sm:w-auto">
+                      Create College
+                    </button>
+                  </Link>
+                  <Link to="/admin/college/join">
+                    <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 shadow-lg hover:shadow-blue-500/20 transition-all w-full sm:w-auto">
+                      Join College
+                    </button>
+                  </Link>
+                </div>
               </div>
             )}
           </div>

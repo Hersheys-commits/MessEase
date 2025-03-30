@@ -9,8 +9,9 @@ import {
   FaCamera,
   FaArrowLeft,
 } from "react-icons/fa";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import AdminHeader from "../../../components/AdminHeader";
+import useAdminAuth from "../../../hooks/useAdminAuth";
 
 const UpdateAdminProfile = () => {
   const [formData, setFormData] = useState({
@@ -23,6 +24,7 @@ const UpdateAdminProfile = () => {
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const navigate = useNavigate();
+  const { loadingAdmin, isAdmin } = useAdminAuth();
 
   useEffect(() => {
     const fetchAdminProfile = async () => {
@@ -101,7 +103,7 @@ const UpdateAdminProfile = () => {
     }
   };
 
-  if (initialLoading) {
+  if (initialLoading || loadingAdmin) {
     return (
       <div>
         <AdminHeader />

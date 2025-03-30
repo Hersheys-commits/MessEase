@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import AdminHeader from "../../components/AdminHeader";
 import { Chart } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import useAdminAuth from "../../hooks/useAdminAuth";
 
 // Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -16,6 +17,12 @@ const AdminElectionResults = () => {
   const [loading, setLoading] = useState(true);
   const { electionId } = useParams();
   const navigate = useNavigate();
+  const { loadingAdmin, isAdmin, isVerified } = useAdminAuth();
+
+  if (!isVerified) {
+    toast.error("Your College is not verified yet. Authorized access denied.");
+    navigate("/admin/home");
+  }
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -66,7 +73,7 @@ const AdminElectionResults = () => {
     };
   };
 
-  if (loading) {
+  if (loading || loadingAdmin) {
     return (
       <div className="min-h-screen bg-gray-900 text-white">
         <AdminHeader />

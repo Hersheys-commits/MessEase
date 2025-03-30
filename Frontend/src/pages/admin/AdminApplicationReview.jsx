@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import ApplicationDetailModal from "../../components/admin/ApplicationDetailModal";
 import AdminHeader from "../../components/AdminHeader";
+import useAdminAuth from "../../hooks/useAdminAuth";
 
 const AdminApplicationReview = () => {
   const [election, setElection] = useState(null);
@@ -13,6 +14,12 @@ const AdminApplicationReview = () => {
   const [submitting, setSubmitting] = useState(false);
   const { electionId } = useParams();
   const navigate = useNavigate();
+  const { loadingAdmin, isAdmin, isVerified } = useAdminAuth();
+
+  if (!isVerified) {
+    toast.error("Your College is not verified yet. Authorized access denied.");
+    navigate("/admin/home");
+  }
 
   // State for modal
   const [selectedApplication, setSelectedApplication] = useState(null);
@@ -98,7 +105,7 @@ const AdminApplicationReview = () => {
     setSelectedApplication(null);
   };
 
-  if (loading) {
+  if (loading || loadingAdmin) {
     return (
       <div className="min-h-screen bg-gray-900 text-white">
         <AdminHeader />

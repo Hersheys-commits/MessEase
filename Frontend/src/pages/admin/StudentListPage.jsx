@@ -13,10 +13,16 @@ import {
   FaBan,
 } from "react-icons/fa";
 import toast from "react-hot-toast";
+import useAdminAuth from "../../hooks/useAdminAuth";
 
 const StudentListPage = () => {
   const navigate = useNavigate();
+  const { loadingAdmin, isAdmin, isVerified } = useAdminAuth();
 
+  if (!isVerified) {
+    toast.error("Your College is not verified yet. Authorized access denied.");
+    navigate("/admin/home");
+  }
   // States for search, filters, sort, pagination and loading
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -299,7 +305,7 @@ const StudentListPage = () => {
         </div>
 
         {/* Loading State */}
-        {loading ? (
+        {loading || loadingAdmin ? (
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
           </div>

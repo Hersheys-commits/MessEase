@@ -11,6 +11,8 @@ import Hostel from "../model/hostel.model.js";
 import Mess from "../model/mess.model.js";
 import { v2 as cloudinary } from "cloudinary";
 import { uploadOnCloudinary } from "../util/cloudinary.js";
+import { createOtpMailOptions } from "../util/mailTemplateOTP.js";
+import { createOtpMailOptions as registerMail } from "../util/mailTemplateRegistration.js";
 
 dotenv.config();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -38,62 +40,65 @@ const transporter = nodemailer.createTransport({
 });
 
 export const registerStudent = async (req, res) => {
-  const { email, name } = req.body;
-
-  const domain = email.split("@")[1];
-  const college = await College.findOne({ domain });
-  if (!college)
-    return res.status(400).json({ message: "College domain doesn't exist." });
-
-  const existingUser = await User.findOne({ email });
-  if (existingUser)
-    return res.status(400).json({ message: "User already exists." });
-
-  // Generate OTP
-  const otp = Math.floor(100000 + Math.random() * 900000);
-  // Store OTP with expiration timestamp (current time + 10 minutes)
-  const expirationTime = Date.now() + 10 * 60 * 1000; // 10 minutes in milliseconds
-  otpStore.set(email, { otp, expirationTime });
-
-  // Set up automatic deletion after 10 minutes
-  setTimeout(
-    () => {
-      // Only delete if it's the same OTP (user might have requested another one)
-      if (otpStore.has(email) && otpStore.get(email).otp === otp) {
-        otpStore.delete(email);
-      }
-    },
-    10 * 60 * 1000
-  );
-
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: email,
-    subject: "OTP Verification",
-    html: `
-        <h2>Your OTP Verification Code</h2>
-        <p>Hello ${name},</p>
-        <p>Your OTP for account verification is: <strong>${otp}</strong></p>
-        <p>This code will expire in 10 minutes.</p>
-        <p>If you did not request this code, please ignore this email.</p>
-    `,
-  };
-
   try {
-    await transporter.verify();
-    console.log("SMTP connection verified successfully");
-  } catch (error) {
-    console.error("SMTP verification failed:", error);
-  }
+    const { email, name } = req.body;
 
-  try {
-    await transporter.sendMail(mailOptions);
-    return res.status(200).json({ message: "OTP sent to email." });
+    // Extract domain and start college lookup
+    const domain = email.split("@")[1];
+    const collegePromise = College.findOne({ domain });
+
+    // Start user existence check in parallel
+    const existingUserPromise = User.findOne({ email });
+
+    // Wait for college check result
+    const college = await collegePromise;
+    if (!college) {
+      return res.status(400).json({ message: "College domain doesn't exist." });
+    }
+    if (college.status === "unverified")
+      return res.status(400).json({ message: "College domain is unverified." });
+
+    // Wait for user check result
+    const existingUser = await existingUserPromise;
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists." });
+    }
+
+    // Generate OTP
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    const expirationTime = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+    // Store OTP
+    otpStore.set(email, { otp, expirationTime });
+
+    // Prepare email
+    const mailOptions = registerMail(email, name, otp);
+
+    // Respond to user immediately
+    res.status(200).json({ message: "OTP sent to email." });
+
+    // Set up automatic deletion in the background
+    setTimeout(
+      () => {
+        const currentOtpData = otpStore.get(email);
+        if (currentOtpData && currentOtpData.otp === otp) {
+          otpStore.delete(email);
+        }
+      },
+      10 * 60 * 1000
+    );
+
+    // Send email in the background without blocking the response
+    transporter.sendMail(mailOptions).catch((error) => {
+      console.error("Email error details:", error);
+      // Log to monitoring system since we've already responded to the client
+    });
   } catch (error) {
-    console.error("Email error details:", error);
-    return res
-      .status(500)
-      .json({ message: "Failed to send OTP email", error: error.message });
+    console.error("Error in registerStudent:", error);
+    return res.status(500).json({
+      message: "Failed to register student",
+      error: error.message,
+    });
   }
 };
 
@@ -156,59 +161,54 @@ export const verifyStudentOTP = async (req, res) => {
 export const forgotPassword = async (req, res) => {
   const { email } = req.body;
 
-  const domain = email.split("@")[1];
-  const college = await College.findOne({ domain });
-  if (!college)
-    return res.status(400).json({ message: "College domain doesn't exist." });
-
-  const existingUser = await User.findOne({ email });
-  if (!existingUser)
-    return res.status(400).json({ message: "User doesn't exists." });
-
-  const otp = Math.floor(100000 + Math.random() * 900000);
-  // Store OTP with expiration timestamp (current time + 10 minutes)
-  const expirationTime = Date.now() + 10 * 60 * 1000; // 10 minutes in milliseconds
-  otpStore.set(email, { otp, expirationTime });
-
-  // Set up automatic deletion after 10 minutes
-  setTimeout(
-    () => {
-      // Only delete if it's the same OTP (user might have requested another one)
-      if (otpStore.has(email) && otpStore.get(email).otp === otp) {
-        otpStore.delete(email);
-      }
-    },
-    10 * 60 * 1000
-  );
-
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: email,
-    subject: "OTP Verification for Password Reset",
-    html: `
-        <h2>Your OTP Verification Code</h2>
-        <p>Hello ${existingUser?.name || "User"},</p>
-        <p>Your OTP for account verification is: <strong>${otp}</strong></p>
-        <p>This code will expire in 10 minutes.</p>
-        <p>If you did not request this code, please ignore this email.</p>
-    `,
-  };
-
   try {
-    await transporter.verify();
-    console.log("SMTP connection verified successfully");
-  } catch (error) {
-    console.error("SMTP verification failed:", error);
-  }
+    // Find user without waiting - we'll handle the response later
+    const userPromise = User.findOne({ email }).select("name");
+    // Generate OTP while the DB query is running
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    const expirationTime = Date.now() + 10 * 60 * 1000; // 10 minutes
 
-  try {
-    await transporter.sendMail(mailOptions);
-    return res.status(200).json({ message: "OTP sent to email." });
+    // Store OTP immediately
+    otpStore.set(email, { otp, expirationTime });
+
+    // Now await the user result
+    const existingUser = await userPromise;
+    if (!existingUser) {
+      return res.status(400).json({ message: "User doesn't exist." });
+    }
+
+    // Prepare email content
+    const mailOptions = createOtpMailOptions(email, existingUser.name, otp);
+
+    // Send email without waiting for it to complete
+    const emailPromise = transporter.sendMail(mailOptions);
+
+    // Set up automatic deletion without awaiting
+    setTimeout(
+      () => {
+        const currentOtpData = otpStore.get(email);
+        if (currentOtpData && currentOtpData.otp === otp) {
+          otpStore.delete(email);
+        }
+      },
+      10 * 60 * 1000
+    );
+
+    // Respond to the user immediately
+    res.status(200).json({ message: "OTP sent to email." });
+
+    // Continue with email sending in the background
+    await emailPromise.catch((error) => {
+      console.error("Email error details:", error);
+      // We can't send an error response here since we've already sent a success response
+      // Consider logging this to a monitoring system
+    });
   } catch (error) {
-    console.error("Email error details:", error);
-    return res
-      .status(500)
-      .json({ message: "Failed to send OTP email", error: error.message });
+    console.error("Error in forgotPassword:", error);
+    return res.status(500).json({
+      message: "Failed to process password reset request",
+      error: error.message,
+    });
   }
 };
 
@@ -294,6 +294,8 @@ export const googleAuth = async (req, res) => {
     if (!college) {
       return res.status(220).json({ message: "College domain doesn't exist." });
     }
+    if (college.status === "unverified")
+      return res.status(400).json({ message: "College domain is unverified." });
 
     // Check if a student exists with this googleId
     let user = await User.findOne({ googleId: sub, role: "student" }).select(
@@ -416,10 +418,14 @@ export const verifyToken = async (req, res) => {
       userInfo: req.user,
     });
   }
+  const userInfo = { ...req.user._doc };
+  delete userInfo.password;
+  delete userInfo.googleId;
+  delete userInfo.refreshToken;
 
   return res.status(200).json({
     user: req.user._id,
-    userInfo: req.user,
+    userInfo,
     code: hostelCode?.code,
   });
 };
@@ -464,7 +470,6 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
   if (!name && !branch && !year && !room && !phoneNumber && !hostelId) {
     throw new ApiError(400, "At least one field is required for update");
   }
-  const hostel = await Hostel.findById(hostelId);
 
   // Start building the update object
   const updateFields = {};
@@ -474,24 +479,38 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
   if (year) updateFields.year = year;
   if (room) updateFields.room = room;
   if (phoneNumber) updateFields.phoneNumber = phoneNumber;
-  if (hostel?.mess) updateFields.mess = hostel.mess;
 
-  // If hostelId is provided, verify it's valid
+  // If hostelId is provided, fetch hostel in parallel with other operations
+  let hostelPromise;
   if (hostelId) {
     if (!mongoose.Types.ObjectId.isValid(hostelId)) {
       throw new ApiError(400, "Invalid hostel ID");
     }
     updateFields.hostel = hostelId;
+    hostelPromise = Hostel.findById(hostelId).select("mess");
   }
 
-  // Update the user
-  const updatedUser = await User.findByIdAndUpdate(
+  // Start user update process
+  const updateUserPromise = User.findByIdAndUpdate(
     req.user?._id,
-    {
-      $set: updateFields,
-    },
+    { $set: updateFields },
     { new: true }
   ).select("-password -refreshToken");
+
+  // Wait for both operations if needed
+  const [hostel, updatedUser] = await Promise.all([
+    hostelPromise,
+    updateUserPromise,
+  ]);
+
+  // If hostel has a mess, update user's mess field in a separate operation
+  if (hostel?.mess) {
+    // No need to wait for this update as we already have the updated user
+    User.updateOne(
+      { _id: req.user?._id },
+      { $set: { mess: hostel.mess } }
+    ).catch((err) => console.error("Error updating mess field:", err));
+  }
 
   if (!updatedUser) {
     throw new ApiError(404, "User not found");
@@ -506,14 +525,12 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
 
 // Upload profile picture
 export const uploadProfilePicture = asyncHandler(async (req, res) => {
-  // Assuming you're using multer or similar middleware for file upload
   const profilePictureFile = req.file;
 
   if (!profilePictureFile) {
     throw new ApiError(400, "Profile picture file is required");
   }
 
-  // Assuming the file is saved and the path/URL is returned
   const profilePicturePath = profilePictureFile.path;
 
   // Add file type validation
@@ -526,49 +543,53 @@ export const uploadProfilePicture = asyncHandler(async (req, res) => {
     );
   }
 
-  const user = await User.findById(req.user?._id);
+  // Start user lookup in parallel with Cloudinary upload
+  const userPromise = User.findById(req.user?._id).select("profilePicture");
+  const uploadPromise = uploadOnCloudinary(profilePicturePath);
+
+  // Wait for both operations
+  const [user, cloudinaryResponse] = await Promise.all([
+    userPromise,
+    uploadPromise,
+  ]);
+
   if (!user) {
-    throw new ApiError(404, "User not found"); // Add user check
+    throw new ApiError(404, "User not found");
   }
 
+  if (!cloudinaryResponse?.url) {
+    throw new ApiError(400, "Error while uploading avatar");
+  }
+
+  // Delete old profile picture if exists (don't block the response for this)
   if (user.profilePicture) {
     try {
       const oldAvatarUrl = user.profilePicture;
       const publicId = oldAvatarUrl.split("/").pop().split(".")[0];
-      await cloudinary.uploader.destroy(publicId);
-      console.log("Old avatar deleted successfully"); // Debug log
+      // Don't await this operation
+      cloudinary.uploader
+        .destroy(publicId)
+        .then(() => console.log("Old avatar deleted successfully"))
+        .catch((error) => console.error("Error deleting old avatar:", error));
     } catch (error) {
-      console.error("Error deleting old avatar:", error); // Debug log
-      // Continue anyway since we want to update the avatar
+      console.error("Error processing old avatar URL:", error);
     }
   }
 
-  try {
-    const cloudinaryResponse = await uploadOnCloudinary(profilePicturePath);
+  // Update user with new profile picture
+  const updatedUser = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: { profilePicture: cloudinaryResponse.url },
+    },
+    { new: true }
+  ).select("-password");
 
-    if (!cloudinaryResponse?.url) {
-      throw new ApiError(400, "Error while uploading avatar");
-    }
-
-    const updatedUser = await User.findByIdAndUpdate(
-      req.user?._id,
-      {
-        $set: {
-          profilePicture: cloudinaryResponse.url,
-        },
-      },
-      { new: true }
-    ).select("-password");
-
-    return res
-      .status(200)
-      .json(
-        new ApiResponse(200, updatedUser, "Avatar image updated successfully")
-      );
-  } catch (error) {
-    console.error("Error in avatar update:", error); // Debug log
-    throw new ApiError(400, `Avatar update failed: ${error.message}`);
-  }
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, updatedUser, "Avatar image updated successfully")
+    );
 });
 
 // Get all students with filtering, sorting, and pagination

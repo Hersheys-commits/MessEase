@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../../../utils/axiosRequest";
-import { Link } from "react-router-dom";
-import { toast } from "react-hot-toast";
+import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import AdminHeader from "../../../components/AdminHeader";
 import {
   FaToggleOn,
@@ -12,12 +12,20 @@ import {
   FaTrash,
   FaSearch,
 } from "react-icons/fa";
+import useAdminAuth from "../../../hooks/useAdminAuth";
 
 const PaymentManagement = () => {
   const [hostels, setHostels] = useState([]);
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { loadingAdmin, isAdmin, isVerified } = useAdminAuth();
+  const navigate = useNavigate();
+
+  if (!isVerified) {
+    toast.error("Your College is not verified yet. Authorized access denied.");
+    navigate("/admin/home");
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -92,7 +100,7 @@ const PaymentManagement = () => {
     return payments.find((payment) => payment.hostelId._id === hostelId);
   };
 
-  if (loading) {
+  if (loading || loadingAdmin) {
     return (
       <div className="min-h-screen bg-gray-900 text-gray-100">
         <AdminHeader />

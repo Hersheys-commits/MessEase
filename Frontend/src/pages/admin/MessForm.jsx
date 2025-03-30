@@ -4,11 +4,18 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import api from "../../utils/axiosRequest";
 import AdminHeader from "../../components/AdminHeader";
+import useAdminAuth from "../../hooks/useAdminAuth";
 
 const MessForm = () => {
   const [hostels, setHostels] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { loadingAdmin, isAdmin, isVerified } = useAdminAuth();
+
+  if (!isVerified) {
+    toast.error("Your College is not verified yet. Authorized access denied.");
+    navigate("/admin/home");
+  }
 
   const {
     register,
@@ -122,19 +129,6 @@ const MessForm = () => {
     setLoading(true);
     const loadingToast = toast.loading("Creating mess...");
     try {
-      // Process each day's meals.
-      // For each meal type on each day, you can either leave them as strings
-      // or convert them to arrays. Here, we send them as strings and let the backend handle splitting.
-      // If you prefer, you can uncomment the transformation below:
-      //
-      // data.meals = data.meals.map(dayMeal => ({
-      //   day: dayMeal.day,
-      //   breakfast: dayMeal.breakfast.split(",").map(item => item.trim()).filter(Boolean),
-      //   lunch: dayMeal.lunch.split(",").map(item => item.trim()).filter(Boolean),
-      //   eveningSnacks: dayMeal.eveningSnacks.split(",").map(item => item.trim()).filter(Boolean),
-      //   dinner: dayMeal.dinner.split(",").map(item => item.trim()).filter(Boolean),
-      // }));
-
       const response = await api.post("/api/mess/create", data);
       toast.success("Mess created successfully!", { id: loadingToast });
       reset();
@@ -148,6 +142,17 @@ const MessForm = () => {
       setLoading(false);
     }
   };
+
+  if (loadingAdmin) {
+    return (
+      <div>
+        <AdminHeader />
+        <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+          <div className="text-xl font-semibold">Loading</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>

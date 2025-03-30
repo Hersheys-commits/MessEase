@@ -9,6 +9,8 @@ import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 import { uploadOnCloudinary } from "../util/cloudinary.js";
 import { v2 as cloudinary } from "cloudinary";
+import { createOtpMailOptions } from "../util/mailTemplateOTP.js";
+import { createOtpMailOptions as registerMail } from "../util/mailTemplateRegistration.js";
 
 dotenv.config();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -42,61 +44,44 @@ export const registerAdmin = async (req, res) => {
   try {
     const { email, password, name, phoneNumber } = req.body;
 
-    // Check if a user with this email already exists
-    const existingUser = await User.findOne({ email });
+    // Start user existence check but don't await immediately
+    const existingUserPromise = User.findOne({ email });
+
+    // Generate OTP in parallel with the DB query
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    const expirationTime = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+    // Now await the user check result
+    const existingUser = await existingUserPromise;
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // Generate OTP
-    const otp = Math.floor(100000 + Math.random() * 900000);
-    // Store OTP with expiration timestamp (current time + 10 minutes)
-    const expirationTime = Date.now() + 10 * 60 * 1000; // 10 minutes in milliseconds
+    // Store OTP
     otpStore.set(email, { otp, expirationTime });
 
-    // Set up automatic deletion after 10 minutes
+    // Prepare email - assuming registerMail is similar to our createOtpMailOptions
+    const mailOptions = registerMail(email, name, otp);
+
+    // Respond to the user immediately
+    res.status(200).json({ message: "OTP sent to email." });
+
+    // Set up automatic deletion without blocking
     setTimeout(
       () => {
-        // Only delete if it's the same OTP (user might have requested another one)
-        if (otpStore.has(email) && otpStore.get(email).otp === otp) {
+        const currentOtpData = otpStore.get(email);
+        if (currentOtpData && currentOtpData.otp === otp) {
           otpStore.delete(email);
         }
       },
       10 * 60 * 1000
     );
 
-    // Prepare email
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Admin Account Verification OTP",
-      html: `
-          <h2>Your OTP Verification Code</h2>
-          <p>Hello ${name},</p>
-          <p>Your OTP for admin account verification is: <strong>${otp}</strong></p>
-          <p>This code will expire in 10 minutes.</p>
-          <p>If you did not request this code, please ignore this email.</p>
-      `,
-    };
-
-    // Verify SMTP connection
-    try {
-      await transporter.verify();
-      console.log("SMTP connection verified successfully");
-    } catch (error) {
-      console.error("SMTP verification failed:", error);
-    }
-
-    // Send OTP email
-    try {
-      await transporter.sendMail(mailOptions);
-      return res.status(200).json({ message: "OTP sent to email." });
-    } catch (error) {
+    // Send email in the background (non-blocking)
+    transporter.sendMail(mailOptions).catch((error) => {
       console.error("Email error details:", error);
-      return res
-        .status(500)
-        .json({ message: "Failed to send OTP email", error: error.message });
-    }
+      // Log to monitoring system since we can't respond to the client anymore
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Server error" });
@@ -178,55 +163,54 @@ export const verifyAdminOTP = async (req, res) => {
 export const forgotPassword = async (req, res) => {
   const { email } = req.body;
 
-  const existingUser = await User.findOne({ email });
-  if (!existingUser)
-    return res.status(400).json({ message: "User doesn't exists." });
-
-  const otp = Math.floor(100000 + Math.random() * 900000);
-
-  // Store OTP with expiration timestamp (current time + 10 minutes)
-  const expirationTime = Date.now() + 10 * 60 * 1000; // 10 minutes in milliseconds
-  otpStore.set(email, { otp, expirationTime });
-
-  // Set up automatic deletion after 10 minutes
-  setTimeout(
-    () => {
-      // Only delete if it's the same OTP (user might have requested another one)
-      if (otpStore.has(email) && otpStore.get(email).otp === otp) {
-        otpStore.delete(email);
-      }
-    },
-    10 * 60 * 1000
-  );
-
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: email,
-    subject: "OTP Verification for Password Reset",
-    html: `
-        <h2>Your OTP Verification Code</h2>
-        <p>Hello ${existingUser?.name || "User"},</p>
-        <p>Your OTP for account verification is: <strong>${otp}</strong></p>
-        <p>This code will expire in 10 minutes.</p>
-        <p>If you did not request this code, please ignore this email.</p>
-    `,
-  };
-
   try {
-    await transporter.verify();
-    console.log("SMTP connection verified successfully");
-  } catch (error) {
-    console.error("SMTP verification failed:", error);
-  }
+    // Find user without waiting - we'll handle the response later
+    const userPromise = User.findOne({ email }).select("name");
+    // Generate OTP while the DB query is running
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    const expirationTime = Date.now() + 10 * 60 * 1000; // 10 minutes
 
-  try {
-    await transporter.sendMail(mailOptions);
-    return res.status(200).json({ message: "OTP sent to email." });
+    // Store OTP immediately
+    otpStore.set(email, { otp, expirationTime });
+
+    // Now await the user result
+    const existingUser = await userPromise;
+    if (!existingUser) {
+      return res.status(400).json({ message: "User doesn't exist." });
+    }
+
+    // Prepare email content
+    const mailOptions = createOtpMailOptions(email, existingUser.name, otp);
+
+    // Send email without waiting for it to complete
+    const emailPromise = transporter.sendMail(mailOptions);
+
+    // Set up automatic deletion without awaiting
+    setTimeout(
+      () => {
+        const currentOtpData = otpStore.get(email);
+        if (currentOtpData && currentOtpData.otp === otp) {
+          otpStore.delete(email);
+        }
+      },
+      10 * 60 * 1000
+    );
+
+    // Respond to the user immediately
+    res.status(200).json({ message: "OTP sent to email." });
+
+    // Continue with email sending in the background
+    await emailPromise.catch((error) => {
+      console.error("Email error details:", error);
+      // We can't send an error response here since we've already sent a success response
+      // Consider logging this to a monitoring system
+    });
   } catch (error) {
-    console.error("Email error details:", error);
-    return res
-      .status(500)
-      .json({ message: "Failed to send OTP email", error: error.message });
+    console.error("Error in forgotPassword:", error);
+    return res.status(500).json({
+      message: "Failed to process password reset request",
+      error: error.message,
+    });
   }
 };
 
@@ -463,8 +447,36 @@ export const logoutAdmin = asyncHandler(async (req, res) => {
 });
 
 export const verifyToken = async (req, res) => {
+  const userInfo = { ...req.user._doc };
+  delete userInfo.password;
+  delete userInfo.googleId;
+  delete userInfo.refreshToken;
+
+  if (userInfo.college) {
+    const college = await College.findById(userInfo.college);
+    if (college.status === "unverified") {
+      return res.status(207).json({
+        message: "College is not verified yet.",
+        user: req.user._id,
+        userInfo,
+        hasCollege: true,
+        verified: false,
+        college,
+      });
+    }
+    return res.status(200).json({
+      user: req.user._id,
+      userInfo,
+      hasCollege: true,
+      verified: true,
+      college,
+    });
+  }
+
   return res.status(200).json({
     user: req.user._id,
+    userInfo,
+    hasCollege: false,
   });
 };
 

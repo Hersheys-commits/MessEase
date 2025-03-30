@@ -4,9 +4,16 @@ import toast from "react-hot-toast";
 import api from "../../utils/axiosRequest";
 import { useNavigate } from "react-router-dom";
 import AdminHeader from "../../components/AdminHeader";
+import useAdminAuth from "../../hooks/useAdminAuth";
 
 const CreateHostelPage = () => {
   const navigate = useNavigate();
+  const { loadingAdmin, isAdmin, isVerified } = useAdminAuth();
+
+  if (!isVerified) {
+    toast.error("Your College is not verified yet. Authorized access denied.");
+    navigate("/admin/home");
+  }
 
   const {
     register,
@@ -60,6 +67,17 @@ const CreateHostelPage = () => {
       console.error("Error creating hostel:", error);
     }
   };
+
+  if (loadingAdmin) {
+    return (
+      <div>
+        <AdminHeader />
+        <div className="min-h-screen bg-gray-900 flex justify-center items-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">

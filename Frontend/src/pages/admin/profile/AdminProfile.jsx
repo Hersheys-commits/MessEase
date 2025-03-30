@@ -13,14 +13,16 @@ import {
 } from "react-icons/fa";
 import { MdVerified, MdOutlineAdminPanelSettings } from "react-icons/md";
 import { TbSchool } from "react-icons/tb";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import AdminHeader from "../../../components/AdminHeader";
+import useAdminAuth from "../../../hooks/useAdminAuth";
 
 const AdminProfile = () => {
   const [profile, setProfile] = useState(null);
   const [college, setCollege] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { loadingAdmin, isAdmin } = useAdminAuth();
 
   useEffect(() => {
     const fetchAdminProfile = async () => {
@@ -43,7 +45,7 @@ const AdminProfile = () => {
     fetchAdminProfile();
   }, [navigate]);
 
-  if (loading) {
+  if (loading || loadingAdmin) {
     return (
       <div>
         <AdminHeader />

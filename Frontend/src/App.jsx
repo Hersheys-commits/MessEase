@@ -39,7 +39,7 @@ import StudentProfilePage from "./pages/admin/StudentProfilePage";
 import StudentListPage from "./pages/admin/StudentListPage";
 import MessDetailsStudent from "./pages/student/MessDetailsStudent";
 import MessTimeTable from "./pages/student/MessTimeTable";
-import JoinCollegePage from "./pages/JoinCollegePage";
+import JoinCollegePage from "./pages/admin/JoinCollegePage";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 
 function App() {

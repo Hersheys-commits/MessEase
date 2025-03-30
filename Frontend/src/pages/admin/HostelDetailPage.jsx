@@ -4,6 +4,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import toast from "react-hot-toast";
 import api from "../../utils/axiosRequest";
 import AdminHeader from "../../components/AdminHeader";
+import useAdminAuth from "../../hooks/useAdminAuth";
 
 const HostelDetailPage = () => {
   const { code } = useParams();
@@ -11,6 +12,12 @@ const HostelDetailPage = () => {
   const [hostel, setHostel] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const { loadingAdmin, isAdmin, isVerified } = useAdminAuth();
+
+  if (!isVerified) {
+    toast.error("Your College is not verified yet. Authorized access denied.");
+    navigate("/admin/home");
+  }
 
   const {
     register,
@@ -109,7 +116,7 @@ const HostelDetailPage = () => {
     setIsEditing(!isEditing);
   };
 
-  if (loading) {
+  if (loading || loadingAdmin) {
     return (
       <div>
         <AdminHeader />

@@ -13,8 +13,9 @@ import {
   FaArrowLeft,
 } from "react-icons/fa";
 import { MdOutlineAdminPanelSettings } from "react-icons/md";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import AdminHeader from "../../../components/AdminHeader";
+import useAdminAuth from "../../../hooks/useAdminAuth";
 
 const UpdateCollege = () => {
   const [formData, setFormData] = useState({
@@ -34,8 +35,14 @@ const UpdateCollege = () => {
   const [previewUrl, setPreviewUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdminOrNot, setIsAdminOrNot] = useState(false);
   const navigate = useNavigate();
+  const { loadingAdmin, isAdmin, isVerified } = useAdminAuth();
+
+  if (!isVerified) {
+    toast.error("Your College is not verified yet. Authorized access denied.");
+    navigate("/admin/home");
+  }
 
   useEffect(() => {
     const checkPermissionsAndLoadData = async () => {
@@ -52,7 +59,7 @@ const UpdateCollege = () => {
           return;
         }
 
-        setIsAdmin(true);
+        setIsAdminOrNot(true);
 
         // Now fetch college details
         const collegeResponse = await api.get("/api/college/getCollege");
@@ -120,7 +127,7 @@ const UpdateCollege = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!isAdmin) {
+    if (!isAdminOrNot) {
       toast.error("Only admins can update college details");
       return;
     }
@@ -160,7 +167,7 @@ const UpdateCollege = () => {
     }
   };
 
-  if (initialLoading) {
+  if (initialLoading || loadingAdmin) {
     return (
       <div>
         <AdminHeader />
@@ -171,7 +178,7 @@ const UpdateCollege = () => {
     );
   }
 
-  if (!isAdmin) {
+  if (!isAdminOrNot) {
     return (
       <div>
         <AdminHeader />

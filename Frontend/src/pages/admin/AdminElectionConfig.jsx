@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import api from "../../utils/axiosRequest";
 import toast from "react-hot-toast";
 import AdminHeader from "../../components/AdminHeader";
+import useAdminAuth from "../../hooks/useAdminAuth";
+import { useNavigate } from "react-router-dom";
 
 const AdminElectionConfig = () => {
   const [college, setCollege] = useState(true);
@@ -9,6 +11,8 @@ const AdminElectionConfig = () => {
   const [messes, setMesses] = useState([]);
   const [electionConfigs, setElectionConfigs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { loadingAdmin, isAdmin, isVerified } = useAdminAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     type: "messManager",
     targetId: "",
@@ -18,6 +22,11 @@ const AdminElectionConfig = () => {
       "What changes would you implement?",
     ],
   });
+
+  if (!isVerified) {
+    toast.error("Your College is not verified yet. Authorized access denied.");
+    navigate("/admin/home");
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -159,7 +168,7 @@ const AdminElectionConfig = () => {
     );
   }
 
-  if (loading) {
+  if (loading || loadingAdmin) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
         <AdminHeader />

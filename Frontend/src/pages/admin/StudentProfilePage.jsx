@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import api from "../../utils/axiosRequest";
 import AdminHeader from "../../components/AdminHeader";
 import {
@@ -17,12 +17,20 @@ import {
   FaCheckCircle,
 } from "react-icons/fa";
 import toast from "react-hot-toast";
+import useAdminAuth from "../../hooks/useAdminAuth";
 
 const StudentProfilePage = () => {
   const { id } = useParams();
   const [loading, setLoading] = useState(true);
   const [student, setStudent] = useState(null);
   const [toggleLoading, setToggleLoading] = useState(false);
+  const { loadingAdmin, isAdmin, isVerified } = useAdminAuth();
+  const navigate = useNavigate();
+
+  if (!isVerified) {
+    toast.error("Your College is not verified yet. Authorized access denied.");
+    navigate("/admin/home");
+  }
 
   // Fetch student details
   const fetchStudent = async () => {
@@ -66,7 +74,7 @@ const StudentProfilePage = () => {
     }
   };
 
-  if (loading) {
+  if (loading || loadingAdmin) {
     return (
       <div>
         <AdminHeader />

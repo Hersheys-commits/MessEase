@@ -11,6 +11,7 @@ import {
   FaUpload,
 } from "react-icons/fa";
 import Header from "../../components/Header";
+import toast from "react-hot-toast";
 
 const UpdateProfile = () => {
   const location = useLocation();
@@ -141,12 +142,14 @@ const UpdateProfile = () => {
       }
 
       setSuccess("Profile updated successfully!");
-
+      toast.success("Profile updated successfully");
+      navigate("/student/profile");
       // Redirect after successful update if there was a redirect path
       if (location.state?.redirect) {
         setTimeout(() => navigate(redirectPath), 1500);
       }
     } catch (err) {
+      console.error("Error updating profile:", err);
       setError(err.response?.data?.message || "Failed to update profile");
     }
   };

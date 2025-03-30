@@ -5,6 +5,7 @@ import api from "../../utils/axiosRequest.js";
 import { Star, ArrowLeft, Clock } from "lucide-react";
 import AdminHeader from "../../components/AdminHeader.jsx";
 import toast from "react-hot-toast";
+import useAdminAuth from "../../hooks/useAdminAuth.js";
 
 const MessDetails = () => {
   const { code } = useParams();
@@ -16,6 +17,12 @@ const MessDetails = () => {
   const [editingMess, setEditingMess] = useState(false);
   const [editingFood, setEditingFood] = useState(false);
   const [selectedDay, setSelectedDay] = useState("Monday");
+  const { loadingAdmin, isAdmin, isVerified } = useAdminAuth();
+
+  if (!isVerified) {
+    toast.error("Your College is not verified yet. Authorized access denied.");
+    navigate("/admin/home");
+  }
 
   const {
     register,
@@ -204,7 +211,7 @@ const MessDetails = () => {
     return "bg-blue-900/50 border-blue-800";
   };
 
-  if (loading) {
+  if (loading || loadingAdmin) {
     return (
       <div>
         <AdminHeader />
