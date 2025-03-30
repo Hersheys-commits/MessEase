@@ -35,7 +35,7 @@ const MessDetails = () => {
       try {
         setLoading(true);
         const response = await api.get(`/api/mess/${code}`);
-        console.log(response);
+        // console.log(response);
         setMessData(response.data.data.mess);
         setWeeklyFoodData(response.data.data.weeklyFood);
         setLoading(false);
@@ -258,6 +258,12 @@ const MessDetails = () => {
         <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden mb-6 border border-gray-700">
           <div className="bg-blue-800 p-4">
             <h1 className="text-2xl font-bold">{messData.name}</h1>
+            <Link
+              to={`/admin/mess/complaints/${code}`}
+              className="z-1 ml-[85%] px-4 py-2 bg-red-500 text-white rounded transition duration-200 hover:bg-red-600"
+            >
+              View Complaints
+            </Link>
             <p className="text-blue-100">Mess Details & Configuration</p>
           </div>
 

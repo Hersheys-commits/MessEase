@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { AlertCircle, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import AdminHeader from "../../components/AdminHeader.jsx";
 
-const HostelComplaintsPage = () => {
+const MessComplaintsPage = () => {
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -18,8 +18,10 @@ const HostelComplaintsPage = () => {
     const fetchComplaints = async () => {
       try {
         setLoading(true);
-        const response = await api.get(`/api/complaint/getcomplaints/${code}`);
-
+        const response = await api.get(
+          `/api/complaint/getMessComplaints/${code}`
+        );
+        console.log(response);
         // Sort complaints - pending first, then by date (newest first)
         const sortedComplaints = response.data.complaint.sort((a, b) => {
           // Both pending - sort by date
@@ -37,6 +39,7 @@ const HostelComplaintsPage = () => {
         setComplaints(sortedComplaints);
         setLoading(false);
       } catch (error) {
+        console.log(error.response);
         setError(error.response?.data?.message || "Failed to fetch complaints");
         setLoading(false);
       }
@@ -53,7 +56,7 @@ const HostelComplaintsPage = () => {
       const response = await api.post(
         `/api/complaint/updatecomplaint/${id}/${status}`
       );
-
+      console.log(response);
       // Update the complaint status and re-sort the list
       setComplaints((prevComplaints) => {
         const updated = prevComplaints.map((complaint) =>
@@ -70,6 +73,7 @@ const HostelComplaintsPage = () => {
         });
       });
     } catch (error) {
+      console.log(error.response);
       setError(
         error.response?.data?.message || "Failed to update complaint status"
       );
@@ -109,7 +113,7 @@ const HostelComplaintsPage = () => {
             No Complaints Found
           </h3>
           <p className="text-gray-300 text-center mb-4">
-            There are currently no hostel complaints registered
+            There are currently no Mess complaints registered
             <span className="font-medium text-white"></span>.
           </p>
           <div className="bg-gray-900 p-4 rounded-lg border border-gray-700 w-full max-w-md">
@@ -138,10 +142,10 @@ const HostelComplaintsPage = () => {
       <div className="w-4/5 mx-auto complaints-container text-gray-100 min-h-screen p-6">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-blue-400">
-            Complaints for Hostel <span className="text-white"></span>
+            Complaints for Mess <span className="text-white"></span>
           </h2>
           <Link
-            to={`/admin/hostel/${code}`}
+            to={`/admin/mess/${code}`}
             className="flex items-center space-x-2 text-blue-400 hover:text-blue-300"
           >
             Go Back
@@ -310,4 +314,4 @@ const HostelComplaintsPage = () => {
   );
 };
 
-export default HostelComplaintsPage;
+export default MessComplaintsPage;

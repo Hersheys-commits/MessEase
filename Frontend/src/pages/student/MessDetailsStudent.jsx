@@ -174,7 +174,10 @@ const MessDetailsStudent = () => {
             <h1 className="text-3xl md:text-4xl font-bold mb-2">
               {messData?.mess.name}
             </h1>
-            <Link className="text-blue-200 ml-[95%] hover:underline" to={`/student/mess/${messCode}/complaints`}>
+            <Link
+              className="text-blue-200 ml-[95%] hover:underline"
+              to={`/student/mess/${messCode}/complaints`}
+            >
               complaints
             </Link>
             <div className="flex items-center text-blue-200">

@@ -41,6 +41,7 @@ import MessTimeTable from "./pages/student/MessTimeTable";
 import JoinCollegePage from "./pages/JoinCollegePage";
 import MessComplaints from "./pages/student/MessComplaints.jsx";
 import HostelComplaintsPage from "./pages/admin/HostelComplaints.jsx";
+import MessComplaintsPage from "./pages/admin/MessComplaints.jsx";
 
 function App() {
   useEffect(() => {
@@ -67,9 +68,16 @@ function App() {
         <Route path="/admin/college/create" element={<CreateCollegePage />} />
         <Route path="/admin/create-hostel" element={<HostelForm />} />
         <Route path="/admin/hostel/:code" element={<HostelDetailPage />} />
-        <Route path="/admin/hostel/complaints/:code" element={<HostelComplaintsPage />} />
+        <Route
+          path="/admin/hostel/complaints/:code"
+          element={<HostelComplaintsPage />}
+        />
         <Route path="/admin/mess/create" element={<MessForm />} />
         <Route path="/admin/mess/:code" element={<MessDetails />} />
+        <Route
+          path="/admin/mess/complaints/:code"
+          element={<MessComplaintsPage />}
+        />
         <Route path="/admin/profile" element={<AdminProfile />} />
         <Route path="/admin/update-profile" element={<UpdateAdminProfile />} />
         <Route path="/admin/update-college" element={<UpdateCollege />} />
@@ -128,9 +136,7 @@ function App() {
           path="/admin/election/:electionId/results"
           element={<AdminElectionResults />}
         />
-
-        <Route path="/admin/college/join" element={<JoinCollegePage />}/>
-
+        <Route path="/admin/college/join" element={<JoinCollegePage />} />
         <Route path="*" element={<PageNotFound />} />
         {/* Protected Routes */}
         <Route

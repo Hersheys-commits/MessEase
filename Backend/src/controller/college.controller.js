@@ -54,7 +54,7 @@ export const createCollegeRequest = async (req, res) => {
     // Create a transporter (configure with your email provider credentials)
     const transporter = nodemailer.createTransport({
       service: "gmail",
-      auth:{
+      auth: {
         user: process.env.EMAIL_USER, // your email
         pass: process.env.EMAIL_PASS, // your email password or app password
       },
@@ -264,12 +264,11 @@ export const getCollegeByCode = async (req, res) => {
   }
 };
 
-
 export const applyRole = async (req, res) => {
   try {
     // Extract data from the request body
     const {
-      role,// Email of the user applying for the role
+      role, // Email of the user applying for the role
       email,
       collegeName,
       applicationDetails,
@@ -314,7 +313,8 @@ export const applyRole = async (req, res) => {
     // Respond to the client
     res.status(200).json({
       success: true,
-      message: "Role application submitted successfully. A confirmation email has been sent.",
+      message:
+        "Role application submitted successfully. A confirmation email has been sent.",
     });
   } catch (error) {
     console.error("Error in applyRole:", error);
@@ -322,7 +322,6 @@ export const applyRole = async (req, res) => {
       success: false,
       message: "An error occurred while processing your request.",
     });
-
   }
 };
 
@@ -334,21 +333,23 @@ export const ReqAccept = async (req, res) => {
     if (!college) {
       return res.status(404).json({ message: "College not found" });
     }
-    
+
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    
+
     // Add user to admins array
     college.admins.push(user._id);
     await college.save();
-    
+
     // Update user's role
     user.role = role;
     await user.save();
-    
-    return res.status(200).json({ message: "User added as admin and role updated successfully" });
+
+    return res
+      .status(200)
+      .json({ message: "User added as admin and role updated successfully" });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Server error in req accept" });
@@ -358,12 +359,12 @@ export const ReqAccept = async (req, res) => {
 export const ReqReject = async (req, res) => {
   try {
     const { code } = req.params;
-    
+
     const college = await College.findOne({ code });
     if (!college) {
       return res.status(404).json({ message: "College not found" });
     }
-  
+
     return res.status(200).json({ message: "Request rejected successfully" });
   } catch (error) {
     console.error(error);
