@@ -4,7 +4,8 @@ import User from "../model/user.model.js";
 import mongoose from "mongoose";
 export const checkAvailability = async (req, res) => {
   try {
-    const { userId, checkInDate } = req.body;
+    const { checkInDate } = req.body;
+    const userId = req.user._id;
 
     // Fetch user details (college & hostel)
     const user = await User.findById(userId)
@@ -46,7 +47,8 @@ export const checkAvailability = async (req, res) => {
 
 export const allocateRoom = async (req, res) => {
   try {
-    const { userId, roomNumber, checkInDate, checkOutDate } = req.body;
+    const { roomNumber, checkInDate, checkOutDate } = req.body;
+    const userId = req.user._id;
     console.log("BODY: ", req.body);
     if (!userId || !roomNumber || !checkInDate || !checkOutDate) {
       return res.status(400).json({ error: "Missing required fields" });
@@ -92,7 +94,7 @@ export const allocateRoom = async (req, res) => {
 
 export const allBookedRoom = async (req, res) => {
   try {
-    const { userId } = req.query; // for get
+    const userId = req.user._id;
     console.log(userId);
     if (!userId) {
       res.status(401).json({ error: "Not a valid User" });
@@ -113,7 +115,9 @@ export const allBookedRoom = async (req, res) => {
 
 export const deleteBookedRoom = async (req, res) => {
   try {
-    const { userId, bookingId } = req.body;
+    const { bookingId } = req.query; // Changed from req.body to req.query
+    const userId = req.user._id;
+    console.log(userId, bookingId);
 
     if (!userId || !bookingId) {
       return res

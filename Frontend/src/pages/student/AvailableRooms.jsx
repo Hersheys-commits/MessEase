@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Header from "../../components/Header";
-import axios from "axios";
-import { useLocation, useNavigate } from "react-router-dom";
+import api from "../../utils/axiosRequest";
+import { useNavigate } from "react-router-dom";
 import hostelService from "../../utils/hostelCheck";
 import toast from "react-hot-toast";
 
@@ -11,13 +11,15 @@ function AvailableRooms() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const location = useLocation();
-  const userId = location.state?.userId;
 
   useEffect(() => {
     const verifyHostel = async () => {
       try {
         const data = await hostelService.checkHostelAssignment();
+        if (data.data.user.isBlocked === true) {
+          toast.error("You are blocked by Admin.");
+          navigate("/student/home");
+        }
         if (
           !(
             data.data.user.role === "student" ||
@@ -39,9 +41,8 @@ function AvailableRooms() {
       }
     };
     verifyHostel();
-  }, []);
+  }, [navigate]);
 
-  console.log("BOOKING PAGE USER: ", userId);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -49,13 +50,25 @@ function AvailableRooms() {
       setError("Check-in date is required!");
       return;
     }
+    if (!checkOutDate) {
+      setError("Check-out date is required!");
+      return;
+    }
+    
+    // Validate dates
+    const inDate = new Date(checkInDate);
+    const outDate = new Date(checkOutDate);
+    
+    if (inDate >= outDate) {
+      setError("Check-out date must be after check-in date");
+      return;
+    }
+    
     try {
-      const response = await axios.post(
-        "http://localhost:4001/api/guest/see-availability",
+      const response = await api.post(
+        "/api/guest/see-availability",
         {
-          userId,
-          checkInDate,
-          checkOutDate,
+          checkInDate
         }
       );
       console.log("Available room: ", response.data);
@@ -65,7 +78,7 @@ function AvailableRooms() {
         return;
       }
       navigate("/book-rooms", {
-        state: { availableRooms, checkInDate, checkOutDate, userId },
+        state: { availableRooms, checkInDate, checkOutDate },
       });
     } catch (error) {
       console.error("Error fetching available rooms:", error);
@@ -103,6 +116,7 @@ function AvailableRooms() {
             onChange={(e) => setCheckInDate(e.target.value)}
             className="w-full border border-gray-600 p-2 rounded mb-4 bg-gray-700 text-white"
             required
+            min={new Date().toISOString().split('T')[0]}
           />
           <label className="block mb-2 text-white">Check-Out Date:</label>
           <input
@@ -110,6 +124,8 @@ function AvailableRooms() {
             value={checkOutDate}
             onChange={(e) => setCheckOutDate(e.target.value)}
             className="w-full border border-gray-600 p-2 rounded mb-4 bg-gray-700 text-white"
+            required
+            min={checkInDate || new Date().toISOString().split('T')[0]}
           />
           <button
             type="submit"

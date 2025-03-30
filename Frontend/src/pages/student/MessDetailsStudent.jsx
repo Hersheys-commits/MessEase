@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "../../utils/axiosRequest";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   Star,
   Clock,
@@ -21,11 +21,16 @@ const MessDetailsStudent = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userRating, setUserRating] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const verifyHostel = async () => {
       try {
         const data = await hostelService.checkHostelAssignment();
+        if (data.data.user.isBlocked === true) {
+          toast.error("You are blocked by Admin.");
+          navigate("/student/home");
+        }
         if (
           !(
             data.data.user.role === "student" ||
@@ -153,8 +158,7 @@ const MessDetailsStudent = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       <Header />
-
-      <div className="w-full px-4 py-8">
+      <div className="w-4/5 mx-auto px-4 py-8">
         {/* Hero Section */}
         <div className="relative w-full bg-gradient-to-r from-blue-900 to-indigo-900 rounded-xl overflow-hidden mb-8">
           <div className="absolute inset-0 bg-black/20"></div>

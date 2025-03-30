@@ -253,9 +253,9 @@ const MessDetails = () => {
   };
 
   return (
-    <div className="bg-gray-900 min-h-screen text-white">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
       <AdminHeader />
-      <div className="container mx-auto p-6">
+      <div className="w-4/5 container mx-auto p-6">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold">Mess Administration</h1>
           <Link

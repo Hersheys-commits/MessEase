@@ -3,7 +3,8 @@ import api from "../../utils/axiosRequest";
 import toast from "react-hot-toast";
 import AdminHeader from "../../components/AdminHeader";
 import useAdminAuth from "../../hooks/useAdminAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
 const AdminElectionConfig = () => {
   const [college, setCollege] = useState(true);
@@ -183,9 +184,20 @@ const AdminElectionConfig = () => {
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
       <AdminHeader />
       <div className="max-w-7xl mx-auto p-6">
-        <h1 className="text-4xl font-bold mb-8 text-center text-blue-400">
-          Election Management Dashboard
-        </h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-4xl font-bold mb-8 text-center text-blue-400">
+            Election Management Dashboard
+          </h1>
+          <Link
+            onClick={() => {
+              navigate(-1);
+            }}
+            className="flex items-center text-blue-400 hover:text-blue-200 mb-5"
+          >
+            <ArrowLeft size={18} className="mr-1" />
+            <span>Back to Previous Page</span>
+          </Link>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           {/* Create New Election Form */}
@@ -337,7 +349,7 @@ const AdminElectionConfig = () => {
           </div>
 
           {/* Election List */}
-          <div className="bg-gray-800 p-8 rounded-xl shadow-xl border border-gray-700">
+          <div className="bg-gray-800 p-8 rounded-xl shadow-xl border border-gray-700 flex flex-col h-full">
             <h2 className="text-2xl font-semibold mb-6 text-blue-400 flex items-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -511,7 +523,7 @@ const AdminElectionConfig = () => {
                             strokeLinecap="round"
                             strokeLinejoin="round"
                             strokeWidth={2}
-                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2-2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
                           />
                         </svg>
                         View Results

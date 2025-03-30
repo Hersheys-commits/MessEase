@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "../../utils/axiosRequest";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Star, ArrowLeft, Clock } from "lucide-react";
 import Header from "../../components/Header";
 import toast from "react-hot-toast";
@@ -13,11 +13,16 @@ const MessTimeTable = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedDay, setSelectedDay] = useState("Monday"); // Default to Monday for item viewing
+  const navigate = useNavigate();
 
   useEffect(() => {
     const verifyHostel = async () => {
       try {
         const data = await hostelService.checkHostelAssignment();
+        if (data.data.user.isBlocked === true) {
+          toast.error("You are blocked by Admin.");
+          navigate("/student/home");
+        }
         if (
           !(
             data.data.user.role === "student" ||
@@ -190,7 +195,7 @@ const MessTimeTable = () => {
     <div className="bg-gray-900 min-h-screen text-white">
       <Header />
 
-      <div className="w-full px-4 py-8">
+      <div className="w-4/5 mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6 px-4">
           <Link
             to={`/student/mess/${messCode}`}

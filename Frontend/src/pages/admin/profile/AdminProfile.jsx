@@ -16,6 +16,7 @@ import { TbSchool } from "react-icons/tb";
 import toast from "react-hot-toast";
 import AdminHeader from "../../../components/AdminHeader";
 import useAdminAuth from "../../../hooks/useAdminAuth";
+import { ArrowLeft } from "lucide-react";
 
 const AdminProfile = () => {
   const [profile, setProfile] = useState(null);
@@ -61,13 +62,24 @@ const AdminProfile = () => {
       <AdminHeader />
       <div className="min-h-screen bg-gray-900 text-white p-6">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8 flex items-center">
-            <MdOutlineAdminPanelSettings
-              className="mr-2 text-blue-400"
-              size={30}
-            />
-            Admin Profile
-          </h1>
+          <div className="flex items-center justify-between">
+            <h1 className="text-3xl font-bold mb-8 flex items-center">
+              <MdOutlineAdminPanelSettings
+                className="mr-2 text-blue-400"
+                size={30}
+              />
+              Admin Profile
+            </h1>
+            <Link
+              onClick={() => {
+                navigate(-1);
+              }}
+              className="flex items-center text-blue-400 hover:text-blue-200 mb-5"
+            >
+              <ArrowLeft size={18} className="mr-1" />
+              <span>Back to Previous Page</span>
+            </Link>
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Admin Profile Card */}

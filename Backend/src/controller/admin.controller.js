@@ -260,7 +260,7 @@ export const loginAdmin = async (req, res) => {
     const { email, password } = req.body;
 
     // Find the admin user by email and ensure the role is admin
-    const adminUser = await User.findOne({ email, role: "admin" });
+    const adminUser = await User.findOne({ email });
     if (!adminUser) {
       return res.status(400).json({ message: "Invalid credentials" });
     }

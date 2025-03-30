@@ -6,15 +6,19 @@ import toast from "react-hot-toast";
 import hostelService from "../../utils/hostelCheck";
 
 function StudentHome() {
-  const [userId, setUserId] = useState("");
   const [loading, setLoading] = useState(true);
   const [studentName, setStudentName] = useState("");
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [userId, setUserId] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
     const verifyHostel = async () => {
       try {
         const data = await hostelService.checkHostelAssignment();
+        setStudentName(data.data.user.name);
+        setUserId(data.data.user._id);
+        setIsBlocked(data.data.user.isBlocked);
         if (
           !(
             data.data.user.role === "student" ||
@@ -38,26 +42,7 @@ function StudentHome() {
     verifyHostel();
   }, []);
 
-  useEffect(() => {
-    const verifyToken = async () => {
-      try {
-        const res = await api.post("/api/student/verify-token");
-        setUserId(res.data.user);
-        // Assuming the API returns user details including name
-        if (res.data.name) {
-          setStudentName(res.data.name);
-        }
-        setLoading(false);
-      } catch (error) {
-        console.error("Error verifying token:", error);
-        navigate("/student/login");
-      }
-    };
-
-    verifyToken();
-  }, [navigate]);
-
-  if (loading || !userId) {
+  if (loading) {
     return (
       <div className="bg-gradient-to-b from-gray-900 to-gray-800 min-h-screen text-gray-100">
         <Header />
@@ -77,46 +62,76 @@ function StudentHome() {
       <Header />
       <div className="max-w-6xl mx-auto p-6">
         {/* Welcome Section */}
-        <div className="bg-indigo-900 bg-opacity-30 p-6 rounded-xl shadow-lg border border-indigo-700 mb-8">
+        <div
+          className={`p-6 rounded-xl shadow-lg border mb-8 ${
+            isBlocked
+              ? "bg-red-900 bg-opacity-30 border-red-700"
+              : "bg-indigo-900 bg-opacity-30 border-indigo-700"
+          }`}
+        >
           <h1 className="text-3xl font-bold text-white">
-            Welcome{studentName ? `, ${studentName}` : ""}
+            {isBlocked
+              ? "Account Blocked"
+              : `Welcome${studentName ? `, ${studentName}` : ""}`}
           </h1>
-          <p className="text-indigo-200 mt-2">
-            Access your student resources and manage your campus experience
+          <p
+            className={`mt-2 ${isBlocked ? "text-red-200" : "text-indigo-200"}`}
+          >
+            {isBlocked
+              ? "Your account has been temporarily suspended. Please contact administration for assistance."
+              : "Access your student resources and manage your campus experience"}
           </p>
         </div>
 
         {/* Main Dashboard Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {/* Room Management Card */}
-          <div className="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700 hover:border-indigo-500 transition-all duration-300 hover:shadow-indigo-900/20 hover:shadow-xl">
+          <div
+            className={`bg-gray-800 p-6 rounded-xl shadow-lg border ${
+              isBlocked
+                ? "border-gray-700 opacity-70"
+                : "border-gray-700 hover:border-indigo-500 transition-all duration-300 hover:shadow-indigo-900/20 hover:shadow-xl"
+            }`}
+          >
             <div className="flex items-center mb-4">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-8 w-8 text-indigo-400 mr-3"
+                className={`h-8 w-8 mr-3 ${isBlocked ? "text-gray-400" : "text-indigo-400"}`}
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >
                 <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
               </svg>
-              <h2 className="text-xl font-semibold text-indigo-400">
+              <h2
+                className={`text-xl font-semibold ${isBlocked ? "text-gray-400" : "text-indigo-400"}`}
+              >
                 Room Management
               </h2>
             </div>
-            <p className="text-gray-300 mb-6">
+            <p
+              className={
+                isBlocked ? "text-gray-500 mb-6" : "text-gray-300 mb-6"
+              }
+            >
               View available rooms and manage your bookings
             </p>
             <div className="flex flex-col space-y-3">
               <button
                 onClick={() =>
-                  navigate("/available-rooms", { state: { userId } })
+                  !isBlocked &&
+                  navigate("/available-rooms")
                 }
-                className="px-4 py-3 bg-indigo-600 text-white rounded-lg w-full hover:bg-indigo-700 transition-all duration-300 flex items-center justify-between group"
+                disabled={isBlocked}
+                className={`px-4 py-3 rounded-lg w-full flex items-center justify-between group ${
+                  isBlocked
+                    ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                    : "bg-indigo-600 text-white hover:bg-indigo-700 transition-all duration-300"
+                }`}
               >
                 <span>Available Rooms</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300"
+                  className={`h-5 w-5 ${isBlocked ? "" : "group-hover:translate-x-1 transition-transform duration-300"}`}
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
@@ -128,13 +143,20 @@ function StudentHome() {
                 </svg>
               </button>
               <button
-                onClick={() => navigate("/see-booking", { state: { userId } })}
-                className="px-4 py-3 bg-indigo-600 text-white rounded-lg w-full hover:bg-indigo-700 transition-all duration-300 flex items-center justify-between group"
+                onClick={() =>
+                  !isBlocked && navigate("/see-booking")
+                }
+                disabled={isBlocked}
+                className={`px-4 py-3 rounded-lg w-full flex items-center justify-between group ${
+                  isBlocked
+                    ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                    : "bg-indigo-600 text-white hover:bg-indigo-700 transition-all duration-300"
+                }`}
               >
                 <span>Your Bookings</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300"
+                  className={`h-5 w-5 ${isBlocked ? "" : "group-hover:translate-x-1 transition-transform duration-300"}`}
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
@@ -149,33 +171,50 @@ function StudentHome() {
           </div>
 
           {/* Elections Card */}
-          <div className="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700 hover:border-indigo-500 transition-all duration-300 hover:shadow-indigo-900/20 hover:shadow-xl">
+          <div
+            className={`bg-gray-800 p-6 rounded-xl shadow-lg border ${
+              isBlocked
+                ? "border-gray-700 opacity-70"
+                : "border-gray-700 hover:border-indigo-500 transition-all duration-300 hover:shadow-indigo-900/20 hover:shadow-xl"
+            }`}
+          >
             <div className="flex items-center mb-4">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-8 w-8 text-indigo-400 mr-3"
+                className={`h-8 w-8 mr-3 ${isBlocked ? "text-gray-400" : "text-indigo-400"}`}
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >
                 <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
                 <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z" />
               </svg>
-              <h2 className="text-xl font-semibold text-indigo-400">
+              <h2
+                className={`text-xl font-semibold ${isBlocked ? "text-gray-400" : "text-indigo-400"}`}
+              >
                 Elections
               </h2>
             </div>
-            <p className="text-gray-300 mb-6">
+            <p
+              className={
+                isBlocked ? "text-gray-500 mb-6" : "text-gray-300 mb-6"
+              }
+            >
               Participate in campus elections and view results
             </p>
             <div className="flex flex-col space-y-3">
               <button
-                onClick={() => navigate("/student/election")}
-                className="px-4 py-3 bg-indigo-600 text-white rounded-lg w-full hover:bg-indigo-700 transition-all duration-300 flex items-center justify-between group"
+                onClick={() => !isBlocked && navigate("/student/election")}
+                disabled={isBlocked}
+                className={`px-4 py-3 rounded-lg w-full flex items-center justify-between group ${
+                  isBlocked
+                    ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                    : "bg-indigo-600 text-white hover:bg-indigo-700 transition-all duration-300"
+                }`}
               >
                 <span>View Elections</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300"
+                  className={`h-5 w-5 ${isBlocked ? "" : "group-hover:translate-x-1 transition-transform duration-300"}`}
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
@@ -190,11 +229,17 @@ function StudentHome() {
           </div>
 
           {/* Fees & Mess Card - NEW */}
-          <div className="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700 hover:border-indigo-500 transition-all duration-300 hover:shadow-indigo-900/20 hover:shadow-xl">
+          <div
+            className={`bg-gray-800 p-6 rounded-xl shadow-lg border ${
+              isBlocked
+                ? "border-gray-700 opacity-70"
+                : "border-gray-700 hover:border-indigo-500 transition-all duration-300 hover:shadow-indigo-900/20 hover:shadow-xl"
+            }`}
+          >
             <div className="flex items-center mb-4">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-8 w-8 text-indigo-400 mr-3"
+                className={`h-8 w-8 mr-3 ${isBlocked ? "text-gray-400" : "text-indigo-400"}`}
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >
@@ -204,22 +249,33 @@ function StudentHome() {
                   clipRule="evenodd"
                 />
               </svg>
-              <h2 className="text-xl font-semibold text-indigo-400">
+              <h2
+                className={`text-xl font-semibold ${isBlocked ? "text-gray-400" : "text-indigo-400"}`}
+              >
                 Payments & Mess
               </h2>
             </div>
-            <p className="text-gray-300 mb-6">
+            <p
+              className={
+                isBlocked ? "text-gray-500 mb-6" : "text-gray-300 mb-6"
+              }
+            >
               Manage your fee payments and access mess services
             </p>
             <div className="flex flex-col space-y-3">
               <button
-                onClick={() => navigate("/student/fees")}
-                className="px-4 py-3 bg-green-600 text-white rounded-lg w-full hover:bg-green-700 transition-all duration-300 flex items-center justify-between group"
+                onClick={() => !isBlocked && navigate("/student/fees")}
+                disabled={isBlocked}
+                className={`px-4 py-3 rounded-lg w-full flex items-center justify-between group ${
+                  isBlocked
+                    ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                    : "bg-green-600 text-white hover:bg-green-700 transition-all duration-300"
+                }`}
               >
                 <span>Pay Fees</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300"
+                  className={`h-5 w-5 ${isBlocked ? "" : "group-hover:translate-x-1 transition-transform duration-300"}`}
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
@@ -232,13 +288,18 @@ function StudentHome() {
                 </svg>
               </button>
               <button
-                onClick={() => navigate("/student/mess/code")}
-                className="px-4 py-3 bg-amber-600 text-white rounded-lg w-full hover:bg-amber-700 transition-all duration-300 flex items-center justify-between group"
+                onClick={() => !isBlocked && navigate("/student/mess/code")}
+                disabled={isBlocked}
+                className={`px-4 py-3 rounded-lg w-full flex items-center justify-between group ${
+                  isBlocked
+                    ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                    : "bg-amber-600 text-white hover:bg-amber-700 transition-all duration-300"
+                }`}
               >
                 <span>Mess Services</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300"
+                  className={`h-5 w-5 ${isBlocked ? "" : "group-hover:translate-x-1 transition-transform duration-300"}`}
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
@@ -250,25 +311,40 @@ function StudentHome() {
         </div>
 
         {/* Quick Links Section */}
-        <div className="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700 hover:border-indigo-500 transition-all duration-300">
+        <div
+          className={`bg-gray-800 p-6 rounded-xl shadow-lg border ${
+            isBlocked
+              ? "border-gray-700"
+              : "border-gray-700 hover:border-indigo-500 transition-all duration-300"
+          }`}
+        >
           <div className="flex items-center mb-4">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-7 w-7 text-indigo-400 mr-3"
+              className={`h-7 w-7 mr-3 ${isBlocked ? "text-gray-400" : "text-indigo-400"}`}
               viewBox="0 0 20 20"
               fill="currentColor"
             >
               <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
             </svg>
-            <h2 className="text-xl font-semibold text-indigo-400">
+            <h2
+              className={`text-xl font-semibold ${isBlocked ? "text-gray-400" : "text-indigo-400"}`}
+            >
               Quick Links
             </h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            <button className="px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-all duration-300 flex flex-col items-center justify-center group">
+            <button
+              disabled={isBlocked}
+              className={`px-4 py-3 rounded-lg flex flex-col items-center justify-center group ${
+                isBlocked
+                  ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                  : "bg-gray-700 text-white hover:bg-gray-600 transition-all duration-300"
+              }`}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 mb-2 text-indigo-300 group-hover:text-indigo-200"
+                className={`h-6 w-6 mb-2 ${isBlocked ? "text-gray-500" : "text-indigo-300 group-hover:text-indigo-200"}`}
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >
@@ -280,10 +356,17 @@ function StudentHome() {
               </svg>
               <span>Profile</span>
             </button>
-            <button className="px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-all duration-300 flex flex-col items-center justify-center group">
+            <button
+              disabled={isBlocked}
+              className={`px-4 py-3 rounded-lg flex flex-col items-center justify-center group ${
+                isBlocked
+                  ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                  : "bg-gray-700 text-white hover:bg-gray-600 transition-all duration-300"
+              }`}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 mb-2 text-indigo-300 group-hover:text-indigo-200"
+                className={`h-6 w-6 mb-2 ${isBlocked ? "text-gray-500" : "text-indigo-300 group-hover:text-indigo-200"}`}
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >
@@ -291,10 +374,17 @@ function StudentHome() {
               </svg>
               <span>Notifications</span>
             </button>
-            <button className="px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-all duration-300 flex flex-col items-center justify-center group">
+            <button
+              disabled={isBlocked}
+              className={`px-4 py-3 rounded-lg flex flex-col items-center justify-center group ${
+                isBlocked
+                  ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                  : "bg-gray-700 text-white hover:bg-gray-600 transition-all duration-300"
+              }`}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 mb-2 text-indigo-300 group-hover:text-indigo-200"
+                className={`h-6 w-6 mb-2 ${isBlocked ? "text-gray-500" : "text-indigo-300 group-hover:text-indigo-200"}`}
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >
@@ -306,10 +396,17 @@ function StudentHome() {
               </svg>
               <span>Help Center</span>
             </button>
-            <button className="px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-all duration-300 flex flex-col items-center justify-center group">
+            <button
+              disabled={isBlocked}
+              className={`px-4 py-3 rounded-lg flex flex-col items-center justify-center group ${
+                isBlocked
+                  ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                  : "bg-gray-700 text-white hover:bg-gray-600 transition-all duration-300"
+              }`}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 mb-2 text-indigo-300 group-hover:text-indigo-200"
+                className={`h-6 w-6 mb-2 ${isBlocked ? "text-gray-500" : "text-indigo-300 group-hover:text-indigo-200"}`}
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >
@@ -317,10 +414,17 @@ function StudentHome() {
               </svg>
               <span>Academic</span>
             </button>
-            <button className="px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-all duration-300 flex flex-col items-center justify-center group">
+            <button
+              disabled={isBlocked}
+              className={`px-4 py-3 rounded-lg flex flex-col items-center justify-center group ${
+                isBlocked
+                  ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                  : "bg-gray-700 text-white hover:bg-gray-600 transition-all duration-300"
+              }`}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 mb-2 text-indigo-300 group-hover:text-indigo-200"
+                className={`h-6 w-6 mb-2 ${isBlocked ? "text-gray-500" : "text-indigo-300 group-hover:text-indigo-200"}`}
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >
@@ -332,10 +436,17 @@ function StudentHome() {
               </svg>
               <span>Calendar</span>
             </button>
-            <button className="px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-all duration-300 flex flex-col items-center justify-center group">
+            <button
+              disabled={isBlocked}
+              className={`px-4 py-3 rounded-lg flex flex-col items-center justify-center group ${
+                isBlocked
+                  ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                  : "bg-gray-700 text-white hover:bg-gray-600 transition-all duration-300"
+              }`}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 mb-2 text-indigo-300 group-hover:text-indigo-200"
+                className={`h-6 w-6 mb-2 ${isBlocked ? "text-gray-500" : "text-indigo-300 group-hover:text-indigo-200"}`}
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >

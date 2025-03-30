@@ -49,7 +49,7 @@ const UpdateProfile = () => {
           year: userResponse?.data?.userInfo?.year || "",
           room: userResponse?.data?.userInfo?.room || "",
           phoneNumber: userResponse?.data?.userInfo?.phoneNumber || "",
-          hostel: userResponse?.data?.userInfo.hostel?._id || "",
+          hostel: userResponse?.data?.userInfo.hostel || "",
           profilePicture: userResponse?.data?.userInfo?.profilePicture || "",
         });
 
@@ -203,7 +203,7 @@ const UpdateProfile = () => {
                       alt="Profile preview"
                       className="w-full h-full object-cover"
                     />
-                  ) : user.profilePicture == "" ? (
+                  ) : user.profilePicture ? (
                     <img
                       src={user.profilePicture}
                       alt="Profile"

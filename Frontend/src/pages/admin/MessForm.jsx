@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import api from "../../utils/axiosRequest";
 import AdminHeader from "../../components/AdminHeader";
 import useAdminAuth from "../../hooks/useAdminAuth";
+import { ArrowLeft } from "lucide-react";
 
 const MessForm = () => {
   const [hostels, setHostels] = useState([]);
@@ -155,10 +156,21 @@ const MessForm = () => {
   }
 
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
       <AdminHeader />
-      <div className="container mx-auto p-4 bg-gray-900 min-h-screen text-white">
-        <h1 className="text-2xl font-bold mb-6">Create New Mess</h1>
+      <div className="w-4/5 container mx-auto p-4 min-h-screen text-white">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold mb-6">Create New Mess</h1>
+          <Link
+            onClick={() => {
+              navigate(-1);
+            }}
+            className="flex items-center text-blue-400 hover:text-blue-200"
+          >
+            <ArrowLeft size={18} className="mr-1" />
+            <span>Back to Previous Page</span>
+          </Link>
+        </div>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Basic Information */}
           <div className="bg-gray-800 p-6 rounded-lg shadow-md border border-gray-700">

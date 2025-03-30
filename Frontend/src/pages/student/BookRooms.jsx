@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../utils/axiosRequest";
 import Header from "../../components/Header";
 import hostelService from "../../utils/hostelCheck";
 import toast from "react-hot-toast";
@@ -12,16 +12,28 @@ function BookRooms() {
     availableRooms = [],
     checkInDate,
     checkOutDate,
-    userId,
   } = location.state || {};
-  console.log("Available rooms state:", location.state);
+  
   const [selectedRoom, setSelectedRoom] = useState("");
   const [loading, setLoading] = useState(true);
+  const [bookingLoading, setBookingLoading] = useState(false);
+
+  // Redirect if missing required data
+  useEffect(() => {
+    if (!location.state || !checkInDate || !checkOutDate || !availableRooms.length) {
+      toast.error("Missing required booking information");
+      navigate("/available-rooms");
+    }
+  }, [location.state, checkInDate, checkOutDate, availableRooms, navigate]);
 
   useEffect(() => {
     const verifyHostel = async () => {
       try {
         const data = await hostelService.checkHostelAssignment();
+        if (data.data.user.isBlocked === true) {
+          toast.error("You are blocked by Admin.");
+          navigate("/student/home");
+        }
         if (
           !(
             data.data.user.role === "student" ||
@@ -43,7 +55,7 @@ function BookRooms() {
       }
     };
     verifyHostel();
-  }, []);
+  }, [navigate]);
 
   const handleRoomSelection = (room) => {
     setSelectedRoom(room);
@@ -51,29 +63,32 @@ function BookRooms() {
 
   const handleSubmit = async () => {
     if (!selectedRoom) {
-      alert("Please select a room!");
+      toast.error("Please select a room!");
       return;
     }
-    console.log(userId, selectedRoom, checkInDate, checkOutDate);
-    // return ;
-    // send userID with the use of redux
+    
+    setBookingLoading(true);
+    
     try {
-      const response = await axios.post(
-        "http://localhost:4001/api/guest/book-guest-room",
+      const response = await api.post(
+        "/api/guest/book-guest-room",
         {
           roomNumber: selectedRoom,
           checkInDate,
           checkOutDate,
-          userId,
         }
       );
+      
       if (response.status === 200) {
-        alert("Room booked successfully!");
+        toast.success("Room booked successfully!");
         navigate("/student/home");
       }
     } catch (error) {
       console.error("Booking error:", error);
-      alert("Failed to book the room. Please try again.");
+      const errorMessage = error.response?.data?.error || "Failed to book the room. Please try again.";
+      toast.error(errorMessage);
+    } finally {
+      setBookingLoading(false);
     }
   };
 
@@ -89,36 +104,50 @@ function BookRooms() {
   }
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-900">
-      <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-96">
-        <h2 className="text-2xl font-bold mb-4 text-center text-white">
-          Select a Guest Room
-        </h2>
-        {availableRooms.length === 0 ? (
-          <p className="text-red-500 text-center">No rooms available.</p>
-        ) : (
-          <ul className="mb-4 flex flex-wrap gap-2 justify-center">
-            {availableRooms.map((room) => (
-              <li
-                key={room}
-                onClick={() => handleRoomSelection(room)}
-                className={`w-40 h-12 flex items-center justify-center border rounded cursor-pointer text-center text-lg font-semibold transition duration-200 ${
-                  selectedRoom === room
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                }`}
-              >
-                Room {room}
-              </li>
-            ))}
-          </ul>
-        )}
-        <button
-          onClick={handleSubmit}
-          className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 transition duration-200"
-        >
-          Confirm Booking
-        </button>
+    <div className="bg-gray-900 min-h-screen">
+      <Header />
+      <div className="flex items-center justify-center h-screen bg-gray-900">
+        <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-96">
+          <h2 className="text-2xl font-bold mb-4 text-center text-white">
+            Select a Guest Room
+          </h2>
+          
+          <div className="mb-4 text-gray-300">
+            <p><span className="font-medium">Check-In:</span> {new Date(checkInDate).toLocaleDateString()}</p>
+            <p><span className="font-medium">Check-Out:</span> {new Date(checkOutDate).toLocaleDateString()}</p>
+          </div>
+          
+          {availableRooms.length === 0 ? (
+            <p className="text-red-500 text-center">No rooms available.</p>
+          ) : (
+            <ul className="mb-4 flex flex-wrap gap-2 justify-center">
+              {availableRooms.map((room) => (
+                <li
+                  key={room}
+                  onClick={() => handleRoomSelection(room)}
+                  className={`w-16 h-16 flex items-center justify-center border rounded cursor-pointer text-center text-lg font-semibold transition duration-200 ${
+                    selectedRoom === room
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                  }`}
+                >
+                  {room}
+                </li>
+              ))}
+            </ul>
+          )}
+          <button
+            onClick={handleSubmit}
+            disabled={bookingLoading || !selectedRoom}
+            className={`w-full py-2 rounded transition duration-200 ${
+              bookingLoading || !selectedRoom
+                ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                : "bg-green-500 text-white hover:bg-green-600"
+            }`}
+          >
+            {bookingLoading ? "Processing..." : "Confirm Booking"}
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -91,7 +91,7 @@ const StudentProfilePage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
       <AdminHeader />
-      <div className="container mx-auto px-4 py-8">
+      <div className="w-3/5 container mx-auto px-4 py-8">
         {/* Back button */}
         <Link
           to="/admin/students"

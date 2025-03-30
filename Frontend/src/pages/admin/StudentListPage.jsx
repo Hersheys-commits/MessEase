@@ -146,9 +146,9 @@ const StudentListPage = () => {
   };
 
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
       <AdminHeader />
-      <div className="min-h-screen bg-gray-900 text-white p-4 md:p-8">
+      <div className="w-4/5 mx-auto min-h-screen text-white p-4 md:p-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
           <h1 className="text-3xl font-bold text-indigo-400 mb-4 md:mb-0">
             Student Management

@@ -128,7 +128,7 @@ const PaymentManagement = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-gray-100">
       <AdminHeader />
-      <div className="container mx-auto p-6">
+      <div className="w-4/5 container mx-auto p-6">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
           <div>

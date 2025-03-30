@@ -16,6 +16,10 @@ const ElectionResultsPage = () => {
     const verifyHostel = async () => {
       try {
         const data = await hostelService.checkHostelAssignment();
+        if (data.data.user.isBlocked === true) {
+          toast.error("You are blocked by Admin.");
+          navigate("/student/home");
+        }
         if (
           !(
             data.data.user.role === "student" ||

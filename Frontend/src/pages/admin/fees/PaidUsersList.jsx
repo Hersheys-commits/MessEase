@@ -96,9 +96,9 @@ const PaidUsersList = () => {
   }
   if (error) {
     return (
-      <div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
         <AdminHeader />
-        <div className="min-h-screen bg-gray-900 text-white p-4 flex justify-center items-center">
+        <div className="w-4/5 mx-auto min-h-screen text-white p-4 flex justify-center items-center">
           <div className="bg-red-900/50 p-6 rounded-lg border border-red-700 max-w-md w-full">
             <h2 className="text-xl font-bold text-red-300 mb-2">Error</h2>
             <p className="text-white">{error}</p>
@@ -111,7 +111,7 @@ const PaidUsersList = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-gray-100">
       <AdminHeader />
-      <div className="container mx-auto p-6">
+      <div className="w-4/5 container mx-auto p-6">
         {/* Header with Back Button */}
         <div className="flex items-center mb-8">
           <Link
