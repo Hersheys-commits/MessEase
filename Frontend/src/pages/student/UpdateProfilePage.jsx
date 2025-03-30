@@ -27,6 +27,7 @@ const UpdateProfile = () => {
     phoneNumber: "",
     hostel: "",
     profilePicture: "",
+    rollNumber: "", // Added rollNumber field
   });
 
   const [hostels, setHostels] = useState([]);
@@ -49,8 +50,9 @@ const UpdateProfile = () => {
           year: userResponse?.data?.userInfo?.year || "",
           room: userResponse?.data?.userInfo?.room || "",
           phoneNumber: userResponse?.data?.userInfo?.phoneNumber || "",
-          hostel: userResponse?.data?.userInfo.hostel || "",
+          hostel: userResponse?.data?.userInfo?.hostel || "",
           profilePicture: userResponse?.data?.userInfo?.profilePicture || "",
+          rollNumber: userResponse?.data?.userInfo?.rollNumber || "", // Set rollNumber
         });
 
         // Get hostels for the user's college
@@ -122,6 +124,7 @@ const UpdateProfile = () => {
         room: user.room,
         phoneNumber: user.phoneNumber,
         hostelId: user.hostel,
+        rollNumber: user.rollNumber, // Include rollNumber in update data
       };
 
       await api.patch("/api/student/update-profile", updateData);
@@ -384,6 +387,27 @@ const UpdateProfile = () => {
                     onChange={handleInputChange}
                     className="bg-gray-700 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-3 py-2 sm:text-sm border-gray-600 rounded-md text-white"
                     placeholder="e.g. A-101"
+                  />
+                </div>
+              </div>
+
+              {/* Roll Number */}
+              <div className="mb-4">
+                <label
+                  htmlFor="rollNumber"
+                  className="block text-sm font-medium text-gray-300"
+                >
+                  Reg/Roll Number
+                </label>
+                <div className="mt-1 relative rounded-md shadow-sm">
+                  <input
+                    type="text"
+                    id="rollNumber"
+                    name="rollNumber"
+                    value={user.rollNumber}
+                    onChange={handleInputChange}
+                    className="bg-gray-700 focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-3 py-2 sm:text-sm border-gray-600 rounded-md text-white"
+                    placeholder="Your reg/roll number"
                   />
                 </div>
               </div>

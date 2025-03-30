@@ -469,9 +469,9 @@ export const checkHostelAssignment = asyncHandler(async (req, res) => {
 
 // Update user profile including hostel
 export const updateUserProfile = asyncHandler(async (req, res) => {
-  const { name, branch, year, room, phoneNumber, hostelId } = req.body;
+  const { name, branch, year, room, phoneNumber, hostelId, rollNumber } = req.body;
 
-  if (!name && !branch && !year && !room && !phoneNumber && !hostelId) {
+  if (!name && !branch && !year && !room && !phoneNumber && !hostelId && !rollNumber) {
     throw new ApiError(400, "At least one field is required for update");
   }
 
@@ -483,6 +483,7 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
   if (year) updateFields.year = year;
   if (room) updateFields.room = room;
   if (phoneNumber) updateFields.phoneNumber = phoneNumber;
+  if (rollNumber) updateFields.rollNumber = rollNumber;
 
   // If hostelId is provided, fetch hostel in parallel with other operations
   let hostelPromise;
