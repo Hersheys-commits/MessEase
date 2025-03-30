@@ -13,14 +13,19 @@ function BookRooms() {
     checkInDate,
     checkOutDate,
   } = location.state || {};
-  
+
   const [selectedRoom, setSelectedRoom] = useState("");
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
 
   // Redirect if missing required data
   useEffect(() => {
-    if (!location.state || !checkInDate || !checkOutDate || !availableRooms.length) {
+    if (
+      !location.state ||
+      !checkInDate ||
+      !checkOutDate ||
+      !availableRooms.length
+    ) {
       toast.error("Missing required booking information");
       navigate("/available-rooms");
     }
@@ -66,26 +71,25 @@ function BookRooms() {
       toast.error("Please select a room!");
       return;
     }
-    
+
     setBookingLoading(true);
-    
+
     try {
-      const response = await api.post(
-        "/api/guest/book-guest-room",
-        {
-          roomNumber: selectedRoom,
-          checkInDate,
-          checkOutDate,
-        }
-      );
-      
+      const response = await api.post("/api/guest/book-guest-room", {
+        roomNumber: selectedRoom,
+        checkInDate,
+        checkOutDate,
+      });
+
       if (response.status === 200) {
         toast.success("Room booked successfully!");
         navigate("/student/home");
       }
     } catch (error) {
       console.error("Booking error:", error);
-      const errorMessage = error.response?.data?.error || "Failed to book the room. Please try again.";
+      const errorMessage =
+        error.response?.data?.error ||
+        "Failed to book the room. Please try again.";
       toast.error(errorMessage);
     } finally {
       setBookingLoading(false);
@@ -111,12 +115,18 @@ function BookRooms() {
           <h2 className="text-2xl font-bold mb-4 text-center text-white">
             Select a Guest Room
           </h2>
-          
+
           <div className="mb-4 text-gray-300">
-            <p><span className="font-medium">Check-In:</span> {new Date(checkInDate).toLocaleDateString()}</p>
-            <p><span className="font-medium">Check-Out:</span> {new Date(checkOutDate).toLocaleDateString()}</p>
+            <p>
+              <span className="font-medium">Check-In:</span>{" "}
+              {new Date(checkInDate).toLocaleDateString()}
+            </p>
+            <p>
+              <span className="font-medium">Check-Out:</span>{" "}
+              {new Date(checkOutDate).toLocaleDateString()}
+            </p>
           </div>
-          
+
           {availableRooms.length === 0 ? (
             <p className="text-red-500 text-center">No rooms available.</p>
           ) : (

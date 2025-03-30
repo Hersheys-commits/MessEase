@@ -44,9 +44,7 @@ const BookedRooms = () => {
 
   const fetchBookedRooms = async () => {
     try {
-      const response = await api.get(
-        `/api/guest/booked-guest-rooms`
-      );
+      const response = await api.get(`/api/guest/booked-guest-rooms`);
       console.log(response.data);
       setBookedRooms(response.data);
     } catch (error) {

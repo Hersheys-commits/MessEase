@@ -43,7 +43,6 @@ function AvailableRooms() {
     verifyHostel();
   }, [navigate]);
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!checkInDate) {
@@ -54,23 +53,20 @@ function AvailableRooms() {
       setError("Check-out date is required!");
       return;
     }
-    
+
     // Validate dates
     const inDate = new Date(checkInDate);
     const outDate = new Date(checkOutDate);
-    
+
     if (inDate >= outDate) {
       setError("Check-out date must be after check-in date");
       return;
     }
-    
+
     try {
-      const response = await api.post(
-        "/api/guest/see-availability",
-        {
-          checkInDate
-        }
-      );
+      const response = await api.post("/api/guest/see-availability", {
+        checkInDate,
+      });
       console.log("Available room: ", response.data);
       const availableRooms = response.data.freeRooms;
       if (availableRooms.length === 0) {
@@ -116,7 +112,7 @@ function AvailableRooms() {
             onChange={(e) => setCheckInDate(e.target.value)}
             className="w-full border border-gray-600 p-2 rounded mb-4 bg-gray-700 text-white"
             required
-            min={new Date().toISOString().split('T')[0]}
+            min={new Date().toISOString().split("T")[0]}
           />
           <label className="block mb-2 text-white">Check-Out Date:</label>
           <input
@@ -125,7 +121,7 @@ function AvailableRooms() {
             onChange={(e) => setCheckOutDate(e.target.value)}
             className="w-full border border-gray-600 p-2 rounded mb-4 bg-gray-700 text-white"
             required
-            min={checkInDate || new Date().toISOString().split('T')[0]}
+            min={checkInDate || new Date().toISOString().split("T")[0]}
           />
           <button
             type="submit"

@@ -117,10 +117,7 @@ function StudentHome() {
             </p>
             <div className="flex flex-col space-y-3">
               <button
-                onClick={() =>
-                  !isBlocked &&
-                  navigate("/available-rooms")
-                }
+                onClick={() => !isBlocked && navigate("/available-rooms")}
                 disabled={isBlocked}
                 className={`px-4 py-3 rounded-lg w-full flex items-center justify-between group ${
                   isBlocked
@@ -143,9 +140,7 @@ function StudentHome() {
                 </svg>
               </button>
               <button
-                onClick={() =>
-                  !isBlocked && navigate("/see-booking")
-                }
+                onClick={() => !isBlocked && navigate("/see-booking")}
                 disabled={isBlocked}
                 className={`px-4 py-3 rounded-lg w-full flex items-center justify-between group ${
                   isBlocked
