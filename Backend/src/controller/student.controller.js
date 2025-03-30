@@ -243,6 +243,7 @@ export const changePassword = async (req, res) => {
     if (!existingUser)
       return res.status(400).json({ message: "User doesn't exists." });
 
+    console.log("Existing User:", existingUser.password);
     existingUser.password = password;
     await existingUser.save();
 
@@ -255,9 +256,12 @@ export const changePassword = async (req, res) => {
 export const loginStudent = async (req, res) => {
   const { email, password } = req.body;
 
-  const user = await User.findOne({ email, role: "student" });
-  if (!user || !(await user.isPasswordCorrect(password))) {
-    return res.status(400).json({ message: "Invalid credentials." });
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(400).json({ message: "Invalid User." });
+  }
+  if (!(await user.isPasswordCorrect(password))) {
+    return res.status(400).json({ message: "Invalid Password." });
   }
 
   const accessToken = user.generateAccessToken();

@@ -162,7 +162,7 @@ const MessTimeTable = () => {
     );
   };
 
-  if (loading) {
+  if (loading || !weeklyData || !userRatings) {
     return (
       <div className="min-h-screen bg-gray-900 text-gray-100">
         <Header />

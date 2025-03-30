@@ -85,7 +85,7 @@ const StudentElectionsPage = () => {
     });
   };
 
-  if (loading) {
+  if (loading || !elections) {
     return (
       <div className="bg-gray-900 min-h-screen text-gray-100">
         <Header />

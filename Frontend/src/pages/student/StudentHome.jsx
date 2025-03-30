@@ -57,7 +57,7 @@ function StudentHome() {
     verifyToken();
   }, [navigate]);
 
-  if (loading) {
+  if (loading || !userId) {
     return (
       <div className="bg-gradient-to-b from-gray-900 to-gray-800 min-h-screen text-gray-100">
         <Header />

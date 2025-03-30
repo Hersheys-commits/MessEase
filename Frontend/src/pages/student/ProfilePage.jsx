@@ -76,7 +76,7 @@ const ProfilePage = () => {
     fetchData();
   }, []);
 
-  if (loading || !user) {
+  if (loading || !user || !college || !hostelMess) {
     return (
       <div>
         <Header />
@@ -135,6 +135,10 @@ const ProfilePage = () => {
     { icon: <FaDoorOpen />, label: "Room", value: user.room || "Not assigned" },
   ];
 
+  let role = "Student";
+  if (user.role === "messManager") role = "Mess Manager";
+  if (user.role === "hostelManager") role = "Hostel Manager";
+
   return (
     <div className="bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 min-h-screen text-white">
       <Header />
@@ -164,7 +168,7 @@ const ProfilePage = () => {
               <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-blue-600">
                 {user.name}
               </h1>
-              <p className="text-lg text-gray-300 mt-2">Student</p>
+              <p className="text-lg text-gray-300 mt-2">{role}</p>
               <button
                 onClick={() => navigate("/student/update-profile")}
                 className="mt-4 px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-105 shadow-lg"
