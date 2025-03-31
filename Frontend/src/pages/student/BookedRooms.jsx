@@ -56,7 +56,6 @@ const BookedRooms = () => {
   useEffect(() => {
     fetchBookedRooms();
   }, []);
-  }, []);
 
   const handleCancelBooking = async (id) => {
     setLoadingId(id);
