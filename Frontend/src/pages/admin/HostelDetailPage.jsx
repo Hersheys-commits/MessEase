@@ -9,9 +9,11 @@ const HostelDetailPage = () => {
   const { code } = useParams();
   const navigate = useNavigate();
   const [hostel, setHostel] = useState(null);
+  const [groupChat, setGroupChat] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
-
+  const [hostelId, setHostelId] = useState("");
+  const [user, setUser] = useState();
   const {
     register,
     handleSubmit,
@@ -39,8 +41,15 @@ const HostelDetailPage = () => {
     const fetchHostelDetails = async () => {
       try {
         const response = await api.get(`/api/hostel/${code}`);
+        console.log("data is here: ", response.data);
         setHostel(response.data.hostel);
         // Set form default values
+        setUser(response.data.user);
+        console.log("HD: ", response.data.user);
+        setHostelId(response.data.hostel._id);
+        // check if group chat is created or not  if not then show create else show see group chat
+        setGroupChat(response.data.hostel.chatCreated);
+
         reset({
           name: response.data.hostel.name,
           location: response.data.hostel.location,
@@ -511,6 +520,39 @@ const HostelDetailPage = () => {
                     Add Mess
                   </button>
                 )}
+                <div>
+                  {groupChat ? (
+                    <button
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+                      onClick={() => {
+                        navigate(`/hostel/groupChat/${hostel.code}`, {
+                          state: {
+                            userId: user._id,
+                            hostelId: hostel._id,
+                            userName: user.name,
+                          },
+                        });
+                      }}
+                    >
+                      See GroupChat
+                    </button>
+                  ) : (
+                    <button
+                      className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded mt-5"
+                      onClick={() => {
+                        navigate("/admin/create-GroupChat", {
+                          state: {
+                            code,
+                            userId: user._id,
+                            hostelId: hostel._id,
+                          },
+                        });
+                      }}
+                    >
+                      Add Group Chat
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           )}

@@ -44,16 +44,23 @@ const BookedRooms = () => {
     };
 
     fetchBookedRooms();
-  }, [userId]);
+  }, []);
 
   const handleCancelBooking = async (id) => {
     setLoadingId(id);
+    console.log("ID", id);
+
     try {
-      // Uncomment below when API is ready:
-      // await axios.delete(`http://localhost:4001/api/guest/cancel-booking`, {
-      //   data: { userId, bookingId: id },
-      // });
-      setBookedRooms((prevRooms) => prevRooms.filter((room) => room.id !== id));
+      await axios.delete(`http://localhost:4001/api/guest/cancel-booking`, {
+        data: { userId, bookingId: id },
+      });
+
+      console.log(bookedRooms);
+      setBookedRooms((prevRooms) => {
+        const updatedRooms = prevRooms.filter((room) => room._id !== id);
+        return updatedRooms; // Return the updated rooms list
+      });
+      console.log(bookedRooms);
     } catch (error) {
       console.error("Error canceling booking:", error);
     } finally {

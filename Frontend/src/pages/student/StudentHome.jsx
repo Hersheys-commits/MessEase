@@ -7,6 +7,7 @@ import hostelService from "../../utils/hostelCheck";
 
 function StudentHome() {
   const [userId, setUserId] = useState("");
+  const [user, setUser] = useState({});
   const [loading, setLoading] = useState(true);
   const [studentName, setStudentName] = useState("");
   const navigate = useNavigate();
@@ -32,6 +33,8 @@ function StudentHome() {
     const verifyToken = async () => {
       try {
         const res = await api.post("/api/student/verify-token");
+        console.log("data:", res.data); // we also need hostelCode
+        setUser(res.data);
         setUserId(res.data.user);
         // Assuming the API returns user details including name
         if (res.data.name) {
@@ -340,6 +343,21 @@ function StudentHome() {
           </div>
         </div>
       </div>
+
+      <button
+        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+        onClick={() => {
+          navigate(`/hostel/groupChat/${user.code}`, {
+            state: {
+              hostelId: user.userInfo.hostel,
+              userId: user.user,
+              userName: user.userInfo.name,
+            },
+          });
+        }}
+      >
+        See GroupChat
+      </button>
     </div>
   );
 }

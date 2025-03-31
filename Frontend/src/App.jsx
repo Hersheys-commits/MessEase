@@ -39,6 +39,8 @@ import StudentProfilePage from "./pages/admin/StudentProfilePage";
 import StudentListPage from "./pages/admin/StudentListPage";
 import MessDetailsStudent from "./pages/student/MessDetailsStudent";
 import MessTimeTable from "./pages/student/MessTimeTable";
+import { CreateGroupChat } from "./pages/admin/CreateGroupChat";
+import { GroupChat } from "./pages/hostel/GroupChat";
 
 function App() {
   useEffect(() => {
@@ -139,11 +141,11 @@ function App() {
             // </ProtectedRoute>
           }
         />
-        <Route path="/available-rooms" element={<AvailableRooms />}>
-          {" "}
-        </Route>
+        <Route path="/available-rooms" element={<AvailableRooms />} />
         <Route path="/book-rooms" element={<BookRooms />} />
         <Route path="/see-booking" element={<BookedRooms />} />
+        <Route path="/admin/create-GroupChat" element={<CreateGroupChat />} />
+        <Route path="/hostel/groupChat/:code" element={<GroupChat />} />
       </Routes>
       <Toaster />
     </>

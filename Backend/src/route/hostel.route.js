@@ -2,6 +2,7 @@ import express from "express";
 import {
   createHostel,
   fetchAllHostels,
+  // getChats,
   getHostelByCode,
   getHostelMess,
   getHostelsWithoutMess,
@@ -16,5 +17,6 @@ router.get("/:code", verifyJWT, getHostelByCode);
 router.put("/update/:code", verifyJWT, updateHostel);
 router.post("/without-mess", verifyJWT, getHostelsWithoutMess);
 router.post("/getHostelMess", verifyJWT, getHostelMess);
+// router.get("/getChats",getChats);
 
 export default router;

@@ -74,6 +74,10 @@ const HostelSchema = new Schema(
         },
       },
     ],
+    chatCreated: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

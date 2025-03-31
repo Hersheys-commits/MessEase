@@ -292,6 +292,7 @@ export const logout = async (req, res) => {
 
 export const verifyToken = async (req, res) => {
   const hostelCode = await Hostel.findById(req.user.hostel).select("code");
+  console.log("HostelCOde", hostelCode);
   if (!hostelCode?.code) {
     return res.status(250).json({
       user: req.user._id,
