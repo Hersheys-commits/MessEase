@@ -489,7 +489,10 @@ export const getMessDetailsForStudent = asyncHandler(async (req, res) => {
     .select("name location capacity notice workers");
 
   if (!mess) {
-    throw new ApiError(404, "Mess not found");
+    return res.status(250).json({
+      message: "Mess not found",
+      messExists: false,
+    });
   }
 
   // Find the weekly food record for the mess

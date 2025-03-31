@@ -1,4 +1,6 @@
 import toast, { Toaster } from "react-hot-toast";
+import React from "react";
+import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from "lucide-react";
 
 // Custom toast component
 export const CustomToaster = () => {
@@ -13,6 +15,7 @@ export const CustomToaster = () => {
       toastOptions={{
         // Default options for all toasts
         duration: 4000,
+        className: "custom-toast",
         style: {
           background: "#333",
           color: "#fff",
@@ -21,92 +24,108 @@ export const CustomToaster = () => {
           padding: "12px 16px",
           maxWidth: "350px",
           boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+          position: "relative",
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          gap: "10px",
+          borderLeft: "4px solid #666", // Default left border
         },
         // Success toast specific styling
         success: {
           style: {
             background: "#222",
             color: "#4caf50",
-            border: "1px solid #4caf50",
+            border: "1px solid #444",
+            borderLeft: "4px solid #4caf50", // Success left border
           },
-          icon: "✅",
         },
         // Error toast specific styling
         error: {
           style: {
             background: "#222",
             color: "#f44336",
-            border: "1px solid #f44336",
+            border: "1px solid #444",
+            borderLeft: "4px solid #f44336", // Error left border
           },
-          icon: "❌",
         },
         // Warning toast specific styling
         warning: {
           style: {
             background: "#222",
             color: "#ff9800",
-            border: "1px solid #ff9800",
+            border: "1px solid #444",
+            borderLeft: "4px solid #ff9800", // Warning left border
           },
-          icon: "⚠️",
+        },
+        // Info toast specific styling
+        info: {
+          style: {
+            background: "#222",
+            color: "#2196f3",
+            border: "1px solid #444",
+            borderLeft: "4px solid #2196f3", // Info left border
+          },
         },
       }}
-    />
+    >
+      {(t) => {
+        // Determine which icon to show based on toast type
+        let IconComponent = Info;
+        let iconColor = "#2196f3";
+        
+        if (t.type === "success") {
+          IconComponent = CheckCircle;
+          iconColor = "#4caf50";
+        } else if (t.type === "error") {
+          IconComponent = AlertCircle;
+          iconColor = "#f44336";
+        } else if (t.type === "warning") {
+          IconComponent = AlertTriangle;
+          iconColor = "#ff9800";
+        }
+        
+        return (
+          <div
+            style={{
+              ...t.style,
+              display: "flex",
+              alignItems: "flex-start",
+              justifyContent: "space-between",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <IconComponent size={18} color={iconColor} />
+              <p style={{ margin: 0, fontWeight: "500" }}>{t.message}</p>
+            </div>
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "#999",
+                cursor: "pointer",
+                marginLeft: "8px",
+                padding: "0",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "all 0.2s ease",
+              }}
+              onMouseOver={(e) => (e.currentTarget.style.color = "#fff")}
+              onMouseOut={(e) => (e.currentTarget.style.color = "#999")}
+              aria-label="Close toast"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        );
+      }}
+    </Toaster>
   );
 };
 
-// Helper functions for easy toast usage
-export const successToast = (message) => {
-  toast.success(message, {
-    icon: "✅",
-    style: {
-      background: "#222",
-      color: "#4caf50",
-      border: "1px solid #4caf50",
-    },
-  });
-};
-
-export const errorToast = (message) => {
-  toast.error(message, {
-    icon: "❌",
-    style: {
-      background: "#222",
-      color: "#f44336",
-      border: "1px solid #f44336",
-    },
-  });
-};
-
-export const warningToast = (message) => {
-  toast.custom((t) => (
-    <div
-      className={`${t.visible ? "animate-enter" : "animate-leave"} max-w-md w-full bg-gray-900 shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
-    >
-      <div className="flex-1 w-0 p-4">
-        <div className="flex items-start">
-          <div className="flex-shrink-0 pt-0.5">
-            <span role="img" aria-label="warning">
-              ⚠️
-            </span>
-          </div>
-          <div className="ml-3 flex-1">
-            <p className="text-sm font-medium text-yellow-500">{message}</p>
-          </div>
-        </div>
-      </div>
-      <div className="flex border-l border-gray-700">
-        <button
-          onClick={() => toast.dismiss(t.id)}
-          className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-700"
-        >
-          Close
-        </button>
-      </div>
-    </div>
-  ));
-};
-
-// Custom global styles for animations (optional, but recommended)
+// Custom global styles for animations
 const toastStyles = `
   @keyframes enter {
     0% { transform: translateX(100%); opacity: 0; }
@@ -116,19 +135,41 @@ const toastStyles = `
     0% { transform: translateX(0); opacity: 1; }
     100% { transform: translateX(100%); opacity: 0; }
   }
-  .animate-enter {
+  .custom-toast {
     animation: enter 0.3s ease-out;
   }
-  .animate-leave {
-    animation: leave 0.3s ease-in;
+  .custom-toast.animate-leave {
+    animation: leave 0.3s ease-in forwards;
+  }
+  .custom-toast:hover {
+    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    transform: translateY(-2px);
+    transition: all 0.2s ease;
   }
 `;
 
 // Add styles to document
-const styleSheet = document.createElement("style");
-styleSheet.type = "text/css";
-styleSheet.innerText = toastStyles;
-document.head.appendChild(styleSheet);
+const addStylesToDocument = () => {
+  if (typeof document !== "undefined") {
+    const styleSheet = document.createElement("style");
+    styleSheet.type = "text/css";
+    styleSheet.innerText = toastStyles;
+    document.head.appendChild(styleSheet);
+  }
+};
 
-// Export main toast for direct usage
+// Call function if we're in the browser
+if (typeof window !== "undefined") {
+  addStylesToDocument();
+}
+
+// Helper functions for easier toast creation
+const showToast = {
+  success: (message) => toast.success(message),
+  error: (message) => toast.error(message),
+  warning: (message) => toast.warning(message),
+  info: (message) => toast(message),
+};
+
+export { showToast };
 export default toast;

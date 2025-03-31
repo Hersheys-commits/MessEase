@@ -86,6 +86,16 @@ const Header = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  if(code === "000"){
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
+        <div className="flex justify-center items-center h-96">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <header className="flex justify-between items-center px-6 py-4 bg-gray-900 text-white shadow-lg h-[60px] sticky top-0 z-50">
       <div className="flex items-center w-[200px]">
