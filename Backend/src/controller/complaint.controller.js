@@ -41,26 +41,6 @@ export const createComplaint = async (req, res) => {
       });
     }
 
-    // const imageUrls=[];
-    // if(files && files.length>0){
-    //     const uploadPromises=files.map(async (file)=>{
-    //         try {
-    //             const res=await uploadOnCloudinary(file.path);
-    //             if(res){
-    //                 return{
-    //                     url:res.secure_url
-    //                 };
-    //             }
-    //         } catch (uploadError) {
-    //             console.error('Image upload error:', uploadError);
-    //             return null;
-    //         }
-    //     });
-
-    //     const uploadResults = await Promise.all(uploadPromises);
-    //     imageUrls.push(...uploadResults.filter(result => result !== null));
-    // }
-
     let imageUrls = [];
     if (files && files.length > 0) {
       const uploadPromises = files.map(async (file) => {
@@ -161,11 +141,6 @@ export const getMessComplaints = async (req, res) => {
     });
     console.log(complaint);
     console.log(1);
-    // if(complaint.length === 0){
-    //     return res.status(200).json({
-    //         message:"No Complaint"
-    //     });
-    // }
     return res.status(200).json({
       complaint,
     });
@@ -178,9 +153,27 @@ export const getMessComplaints = async (req, res) => {
   }
 };
 
+export const UserComplaints = async (req, res) => {
+  try {
+    const user = req.user;
+    const complaints = await Complaint.find({ User: user._id });
+    console.log("User complaints fetched successfully", complaints);
+    return res.status(200).json({
+      complaints,
+    });
+  } catch (error) {
+    console.error("Error fetching complaints:", error);
+    return res.status(500).json({
+      message: "Server Error in fetching user complaints",
+      error: error.message,
+    });
+  }
+};
+
 export default {
   createComplaint,
   getComplaints,
   updateComplaint,
   getMessComplaints,
+  UserComplaints,
 };
