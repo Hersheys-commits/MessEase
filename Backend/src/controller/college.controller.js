@@ -254,6 +254,7 @@ export const ReqReject = async (req, res) => {
       return res.status(404).json({ message: "College not found" });
     }
 
+
     return res.status(200).json({ message: "Request rejected successfully" });
   } catch (error) {
     console.error(error);
