@@ -20,7 +20,6 @@ const AdminHome = () => {
       try {
         // Fetch college details
         const collegeResponse = await api.post(`/api/admin/college`);
-        console.log("College response:", collegeResponse);
 
         if (collegeResponse.status === 200) {
           setCollege(collegeResponse.data.college);
@@ -31,12 +30,10 @@ const AdminHome = () => {
             const hostelsResponse = await api.post(
               `/api/hostel/fetchAllHostels`
             );
-            console.log("Hostels response:", hostelsResponse);
             setHostels(hostelsResponse.data.hostels || []);
 
             // Fetch messes
             const messesResponse = await api.post(`/api/mess/fetchAllMesses`);
-            console.log("Messes response:", messesResponse);
             setMesses(messesResponse.data.data || []);
           } catch (error) {
             console.error("Error fetching hostels or messes:", error);
