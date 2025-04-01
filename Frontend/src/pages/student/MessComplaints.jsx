@@ -2,6 +2,9 @@ import React, { useState, useRef, useEffect } from "react";
 import api from "../../utils/axiosRequest";
 import { useParams } from "react-router-dom";
 import Header from "../../components/Header";
+import { useNavigate } from "react-router-dom";
+import hostelService from "../../utils/hostelCheck";
+import toast from "react-hot-toast";
 
 const MessComplaints = () => {
   const [description, setDescription] = useState("");
@@ -17,7 +20,7 @@ const MessComplaints = () => {
 
   const fileInputRef = useRef(null);
   const notificationTimeout = useRef(null);
-
+  const navigate = useNavigate();
   const complaintsCategories = [
     "Food Quality",
     "Service",
@@ -26,6 +29,37 @@ const MessComplaints = () => {
   ];
 
   const code = useParams();
+
+  useEffect(() => {
+    const verifyHostel = async () => {
+      try {
+        const data = await hostelService.checkHostelAssignment();
+        if (data.data.user.isBlocked === true) {
+          toast.error("You are blocked by Admin.");
+          navigate("/student/home");
+        }
+        if (
+          !(
+            data.data.user.role === "student" ||
+            data.data.user.role === "messManager" ||
+            data.data.user.role === "hostelManager"
+          )
+        ) {
+          toast.error("You are not authorized to access this page.");
+          navigate("/admin/home");
+        }
+        if (data.data.user.role === "student" && !data.data.user.hostel) {
+          toast.error("Hostel must be assigned.");
+          navigate("/student/update-profile");
+        }
+        setIsLoading(false);
+      } catch (err) {
+        setIsLoading(false);
+        navigate("/student/login");
+      }
+    };
+    verifyHostel();
+  }, []);
 
   useEffect(() => {
     const fetchComplaints = async () => {
