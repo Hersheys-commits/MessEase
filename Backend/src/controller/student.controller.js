@@ -731,22 +731,11 @@ export const getFilterOptions = asyncHandler(async (req, res) => {
       college: collegeId,
       year: { $ne: null },
     });
-
-    // Get hostels with names
-    const hostels = await User.aggregate([
-      { $match: { college: collegeId, hostel: { $ne: null } } },
-      { $group: { _id: "$hostel" } },
-      {
-        $lookup: {
-          from: "hostels",
-          localField: "_id",
-          foreignField: "_id",
-          as: "hostelInfo",
-        },
-      },
-      { $unwind: "$hostelInfo" },
-      { $project: { _id: 1, name: "$hostelInfo.name" } },
-    ]);
+    
+    // Get unique hostels
+    const hostels = await Hostel.find({ college: collegeId })
+      .select("name")
+      .lean();
 
     return res.status(200).json(
       new ApiResponse(

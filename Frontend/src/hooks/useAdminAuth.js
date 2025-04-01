@@ -14,8 +14,6 @@ const useAdminAuth = () => {
     const verifyAdmin = async () => {
       try {
         const data = await api.post("/api/admin/verify-token");
-        console.log("Admin Check data: ", data);
-        console.log("Admin Check data.data: ", data.data.verified);
         if (
           data.data?.verified === undefined ||
           data.data?.verified === false

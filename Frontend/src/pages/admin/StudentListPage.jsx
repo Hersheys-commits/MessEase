@@ -57,6 +57,7 @@ const StudentListPage = () => {
   const fetchFilterOptions = async () => {
     try {
       const res = await api.get("/api/admin/students/filter-options");
+      console.log(res.data.data);
       const data = res.data.data;
       setFilterOptions({
         branches: data.branches || [],

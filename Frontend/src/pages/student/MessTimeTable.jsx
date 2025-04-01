@@ -53,11 +53,16 @@ const MessTimeTable = () => {
         // Fetch mess details with weekly schedule
         const messResponse = await api.get(`/api/mess/student/${messCode}`);
         console.log(messResponse);
-        setWeeklyData(messResponse.data.data);
-
-        // Fetch user's ratings
-        const ratingsResponse = await api.get(`/api/mess/ratings/${messCode}`);
-        setUserRatings(ratingsResponse.data.data.userRatings);
+        if(messResponse.data?.messExists === false){
+          toast.error("Mess not found");
+          setError("Mess not found");
+        }
+        else{
+          setWeeklyData(messResponse.data.data);
+          // Fetch user's ratings
+          const ratingsResponse = await api.get(`/api/mess/ratings/${messCode}`);
+          setUserRatings(ratingsResponse.data.data.userRatings);
+        }
       } catch (err) {
         setError(err.response?.data?.message || "Failed to fetch data");
         toast.error(err.response?.data?.message || "Failed to fetch data");
@@ -167,7 +172,7 @@ const MessTimeTable = () => {
     );
   };
 
-  if (loading || !weeklyData || !userRatings) {
+  if (loading || ((!weeklyData || !userRatings) && !error)) {
     return (
       <div className="min-h-screen bg-gray-900 text-gray-100">
         <Header />

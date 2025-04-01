@@ -59,12 +59,15 @@ const MessDetailsStudent = () => {
       try {
         setLoading(true);
         const response = await api.get(`/api/mess/student/${messCode}`);
-        console.log(response);
-        setMessData(response.data.data);
-
-        // Set initial user rating if available
-        if (response.data.data.currentMealInfo.userRating) {
-          setUserRating(response.data.data.currentMealInfo.userRating);
+        if (response.data?.messExists === false) {
+          setError("Mess doesn't exist");
+          toast.error("Mess doesn't exist");
+        } else {
+          setMessData(response.data.data);
+          // Set initial user rating if available
+          if (response.data.data.currentMealInfo.userRating) {
+            setUserRating(response.data.data.currentMealInfo.userRating);
+          }
         }
       } catch (err) {
         setError(err.response?.data?.message || "Failed to fetch mess details");
@@ -72,7 +75,7 @@ const MessDetailsStudent = () => {
           err.response?.data?.message || "Failed to fetch mess details"
         );
       } finally {
-        setLoading(false);
+        setLoading(false); // Ensure loading stops in all cases
       }
     };
 
@@ -130,7 +133,7 @@ const MessDetailsStudent = () => {
     return mealType?.charAt(0).toUpperCase() + mealType?.slice(1);
   };
 
-  if (loading || !messData) {
+  if (loading || (!messData && !error)) {
     return (
       <div className="min-h-screen bg-gray-900 text-gray-100">
         <Header />
