@@ -259,13 +259,11 @@ const MessDetails = () => {
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold">Mess Administration</h1>
           <Link
-            onClick={() => {
-              navigate(-1);
-            }}
+            to={`/admin/home`}
             className="flex items-center text-blue-400 hover:text-blue-200"
           >
             <ArrowLeft size={18} className="mr-1" />
-            <span>Back to Previous Page</span>
+            <span>Back to Home Page</span>
           </Link>
         </div>
 
@@ -275,7 +273,7 @@ const MessDetails = () => {
             <h1 className="text-2xl font-bold">{messData.name}</h1>
             <Link
               to={`/admin/mess/complaints/${code}`}
-              className="z-1 ml-[85%] px-4 py-2 bg-red-500 text-white rounded transition duration-200 hover:bg-red-600"
+              className="z-1 ml-[80%] px-4 py-2 bg-red-500 text-white rounded transition duration-200 hover:bg-red-600"
             >
               View Complaints
             </Link>

@@ -3,8 +3,16 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../utils/axiosRequest.js";
 import { Link } from "react-router-dom";
-import { AlertCircle, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle,
+  XCircle,
+  Loader2,
+  ArrowLeft,
+} from "lucide-react";
 import AdminHeader from "../../components/AdminHeader.jsx";
+import useAdminAuth from "../../hooks/useAdminAuth.js"; //import authorization hook
+import toast from "react-hot-toast";
 
 const HostelComplaintsPage = () => {
   const [complaints, setComplaints] = useState([]);
@@ -14,30 +22,50 @@ const HostelComplaintsPage = () => {
   const navigate = useNavigate();
   const { code } = useParams();
 
+  const { loadingAdmin, isVerified } = useAdminAuth(); //initialize hook
+
   useEffect(() => {
     const fetchComplaints = async () => {
       try {
         setLoading(true);
         const response = await api.get(`/api/complaint/getcomplaints/${code}`);
 
-        // Sort complaints - pending first, then by date (newest first)
-        const sortedComplaints = response.data.complaint.sort((a, b) => {
-          // Both pending - sort by date
-          if (a.status === "Pending" && b.status === "Pending") {
+        // Check if response.data.complaint exists before sorting
+        if (
+          response.data &&
+          response.data.complaint &&
+          Array.isArray(response.data.complaint)
+        ) {
+          // Sort complaints - pending first, then by date (newest first)
+          const sortedComplaints = response.data.complaint.sort((a, b) => {
+            // Both pending - sort by date
+            if (a.status === "Pending" && b.status === "Pending") {
+              return new Date(b.createdAt) - new Date(a.createdAt);
+            }
+            // Only a is pending
+            if (a.status === "Pending") return -1;
+            // Only b is pending
+            if (b.status === "Pending") return 1;
+            // Neither is pending - sort by date
             return new Date(b.createdAt) - new Date(a.createdAt);
-          }
-          // Only a is pending
-          if (a.status === "Pending") return -1;
-          // Only b is pending
-          if (b.status === "Pending") return 1;
-          // Neither is pending - sort by date
-          return new Date(b.createdAt) - new Date(a.createdAt);
-        });
+          });
 
-        setComplaints(sortedComplaints);
+          setComplaints(sortedComplaints);
+        } else {
+          // Handle the case where response.data.complaint is not an array
+          console.log(
+            "No complaints found or invalid response format:",
+            response.data
+          );
+          setComplaints([]);
+        }
+
         setLoading(false);
       } catch (error) {
-        setError(error.response?.data?.message || "Failed to fetch complaints");
+        console.error("Fetch complaints error:", error);
+        setError(
+          error?.response?.data?.message || "Failed to fetch complaints"
+        );
         setLoading(false);
       }
     };
@@ -95,37 +123,62 @@ const HostelComplaintsPage = () => {
     );
   }
 
+  if (loadingAdmin) {
+    return (
+      <div>
+        <AdminHeader />
+        <div className="min-h-screen bg-gray-900 flex justify-center items-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isVerified) {
+    toast.error("Your College is not verified yet. Authorized access denied.");
+    navigate("/admin/home");
+  }
+
   const complaintsArray = Array.isArray(complaints) ? complaints : [];
 
   if (complaintsArray.length === 0) {
     return (
       <div>
         <AdminHeader />
-        <div className="flex flex-col items-center justify-center h-screen mt-0 p-8 my-8 bg-gray-800 rounded-lg border border-gray-700">
-          <div className="bg-blue-900 p-4 rounded-full mb-4">
-            <AlertCircle size={48} className="text-blue-400" />
-          </div>
-          <h3 className="text-xl font-semibold text-gray-100 mb-2">
-            No Complaints Found
-          </h3>
-          <p className="text-gray-300 text-center mb-4">
-            There are currently no hostel complaints registered
-            <span className="font-medium text-white"></span>.
-          </p>
-          <div className="bg-gray-900 p-4 rounded-lg border border-gray-700 w-full max-w-md">
-            <h4 className="text-sm font-medium text-gray-200 mb-2">
-              This could mean:
-            </h4>
-            <ul className="space-y-2 text-sm text-gray-300">
-              <li className="flex items-start">
-                <span className="mr-2">•</span>
-                <span>All previous issues have been resolved</span>
-              </li>
-              <li className="flex items-start">
-                <span className="mr-2">•</span>
-                <span>No complaints have been submitted yet</span>
-              </li>
-            </ul>
+        <div className="bg-[#1f2937] p-2 ">
+          <Link
+            to={`/admin/hostel/${code}`}
+            className="ml-[90%] flex items-center space-x-2 text-blue-400 hover:text-blue-300"
+          >
+            <ArrowLeft />
+            Go Back
+          </Link>
+          <div className="flex flex-col items-center justify-center h-screen mt-0 p-8 my-8 bg-gray-800 rounded-lg ">
+            <div className="bg-blue-900 p-4 rounded-full mb-4">
+              <AlertCircle size={48} className="text-blue-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-100 mb-2">
+              No Complaints Found
+            </h3>
+            <p className="text-gray-300 text-center mb-4">
+              There are currently no hostel complaints registered
+              <span className="font-medium text-white"></span>.
+            </p>
+            <div className="bg-gray-900 p-4 rounded-lg border border-gray-700 w-full max-w-md">
+              <h4 className="text-sm font-medium text-gray-200 mb-2">
+                This could mean:
+              </h4>
+              <ul className="space-y-2 text-sm text-gray-300">
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>All previous issues have been resolved</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>No complaints have been submitted yet</span>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
@@ -144,6 +197,7 @@ const HostelComplaintsPage = () => {
             to={`/admin/hostel/${code}`}
             className="flex items-center space-x-2 text-blue-400 hover:text-blue-300"
           >
+            <ArrowLeft />
             Go Back
           </Link>
         </div>

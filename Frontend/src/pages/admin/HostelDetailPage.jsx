@@ -6,6 +6,7 @@ import api from "../../utils/axiosRequest";
 import AdminHeader from "../../components/AdminHeader";
 import useAdminAuth from "../../hooks/useAdminAuth";
 import { Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
 const HostelDetailPage = () => {
   const { code } = useParams();
@@ -145,6 +146,13 @@ const HostelDetailPage = () => {
     <div>
       <AdminHeader />
       <div className="min-h-screen bg-gray-900 p-6 text-white">
+        {/* <Link
+            to={`/admin/home`}
+            className="flex items-center text-blue-400 hover:text-blue-200 ml-[85%] mb-5"
+          >
+            <ArrowLeft size={18} className="mr-1" />
+            <span>Back to Home Page</span>
+          </Link> */}
         <div className="max-w-4xl mx-auto bg-gray-800 rounded-lg shadow-md overflow-hidden border border-gray-700">
           <div className="flex justify-between items-center bg-indigo-700 p-6">
             <h1 className="text-2xl font-bold text-white">Hostel Details</h1>
