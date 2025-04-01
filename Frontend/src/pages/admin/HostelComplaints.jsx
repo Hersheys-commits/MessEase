@@ -106,24 +106,19 @@ const HostelComplaintsPage = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center p-8 bg-gray-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400"></div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
-      <div className="p-4 bg-red-900 border border-red-700 rounded-md text-red-200">
-        <h3 className="font-medium mb-2">Error Loading Complaints</h3>
-        <p>{error}</p>
+      <div>
+        <AdminHeader />
+        <div className="p-4 bg-red-900 border border-red-700 rounded-md text-red-200">
+          <h3 className="font-medium mb-2">Error Loading Complaints</h3>
+          <p>{error}</p>
+        </div>
       </div>
     );
   }
 
-  if (loadingAdmin) {
+  if (loadingAdmin || loading) {
     return (
       <div>
         <AdminHeader />
