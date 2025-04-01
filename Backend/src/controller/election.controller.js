@@ -5,22 +5,6 @@ import Mess from "../model/mess.model.js";
 import mongoose from "mongoose";
 import College from "../model/college.model.js";
 
-// Helper functions
-const getTargetName = async (targetId) => {
-  let name = null;
-  const hostel = await Hostel.findById(targetId).select("name");
-  if (hostel) return hostel.name;
-
-  const mess = await Mess.findById(targetId).select("name");
-  return mess?.name || null;
-};
-
-const validateTarget = async (type, targetId) => {
-  return type === "messManager"
-    ? await Mess.findById(targetId)
-    : await Hostel.findById(targetId);
-};
-
 // ADMIN CONTROLLERS
 
 // Get all election configurations
@@ -29,24 +13,32 @@ export const getAllElectionConfigs = async (req, res) => {
     const collegeId = req.user.college;
     const electionConfigs = await ElectionConfig.find({ college: collegeId })
       .populate("targetId")
-      .sort({ createdAt: -1 })
-      .lean();
-
-    // Add name property to each config
+      .sort({ createdAt: -1 });
+    // Map through each config to add the name property
     const configsWithNames = await Promise.all(
       electionConfigs.map(async (config) => {
-        if (config.targetId && config.targetId._id) {
+        // Convert to plain object so we can modify it
+        const configObj = config.toObject();
+        // Check if targetId exists for this config
+        if (configObj.targetId && configObj.targetId._id) {
           try {
-            const name = await getTargetName(config.targetId._id);
-            if (name) config.name = name;
+            let name = null;
+            name = await Hostel.findById(configObj.targetId._id).select("name");
+            if (!name) {
+              name = await Mess.findById(configObj.targetId._id).select("name");
+            }
+            if (name && name.name) {
+              configObj.name = name.name;
+            }
           } catch (err) {
             console.error(
-              `Error finding name for targetId ${config.targetId._id}:`,
+              `Error finding name for targetId ${configObj.targetId._id}:`,
               err
             );
           }
         }
-        return config;
+
+        return configObj;
       })
     );
 
@@ -68,9 +60,14 @@ export const createElectionConfig = async (req, res) => {
   try {
     const { type, targetId, questions } = req.body;
     const college = req.user.college;
+    // Validate target exists (mess or hostel)
+    let targetExists;
+    if (type === "messManager") {
+      targetExists = await Mess.findById(targetId);
+    } else {
+      targetExists = await Hostel.findById(targetId);
+    }
 
-    // Validate target exists
-    const targetExists = await validateTarget(type, targetId);
     if (!targetExists) {
       return res.status(404).json({
         success: false,
@@ -143,9 +140,11 @@ export const toggleApplicationPhase = async (req, res) => {
 
     // Toggle state and record timestamp
     election.applicationPhase.isOpen = !election.applicationPhase.isOpen;
-    election.applicationPhase[
-      election.applicationPhase.isOpen ? "openedAt" : "closedAt"
-    ] = new Date();
+    if (election.applicationPhase.isOpen) {
+      election.applicationPhase.openedAt = new Date();
+    } else {
+      election.applicationPhase.closedAt = new Date();
+    }
 
     await election.save();
 
@@ -186,7 +185,6 @@ export const selectCandidates = async (req, res) => {
         message: "Close application phase before selecting candidates",
       });
     }
-
     // Validate all applicationIds
     const applications = await Application.find({
       _id: { $in: applicationIds },
@@ -201,29 +199,21 @@ export const selectCandidates = async (req, res) => {
       });
     }
 
-    // Use bulkWrite for better performance
-    const bulkOps = [
-      {
-        // Approve selected applications
-        updateMany: {
-          filter: { _id: { $in: applicationIds } },
-          update: { status: "approved" },
-        },
-      },
-      {
-        // Reject other applications
-        updateMany: {
-          filter: {
-            position: election.type,
-            targetId: election.targetId,
-            _id: { $nin: applicationIds },
-          },
-          update: { status: "rejected" },
-        },
-      },
-    ];
+    // Update application status
+    await Application.updateMany(
+      { _id: { $in: applicationIds } },
+      { status: "approved" }
+    );
 
-    await Application.bulkWrite(bulkOps);
+    // Reject other applications
+    await Application.updateMany(
+      {
+        position: election.type,
+        targetId: election.targetId,
+        _id: { $nin: applicationIds },
+      },
+      { status: "rejected" }
+    );
 
     // Update candidates list
     election.votingPhase.candidates = applications.map((app) => ({
@@ -244,42 +234,6 @@ export const selectCandidates = async (req, res) => {
       message: "Failed to select candidates",
       error: error.message,
     });
-  }
-};
-
-// Helper function to calculate results
-const calculateResults = async (electionId) => {
-  // Use aggregation for better performance
-  const voteResults = await Vote.aggregate([
-    { $match: { election: new mongoose.Types.ObjectId(electionId) } },
-    { $group: { _id: "$candidate", count: { $sum: 1 } } },
-    { $sort: { count: -1 } },
-    { $limit: 1 },
-  ]);
-
-  if (voteResults.length > 0) {
-    const winnerId = voteResults[0]._id;
-    const maxVotes = voteResults[0].count;
-
-    const winner = await User.findById(winnerId)
-      .select("name branch year email")
-      .lean();
-    const winnerWithVoteCount = { ...winner, voteCount: maxVotes };
-
-    // Update election with winner
-    const election = await ElectionConfig.findByIdAndUpdate(
-      electionId,
-      {
-        "result.winnerId": winnerWithVoteCount,
-        "result.announcedAt": new Date(),
-      },
-      { new: true }
-    );
-
-    // Update user role based on election type
-    if (election) {
-      await User.findByIdAndUpdate(winnerId, { role: election.type });
-    }
   }
 };
 
@@ -316,20 +270,21 @@ export const toggleVotingPhase = async (req, res) => {
     }
 
     // Toggle state and record timestamp
-    const isOpening = !election.votingPhase.isOpen;
-    election.votingPhase.isOpen = isOpening;
-    election.votingPhase[isOpening ? "openedAt" : "closedAt"] = new Date();
+    election.votingPhase.isOpen = !election.votingPhase.isOpen;
+    if (election.votingPhase.isOpen) {
+      election.votingPhase.openedAt = new Date();
+    } else {
+      election.votingPhase.closedAt = new Date();
 
-    await election.save();
-
-    // Calculate results when closing voting
-    if (!isOpening) {
+      // Calculate results when closing voting
       await calculateResults(id);
     }
 
+    await election.save();
+
     return res.status(200).json({
       success: true,
-      message: `Voting phase ${isOpening ? "opened" : "closed"} successfully`,
+      message: `Voting phase ${election.votingPhase.isOpen ? "opened" : "closed"} successfully`,
       data: election,
     });
   } catch (error) {
@@ -338,6 +293,48 @@ export const toggleVotingPhase = async (req, res) => {
       message: "Failed to toggle voting phase",
       error: error.message,
     });
+  }
+};
+
+// Helper function to calculate results
+const calculateResults = async (electionId) => {
+  const votes = await Vote.find({ election: electionId });
+  const voteCounts = {};
+
+  // Count votes for each candidate
+  for (const vote of votes) {
+    const candidateId = vote.candidate.toString();
+    voteCounts[candidateId] = (voteCounts[candidateId] || 0) + 1;
+  }
+
+  let winnerIdString = null;
+  let maxVotes = 0;
+
+  // Find the winner (most votes)
+  for (const [candidateId, count] of Object.entries(voteCounts)) {
+    if (count > maxVotes) {
+      maxVotes = count;
+      winnerIdString = candidateId;
+    }
+  }
+
+  // Update election with winner
+  if (winnerIdString) {
+    const winnerId = new mongoose.Types.ObjectId(winnerIdString);
+    const winner = await User.findById(winnerId).select(
+      "name branch year email"
+    );
+    const winnerWithVoteCount = { ...winner, voteCount: maxVotes };
+    await ElectionConfig.findByIdAndUpdate(electionId, {
+      "result.winnerId": winnerWithVoteCount,
+      "result.announcedAt": new Date(),
+    });
+
+    // Update user role based on election type
+    const election = await ElectionConfig.findById(electionId);
+    if (election) {
+      await User.findByIdAndUpdate(winnerId, { role: election.type });
+    }
   }
 };
 
@@ -380,7 +377,7 @@ export const getApplications = async (req, res) => {
 // Get available elections for a student
 export const getAvailableElections = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user._id; // From auth middleware
     const user = await User.findById(userId);
 
     if (!user) {
@@ -390,7 +387,7 @@ export const getAvailableElections = async (req, res) => {
       });
     }
 
-    // Use a single query with proper indexing
+    // Get elections relevant to the student's hostel and mess
     const elections = await ElectionConfig.find({
       $or: [
         { targetId: user.hostel, type: "hostelManager" },
@@ -419,19 +416,11 @@ export const getAvailableElections = async (req, res) => {
 // Submit an application
 export const submitApplication = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user._id; // From auth middleware
     const { electionId, answers } = req.body;
 
-    // Use Promise.all for parallel queries
-    const [user, election, existingApplication] = await Promise.all([
-      User.findById(userId),
-      ElectionConfig.findById(electionId),
-      Application.findOne({
-        user: userId,
-        position: election?.type,
-        targetId: election?.targetId,
-      }),
-    ]);
+    const user = await User.findById(userId);
+    const election = await ElectionConfig.findById(electionId);
 
     if (!election) {
       return res.status(404).json({
@@ -449,9 +438,12 @@ export const submitApplication = async (req, res) => {
     }
 
     // Check if user belongs to the target hostel/mess
-    const userTargetId =
-      election.type === "hostelManager" ? user.hostel : user.mess;
-    if (userTargetId.toString() !== election.targetId.toString()) {
+    if (
+      (election.type === "hostelManager" &&
+        user.hostel.toString() !== election.targetId.toString()) ||
+      (election.type === "messManager" &&
+        user.mess.toString() !== election.targetId.toString())
+    ) {
       return res.status(403).json({
         success: false,
         message: `You can only apply for your own ${election.type === "hostelManager" ? "hostel" : "mess"}`,
@@ -459,6 +451,12 @@ export const submitApplication = async (req, res) => {
     }
 
     // Check if user already applied
+    const existingApplication = await Application.findOne({
+      user: userId,
+      position: election.type,
+      targetId: election.targetId,
+    });
+
     if (existingApplication) {
       return res.status(400).json({
         success: false,
@@ -474,13 +472,15 @@ export const submitApplication = async (req, res) => {
       })
     );
 
-    // Create and save application
-    const application = await Application.create({
+    // Create application
+    const application = new Application({
       user: userId,
       position: election.type,
       targetId: election.targetId,
       answers: formattedAnswers,
     });
+
+    await application.save();
 
     return res.status(201).json({
       success: true,
@@ -533,14 +533,10 @@ export const getCandidates = async (req, res) => {
 // Cast a vote
 export const castVote = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user._id; // From auth middleware
     const { electionId, candidateId } = req.body;
 
-    // Get election data and check for existing vote in parallel
-    const [election, existingVote] = await Promise.all([
-      ElectionConfig.findById(electionId),
-      Vote.findOne({ election: electionId, voter: userId }),
-    ]);
+    const election = await ElectionConfig.findById(electionId);
 
     if (!election) {
       return res.status(404).json({
@@ -570,6 +566,11 @@ export const castVote = async (req, res) => {
     }
 
     // Check if user already voted
+    const existingVote = await Vote.findOne({
+      election: electionId,
+      voter: userId,
+    });
+
     if (existingVote) {
       return res.status(250).json({
         success: false,
@@ -579,11 +580,13 @@ export const castVote = async (req, res) => {
     }
 
     // Create vote
-    await Vote.create({
+    const vote = new Vote({
       election: electionId,
       voter: userId,
       candidate: candidateId,
     });
+
+    await vote.save();
 
     return res.status(201).json({
       success: true,
@@ -607,6 +610,7 @@ export const getElectionResults = async (req, res) => {
       "result.winnerId",
       "name email branch year"
     );
+    // console.log(election)
 
     if (!election) {
       return res.status(404).json({
@@ -623,38 +627,25 @@ export const getElectionResults = async (req, res) => {
       });
     }
 
-    // Get vote counts for all candidates using aggregation
-    const voteCounts = await Vote.aggregate([
-      { $match: { election: new mongoose.Types.ObjectId(electionId) } },
-      { $group: { _id: "$candidate", count: { $sum: 1 } } },
-    ]);
+    // Get vote counts for all candidates
+    const votes = await Vote.find({ election: electionId });
+    const candidates = election.votingPhase.candidates;
 
-    // Create a map for quick lookup
-    const voteCountMap = Object.fromEntries(
-      voteCounts.map((item) => [item._id.toString(), item.count])
+    const results = await Promise.all(
+      candidates.map(async (candidate) => {
+        const candidateId = candidate.userId.toString();
+        const voteCount = votes.filter(
+          (vote) => vote.candidate.toString() === candidateId
+        ).length;
+        const user = await User.findById(candidateId, "name email branch year");
+
+        return {
+          candidate: user,
+          voteCount,
+          isWinner: election.result.winnerId.toString() === candidateId,
+        };
+      })
     );
-
-    // Get all candidate user details
-    const candidateIds = election.votingPhase.candidates.map((c) => c.userId);
-    const candidateUsers = await User.find(
-      { _id: { $in: candidateIds } },
-      "name email branch year"
-    ).lean();
-
-    // Map user details to candidate IDs
-    const userMap = Object.fromEntries(
-      candidateUsers.map((user) => [user._id.toString(), user])
-    );
-
-    // Build results
-    const results = election.votingPhase.candidates.map((candidate) => {
-      const candidateId = candidate.userId.toString();
-      return {
-        candidate: userMap[candidateId],
-        voteCount: voteCountMap[candidateId] || 0,
-        isWinner: election.result.winnerId.toString() === candidateId,
-      };
-    });
 
     // Sort by vote count in descending order
     results.sort((a, b) => b.voteCount - a.voteCount);
@@ -677,13 +668,10 @@ export const getElectionById = async (req, res) => {
   try {
     const { electionId } = req.params;
 
-    // Get election, college, and target name in parallel
-    const [election, college] = await Promise.all([
-      ElectionConfig.findById(electionId)
-        .populate("result.winnerId", "name email branch year")
-        .lean(),
-      College.findById(election?.college).select("name"),
-    ]);
+    let election = await ElectionConfig.findById(electionId).populate(
+      "result.winnerId",
+      "name email branch year"
+    ); // Populate winner details if exists
 
     if (!election) {
       return res.status(404).json({
@@ -691,16 +679,29 @@ export const getElectionById = async (req, res) => {
         message: "Election not found",
       });
     }
+    const college = await College.findById(election.college).select("name");
 
-    const name = await getTargetName(election.targetId);
+    const targetId = election.targetId;
+    let name;
 
-    // Add name fields
-    election.name = name;
-    election.collegeName = college.name;
+    const hostel = await Hostel.findById(targetId).select("name");
+    if (hostel) {
+      name = hostel.name;
+    } else {
+      const mess = await Mess.findById(targetId).select("name");
+      if (mess) {
+        name = mess.name;
+      }
+    }
+
+    // Convert Mongoose document to plain object and add `name` field
+    let electionData = election.toObject();
+    electionData.name = name;
+    electionData.collegeName = college.name;
 
     return res.status(200).json({
       success: true,
-      data: election,
+      data: electionData,
     });
   } catch (error) {
     return res.status(500).json({
@@ -712,30 +713,20 @@ export const getElectionById = async (req, res) => {
 };
 
 export const votedOrNot = async (req, res) => {
-  try {
-    const { electionId } = req.params;
-    const voterId = req.user._id;
-
-    const vote = await Vote.findOne({ election: electionId, voter: voterId });
-
-    if (vote) {
-      return res.status(250).json({
-        success: true,
-        hasVoted: true,
-        data: vote,
-      });
-    } else {
-      return res.status(200).json({
-        success: false,
-        hasVoted: false,
-        message: "No vote found for the given voter and election.",
-      });
-    }
-  } catch (error) {
-    return res.status(500).json({
+  const { electionId } = req.params;
+  const voterId = req.user._id;
+  const vote = await Vote.findOne({ election: electionId, voter: voterId });
+  if (vote) {
+    return res.status(250).json({
+      success: true,
+      hasVoted: true,
+      data: vote,
+    });
+  } else {
+    return res.status(200).json({
       success: false,
-      message: "Failed to check vote status",
-      error: error.message,
+      hasVoted: false,
+      message: "No vote found for the given voter and election.",
     });
   }
 };
@@ -753,50 +744,48 @@ export const getStudentElections = async (req, res) => {
 
     // Build conditions based on user's assigned mess and hostel
     const typeConditions = [];
-    if (messId) typeConditions.push({ type: "messManager", targetId: messId });
-    if (hostelId)
+    if (messId) {
+      typeConditions.push({ type: "messManager", targetId: messId });
+    }
+    if (hostelId) {
       typeConditions.push({ type: "hostelManager", targetId: hostelId });
+    }
 
-    // Combined query
-    const elections = await ElectionConfig.find({
-      $and: [
-        { $or: typeConditions },
-        {
-          $or: [
-            { "applicationPhase.isOpen": true },
-            { "votingPhase.isOpen": true },
-            { "result.winnerId": { $exists: true } },
-          ],
-        },
+    // Build the status condition: elections that are open (applications or voting) or have results announced.
+    const statusCondition = {
+      $or: [
+        { "applicationPhase.isOpen": true },
+        { "votingPhase.isOpen": true },
+        { "result.winnerId": { $exists: true } },
       ],
-    })
+    };
+
+    // Combine both conditions using $and
+    const query = {
+      $and: [{ $or: typeConditions }, statusCondition],
+    };
+
+    // Query elections without populating
+    const elections = await ElectionConfig.find(query)
       .sort({ updatedAt: -1 })
       .lean();
 
-    // Batch process target names
-    const targetIds = [...new Set(elections.map((e) => e.targetId.toString()))];
-
-    // Get all hostel names
-    const hostels = await Hostel.find(
-      { _id: { $in: targetIds } },
-      { _id: 1, name: 1 }
-    ).lean();
-
-    // Get all mess names
-    const messes = await Mess.find(
-      { _id: { $in: targetIds } },
-      { _id: 1, name: 1 }
-    ).lean();
-
-    // Create lookup map
-    const nameMap = {};
-    [...hostels, ...messes].forEach((item) => {
-      nameMap[item._id.toString()] = item.name;
-    });
-
-    // Add names to elections
+    // Fetch names for each election
     for (let election of elections) {
-      election.name = nameMap[election.targetId.toString()] || null;
+      let name = null;
+
+      const hostel = await Hostel.findById(election.targetId).select("name");
+      if (hostel) {
+        name = hostel.name;
+      } else {
+        const mess = await Mess.findById(election.targetId).select("name");
+        if (mess) {
+          name = mess.name;
+        }
+      }
+
+      // Add name field to election object
+      election.name = name;
     }
 
     return res.status(200).json({

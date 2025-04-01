@@ -21,19 +21,19 @@ export const createHostel = async (req, res) => {
       return res.status(400).json({ message: "College ID is required" });
     }
 
-    // Check if hostel with same name exists in the same college
-    const existingHostel = await Hostel.findOne({ college, name });
+    const code = crypto.randomBytes(3).toString("hex");
 
-    if (existingHostel) {
+    // Check if hostel with same name exists in the same college
+    let hostel = await Hostel.findOne({ college, name });
+
+    if (hostel) {
       return res
         .status(400)
         .json({ message: "Hostel with same name already exists" });
     }
 
-    const code = crypto.randomBytes(3).toString("hex");
-
     // Create the hostel with the provided data
-    const hostel = await Hostel.create({
+    hostel = await Hostel.create({
       name,
       code,
       location,
@@ -50,7 +50,7 @@ export const createHostel = async (req, res) => {
 
     return res.status(201).json({
       message: "Hostel created successfully",
-      hostel,
+      hostel: hostel,
     });
   } catch (error) {
     console.log("Error creating hostel:", error);
@@ -68,11 +68,12 @@ export const fetchAllHostels = async (req, res) => {
         .json({ message: "College ID is required", college: false });
     }
 
-    // Find all hostels that belong to the specified college with projection
+    // Find all hostels that belong to the specified college
     const hostels = await Hostel.find({ college: collegeId })
       .select("name location code totalRooms roomCapacity guestRooms.count")
       .sort({ createdAt: -1 });
 
+    // Return the hostels data
     return res.status(200).json({
       success: true,
       message: "Hostels fetched successfully",
@@ -98,9 +99,9 @@ export const getHostelByCode = async (req, res) => {
         message: "Hostel code is required",
       });
     }
-
+    // console.log("UUUUUUU ",req.user);
     const hostel = await Hostel.findOne({ code });
-
+    // console.log("HHHHHHHHHHHH: ",hostel);
     if (!hostel) {
       return res.status(404).json({
         success: false,
@@ -138,7 +139,7 @@ export const updateHostel = async (req, res) => {
     }
 
     // Find the hostel
-    const hostel = await Hostel.findOne({ code });
+    let hostel = await Hostel.findOne({ code });
 
     if (!hostel) {
       return res.status(404).json({
@@ -163,29 +164,34 @@ export const updateHostel = async (req, res) => {
       }
     }
 
-    // Update using findOneAndUpdate for better performance
-    const updatedHostel = await Hostel.findOneAndUpdate(
-      { code },
-      {
-        name,
-        location,
-        totalRooms,
-        roomCapacity,
-        ...(guestRooms && {
-          "guestRooms.count": guestRooms.count,
-          ...(guestRooms.roomNumbers && {
-            "guestRooms.roomNumbers": guestRooms.roomNumbers,
-          }),
-        }),
-        ...(workers && { workers }),
-      },
-      { new: true }
-    );
+    // Update the hostel
+    hostel.name = name;
+    hostel.location = location;
+    hostel.totalRooms = totalRooms;
+    hostel.roomCapacity = roomCapacity;
+
+    // Update guest rooms
+    if (guestRooms) {
+      hostel.guestRooms.count = guestRooms.count;
+
+      // Update room numbers if provided
+      if (guestRooms.roomNumbers) {
+        hostel.guestRooms.roomNumbers = guestRooms.roomNumbers;
+      }
+    }
+
+    // Update workers if provided
+    if (workers) {
+      hostel.workers = workers;
+    }
+
+    // Save the updated hostel
+    await hostel.save();
 
     return res.status(200).json({
       success: true,
       message: "Hostel updated successfully",
-      hostel: updatedHostel,
+      hostel,
     });
   } catch (error) {
     console.error("Error updating hostel:", error);
@@ -200,6 +206,8 @@ export const updateHostel = async (req, res) => {
 export const getHostelsWithoutMess = async (req, res) => {
   try {
     // Find all hostels where the mess field is either undefined or null
+    // const hostels = await Hostel.find({college: req.user.college});
+
     const hostels = await Hostel.find({
       $or: [{ mess: { $exists: false } }, { mess: null }],
       college: req.user.college,
