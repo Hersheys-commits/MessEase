@@ -9,6 +9,8 @@ function StudentHome() {
   const [loading, setLoading] = useState(true);
   const [studentName, setStudentName] = useState("");
   const [isBlocked, setIsBlocked] = useState(false);
+  const user = JSON.parse(localStorage.getItem("user"));
+  console.log(user);
   const [userId, setUserId] = useState("");
   const navigate = useNavigate();
 
@@ -463,7 +465,7 @@ function StudentHome() {
           navigate(`/hostel/groupChat/${user.code}`, {
             state: {
               hostelId: user.userInfo.hostel,
-              userId: user.user,
+              userId: user.userInfo._id,
               userName: user.userInfo.name,
             },
           });

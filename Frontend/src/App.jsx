@@ -46,6 +46,7 @@ import HostelComplaintsPage from "./pages/admin/HostelComplaints.jsx";
 import MessComplaintsPage from "./pages/admin/MessComplaints.jsx";
 import { CreateGroupChat } from "./pages/admin/CreateGroupChat";
 import { GroupChat } from "./pages/hostel/GroupChat";
+import Check from "./pages/admin/Check.jsx";
 
 function App() {
   useEffect(() => {

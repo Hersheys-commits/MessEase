@@ -5,12 +5,13 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import api from "../../utils/axiosRequest";
 import toast from "react-hot-toast";
 import { useNavigate, Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { setUser } from "../../store/authSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 const Login = ({ userType = "student" }) => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
+  console.log("login state", user);
+  console.log("login state", isAuthenticated);
 
   const loginFields = [
     {
@@ -39,7 +40,7 @@ const Login = ({ userType = "student" }) => {
       localStorage.setItem("refreshToken", response.data.refreshToken);
 
       // Update Redux state
-      dispatch(setUser(response.data));
+      // dispatch(setUser(response.data));
 
       toast.success(
         `${userType === "admin" ? "Admin" : "Student"} login successful!`

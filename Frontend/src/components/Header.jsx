@@ -1,11 +1,11 @@
-import { useDispatch } from "react-redux";
-import { useNavigate, NavLink, useLocation } from "react-router-dom";
-import { logout } from "../store/authSlice";
-import api from "../utils/axiosRequest";
-import toast from "react-hot-toast";
 import { FaMoneyBillWave } from "react-icons/fa";
 import { Utensils } from "lucide-react";
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import { useNavigate, NavLink, useLocation } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { setUser, logout, setCode } from "../store/authSlice";
+import api from "../utils/axiosRequest";
+import toast from "react-hot-toast";
 import Logo from "./Logo";
 
 const Header = () => {
@@ -17,6 +17,10 @@ const Header = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
+
+  const { user, code } = useSelector((state) => state.auth);
+  // console.log(user);
+  // console.log(code);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -49,29 +53,31 @@ const Header = () => {
 
   const handleLogout = async () => {
     try {
-      const res = await api.post("/api/student/logout", {});
+      await api.post("/api/student/logout");
       dispatch(logout());
       toast.success("Logged out successfully!");
       navigate("/student/login");
     } catch (error) {
-      console.error("Logout failed:", error);
       toast.error("Logout failed. Please try again.");
     }
   };
 
-  const [code, setCode] = useState("000");
-
   useEffect(() => {
-    const fetchCode = async () => {
-      try {
-        const userRes = await api.post("/api/student/verify-token");
-        setCode(userRes.data.code);
-      } catch (error) {
-        console.error("Error fetching code:", error);
+    const fetchUser = async () => {
+      if (!user) {
+        try {
+          const res = await api.post("/api/student/verify-token");
+          console.log("header call to save data in redux auth", res.data);
+          dispatch(setCode(res.data.code));
+          dispatch(setUser(res.data.userInfo));
+        } catch (err) {
+          console.error("Token verification failed", err);
+          navigate("/student/login");
+        }
       }
     };
-    fetchCode();
-  }, []);
+    fetchUser();
+  }, [dispatch, navigate, user]);
 
   // Navigation links with their paths and icons
   const navLinks = [
@@ -85,16 +91,6 @@ const Header = () => {
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
-
-  if(code === "000"){
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
-        <div className="flex justify-center items-center h-96">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <header className="flex justify-between items-center px-6 py-4 bg-gray-900 text-white shadow-lg h-[60px] sticky top-0 z-50">
@@ -163,7 +159,7 @@ const Header = () => {
 
       {/* Mobile Menu Button */}
       <div className="md:hidden relative" ref={menuRef}>
-        <button 
+        <button
           onClick={toggleMenu}
           className="p-2 rounded-md hover:bg-gray-800 transition-colors duration-200"
           aria-label="Toggle menu"
@@ -183,7 +179,7 @@ const Header = () => {
             />
           </svg>
         </button>
-        
+
         {/* Mobile Menu Dropdown */}
         {isMenuOpen && (
           <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-xl z-50 animate-fadeIn">
@@ -233,7 +229,9 @@ const Header = () => {
                         />
                       </svg>
                     )}
-                    {link.icon === "money" && <FaMoneyBillWave className="mr-2" />}
+                    {link.icon === "money" && (
+                      <FaMoneyBillWave className="mr-2" />
+                    )}
                     {link.icon === "mess" && code != "000" && (
                       <Utensils className="h-4 mr-2" />
                     )}

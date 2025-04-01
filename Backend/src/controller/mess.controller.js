@@ -18,7 +18,9 @@ export const createMess = async (req, res) => {
       capacity,
       workers,
       meals,
+      mealTimings,
     } = req.body;
+
     // Check if hostel exists
     const hostel = await Hostel.findById(hostelId).session(session);
     if (!hostel) {
@@ -27,64 +29,79 @@ export const createMess = async (req, res) => {
       return res.status(404).json({ message: "Hostel not found" });
     }
 
-    // Create new mess
-    const newMess = new Mess({
-      name,
-      hostel: hostelId,
-      location,
-      capacity: capacity || 100,
-      workers,
-      admins: req.user?._id ? [req.user._id] : [],
-      code: hostel.code,
-      college: req.user.college,
-    });
+    // Process meal data once to avoid repetitive operations
+    const processedMeals = meals.map((meal) => ({
+      day: meal.day,
+      breakfast: {
+        items: meal.breakfast
+          .split(",")
+          .map((item) => item.trim())
+          .filter((item) => item !== ""),
+        timing: mealTimings.breakfast,
+      },
+      lunch: {
+        items: meal.lunch
+          .split(",")
+          .map((item) => item.trim())
+          .filter((item) => item !== ""),
+        timing: mealTimings.lunch,
+      },
+      eveningSnacks: {
+        items: meal.eveningSnacks
+          .split(",")
+          .map((item) => item.trim())
+          .filter((item) => item !== ""),
+        timing: mealTimings.eveningSnacks,
+      },
+      dinner: {
+        items: meal.dinner
+          .split(",")
+          .map((item) => item.trim())
+          .filter((item) => item !== ""),
+        timing: mealTimings.dinner,
+      },
+    }));
 
-    const savedMess = await newMess.save({ session });
-    // Create weekly food record
-    const weeklyFood = new WeeklyFood({
-      mess: savedMess._id,
-      meals: meals.map((meal) => ({
-        day: meal.day,
-        breakfast: {
-          items: meal.breakfast
-            .split(",")
-            .map((item) => item.trim())
-            .filter((item) => item !== ""),
-          timing: req.body.mealTimings.breakfast,
-        },
-        lunch: {
-          items: meal.lunch
-            .split(",")
-            .map((item) => item.trim())
-            .filter((item) => item !== ""),
-          timing: req.body.mealTimings.lunch,
-        },
-        eveningSnacks: {
-          items: meal.eveningSnacks
-            .split(",")
-            .map((item) => item.trim())
-            .filter((item) => item !== ""),
-          timing: req.body.mealTimings.eveningSnacks,
-        },
-        dinner: {
-          items: meal.dinner
-            .split(",")
-            .map((item) => item.trim())
-            .filter((item) => item !== ""),
-          timing: req.body.mealTimings.dinner,
-        },
-      })),
-    });
+    // Create models and save in parallel
+    const [savedMess, savedWeeklyFood] = await Promise.all([
+      // Create and save new mess
+      new Mess({
+        name,
+        hostel: hostelId,
+        location,
+        capacity: capacity || 100,
+        workers,
+        admins: req.user?._id ? [req.user._id] : [],
+        code: hostel.code,
+        college: req.user.college,
+      }).save({ session }),
 
-    const savedWeeklyFood = await weeklyFood.save({ session });
+      // Create and save weekly food record
+      new WeeklyFood({
+        mess: null, // Temporarily null, will update after mess is created
+        meals: processedMeals,
+      }).save({ session }),
+    ]);
 
-    // Update mess with food record reference
-    savedMess.foodRecords = [savedWeeklyFood._id];
-    await savedMess.save({ session });
+    // Update references in parallel
+    await Promise.all([
+      // Update mess with food record reference
+      Mess.findByIdAndUpdate(
+        savedMess._id,
+        { foodRecords: [savedWeeklyFood._id] },
+        { session }
+      ),
 
-    // Update hostel with mess reference
-    hostel.mess = savedMess._id;
-    await hostel.save({ session });
+      // Update weekly food with mess reference
+      WeeklyFood.findByIdAndUpdate(
+        savedWeeklyFood._id,
+        { mess: savedMess._id },
+        { session }
+      ),
+
+      // Update hostel with mess reference
+      Hostel.findByIdAndUpdate(hostelId, { mess: savedMess._id }, { session }),
+    ]);
 
     await session.commitTransaction();
     session.endSession();
@@ -113,17 +130,24 @@ export const fetchMessDetails = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Mess code is required");
   }
 
-  // Find mess by code
-  const mess = await Mess.findOne({ code })
-    .populate("hostel", "name")
-    .populate("admins", "name email");
+  // Find mess and weekly food in parallel for better performance
+  const [mess, weeklyFood] = await Promise.all([
+    Mess.findOne({ code })
+      .populate("hostel", "name")
+      .populate("admins", "name email"),
+
+    WeeklyFood.findOne({ code }).then(
+      (found) =>
+        found ||
+        WeeklyFood.findOne()
+          .where("mess")
+          .equals(Mess.findOne({ code }).select("_id"))
+    ),
+  ]);
 
   if (!mess) {
     throw new ApiError(404, "Mess not found");
   }
-
-  // Fetch weekly food data for the mess
-  const weeklyFood = await WeeklyFood.findOne({ mess: mess._id });
 
   if (!weeklyFood) {
     throw new ApiError(404, "Weekly food schedule not found for this mess");
@@ -148,22 +172,21 @@ export const updateMessDetails = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Mess code is required");
   }
 
-  // Find mess by code
-  const mess = await Mess.findOne({ code });
+  // Use findOneAndUpdate for better performance
+  const updateObject = {};
+  if (name) updateObject.name = name;
+  if (location) updateObject.location = location;
+  if (capacity) updateObject.capacity = capacity;
+  if (notice) updateObject.notice = notice;
+  if (workers) updateObject.workers = workers;
+
+  const mess = await Mess.findOneAndUpdate({ code }, updateObject, {
+    new: true,
+  });
 
   if (!mess) {
     throw new ApiError(404, "Mess not found");
   }
-
-  // Update fields if provided
-  if (name) mess.name = name;
-  if (location) mess.location = location;
-  if (capacity) mess.capacity = capacity;
-  if (notice) mess.notice = notice;
-  if (workers) mess.workers = workers;
-
-  // Save updated mess
-  await mess.save();
 
   return res
     .status(200)
@@ -174,84 +197,75 @@ export const updateWeeklyFood = asyncHandler(async (req, res) => {
   const { code } = req.params;
   const { meals } = req.body;
 
-  if (!code) {
-    throw new ApiError(400, "Mess code is required");
+  if (!code || !meals || !Array.isArray(meals)) {
+    throw new ApiError(400, "Missing or invalid required fields");
   }
 
   // Find mess by code
-  const mess = await Mess.findOne({ code });
-
+  const mess = await Mess.findOne({ code }).select("_id");
   if (!mess) {
     throw new ApiError(404, "Mess not found");
   }
 
   // Find weekly food for the mess
-  let weeklyFood = await WeeklyFood.findOne({ mess: mess._id });
-
+  const weeklyFood = await WeeklyFood.findOne({ mess: mess._id });
   if (!weeklyFood) {
     throw new ApiError(404, "Weekly food schedule not found for this mess");
   }
 
-  // Update meals if provided
-  if (meals && Array.isArray(meals)) {
-    // Create a map of existing meals by day for quick lookup
-    const existingMealsMap = {};
-    weeklyFood.meals.forEach((meal) => {
-      existingMealsMap[meal.day] = meal;
-    });
+  // Create a map of existing meals by day for quick lookup
+  const existingMealsMap = new Map(
+    weeklyFood.meals.map((meal) => [meal.day, meal])
+  );
 
-    // Process each meal from request body
-    const updatedMeals = meals.map((newMeal) => {
-      const existingMeal = existingMealsMap[newMeal.day];
+  // Meal types for processing
+  const mealTypes = ["breakfast", "lunch", "eveningSnacks", "dinner"];
 
-      // If meal for this day exists, merge only the meal content (items, timing)
-      // but preserve existing ratings
-      if (existingMeal) {
-        const mealTypes = ["breakfast", "lunch", "eveningSnacks", "dinner"];
+  // Process meals more efficiently
+  const updatedMeals = meals.map((newMeal) => {
+    const existingMeal = existingMealsMap.get(newMeal.day);
 
-        mealTypes.forEach((type) => {
-          if (newMeal[type]) {
-            // If the meal type exists in request, update items and timing
-            if (existingMeal[type]) {
-              // Preserve ratings and just update items and timing
-              newMeal[type] = {
-                ...newMeal[type],
-                ratings: existingMeal[type].ratings || [],
-                averageRating: existingMeal[type].averageRating || 0,
-                ratingCount: existingMeal[type].ratingCount || 0,
-              };
-            } else {
-              // If this meal type is new, initialize ratings array
-              newMeal[type].ratings = [];
-              newMeal[type].averageRating = 0;
-              newMeal[type].ratingCount = 0;
-            }
-          } else if (existingMeal[type]) {
-            // If meal type not in request but exists in DB, keep it
-            newMeal[type] = existingMeal[type];
-          }
-        });
+    if (existingMeal) {
+      // For existing meals, preserve ratings and update content
+      const processedMeal = { day: newMeal.day };
 
-        return newMeal;
-      }
-
-      // If it's a completely new meal for a day, initialize ratings for each meal type
-      const mealTypes = ["breakfast", "lunch", "eveningSnacks", "dinner"];
       mealTypes.forEach((type) => {
         if (newMeal[type]) {
-          newMeal[type].ratings = [];
-          newMeal[type].averageRating = 0;
-          newMeal[type].ratingCount = 0;
+          // Update items and timing, preserve ratings data
+          processedMeal[type] = {
+            ...newMeal[type],
+            ratings: existingMeal[type]?.ratings || [],
+            averageRating: existingMeal[type]?.averageRating || 0,
+            ratingCount: existingMeal[type]?.ratingCount || 0,
+          };
+        } else if (existingMeal[type]) {
+          // Keep existing meal type if not in request
+          processedMeal[type] = existingMeal[type];
         }
       });
 
-      return newMeal;
-    });
+      return processedMeal;
+    } else {
+      // For new meals, initialize rating fields
+      const processedMeal = { day: newMeal.day };
 
-    weeklyFood.meals = updatedMeals;
-  }
+      mealTypes.forEach((type) => {
+        if (newMeal[type]) {
+          processedMeal[type] = {
+            ...newMeal[type],
+            ratings: [],
+            averageRating: 0,
+            ratingCount: 0,
+          };
+        }
+      });
 
-  // Save updated weekly food
+      return processedMeal;
+    }
+  });
+
+  // Update and save
+  weeklyFood.meals = updatedMeals;
   await weeklyFood.save();
 
   return res
@@ -269,7 +283,6 @@ export const getAllMessesInCollege = asyncHandler(async (req, res) => {
   try {
     // Get the college ID from the authenticated user
     const collegeId = req.user.college;
-    console.log("first", req.user);
 
     if (!collegeId) {
       throw new ApiError(400, "College ID not found in user data");
@@ -277,18 +290,21 @@ export const getAllMessesInCollege = asyncHandler(async (req, res) => {
 
     // Find all messes with the matching college ID
     const messes = await Mess.find({ college: collegeId })
-      .populate("hostel", "name code") // Populate hostel with name and code fields
-      .select("-foodRecords"); // Exclude the foodRecords array for better performance
-
-    if (!messes || messes.length === 0) {
-      return res
-        .status(200)
-        .json(new ApiResponse(200, [], "No messes found for this college"));
-    }
+      .populate("hostel", "name code")
+      .select("-foodRecords")
+      .lean(); // Use lean() for better performance when we don't need Mongoose documents
 
     return res
       .status(200)
-      .json(new ApiResponse(200, messes, "Messes fetched successfully"));
+      .json(
+        new ApiResponse(
+          200,
+          messes.length ? messes : [],
+          messes.length
+            ? "Messes fetched successfully"
+            : "No messes found for this college"
+        )
+      );
   } catch (error) {
     throw new ApiError(500, error.message || "Error fetching messes");
   }
@@ -307,15 +323,14 @@ export const getCurrentMealInfo = () => {
   ];
   const currentDate = new Date();
   const currentDay = days[currentDate.getDay()];
-
   const currentHour = currentDate.getHours();
-  const currentMinute = currentDate.getMinutes();
 
   // Define meal time boundaries (24-hour format)
   const breakfastEnd = 10; // 10:00 AM
   const lunchEnd = 15; // 3:00 PM
   const snacksEnd = 18; // 6:00 PM
 
+  // Determine current meal
   let currentMeal;
   if (currentHour < breakfastEnd) {
     currentMeal = "breakfast";
@@ -328,16 +343,14 @@ export const getCurrentMealInfo = () => {
   }
 
   // Determine next meal
-  let nextMeal;
-  if (currentMeal === "breakfast") {
-    nextMeal = "lunch";
-  } else if (currentMeal === "lunch") {
-    nextMeal = "eveningSnacks";
-  } else if (currentMeal === "eveningSnacks") {
-    nextMeal = "dinner";
-  } else {
-    nextMeal = "breakfast"; // Next day's breakfast
-  }
+  const nextMeal =
+    currentMeal === "breakfast"
+      ? "lunch"
+      : currentMeal === "lunch"
+        ? "eveningSnacks"
+        : currentMeal === "eveningSnacks"
+          ? "dinner"
+          : "breakfast";
 
   return { currentDay, currentMeal, nextMeal };
 };
@@ -345,7 +358,9 @@ export const getCurrentMealInfo = () => {
 // Rate a meal or update existing rating
 export const rateMeal = asyncHandler(async (req, res) => {
   const { messCode, day, mealType, rating } = req.body;
+  const userId = req.user._id;
 
+  // Validate inputs
   if (!messCode || !day || !mealType || !rating) {
     throw new ApiError(400, "Missing required fields");
   }
@@ -354,57 +369,79 @@ export const rateMeal = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Rating must be between 1 and 5");
   }
 
-  // Get the userId from the authenticated user
-  const userId = req.user._id;
-
-  // First, find the mess by its code
+  // Find mess and weekly food data
   const mess = await Mess.findOne({ code: messCode }).select("_id");
   if (!mess) {
     throw new ApiError(404, "Mess not found");
   }
 
-  // Now, find the weekly food record using the mess id
-  const weeklyFood = await WeeklyFood.findOne({ mess: mess._id }).populate(
-    "mess"
+  // Use findOneAndUpdate for atomic operation
+  const updateResult = await WeeklyFood.findOneAndUpdate(
+    {
+      mess: mess._id,
+      "meals.day": day,
+      [`meals.$.${mealType}`]: { $exists: true },
+    },
+    {
+      $set: {
+        [`meals.$[meal].${mealType}.ratings.$[rating].rating`]: Number(rating),
+      },
+    },
+    {
+      arrayFilters: [{ "meal.day": day }, { "rating.user": userId }],
+      new: true,
+    }
   );
 
-  if (!weeklyFood) {
-    throw new ApiError(404, "Weekly food schedule not found for this mess");
+  // If user hasn't rated before, add new rating
+  if (!updateResult || !updateResult.modifiedCount) {
+    const weeklyFood = await WeeklyFood.findOne({ mess: mess._id });
+    if (!weeklyFood) {
+      throw new ApiError(404, "Weekly food schedule not found for this mess");
+    }
+
+    const mealIndex = weeklyFood.meals.findIndex((meal) => meal.day === day);
+    if (mealIndex === -1) {
+      throw new ApiError(404, `Meal schedule for ${day} not found`);
+    }
+
+    if (!weeklyFood.meals[mealIndex][mealType]) {
+      throw new ApiError(404, `${mealType} is not a valid meal type`);
+    }
+
+    // Push new rating
+    weeklyFood.meals[mealIndex][mealType].ratings.push({
+      user: userId,
+      rating: Number(rating),
+    });
+
+    await weeklyFood.save();
+
+    // Get updated meal for response
+    const updatedMeal = weeklyFood.meals[mealIndex][mealType];
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          day,
+          mealType,
+          rating,
+          averageRating: updatedMeal.averageRating,
+          ratingCount: updatedMeal.ratingCount,
+        },
+        "Meal rated successfully"
+      )
+    );
   }
 
-  // Find the meal for the specified day
-  const mealIndex = weeklyFood.meals.findIndex((meal) => meal.day === day);
-
-  if (mealIndex === -1) {
-    throw new ApiError(404, `Meal schedule for ${day} not found`);
-  }
-
-  // Check if the meal type exists
-  if (!weeklyFood.meals[mealIndex][mealType]) {
-    throw new ApiError(404, `${mealType} is not a valid meal type`);
-  }
-
-  // Check if user has already rated this meal
-  const ratingIndex = weeklyFood.meals[mealIndex][mealType].ratings.findIndex(
-    (r) => r.user.toString() === userId.toString()
+  // Get the updated meal for the response
+  const weeklyFood = await WeeklyFood.findOne(
+    { mess: mess._id },
+    { meals: { $elemMatch: { day } } }
   );
 
-  // Create the rating object with only user and rating fields
-  const ratingObject = {
-    user: userId,
-    rating: Number(rating),
-  };
-
-  // Update or add the rating
-  if (ratingIndex !== -1) {
-    // Update existing rating by replacing the rating value
-    weeklyFood.meals[mealIndex][mealType].ratings[ratingIndex].rating =
-      Number(rating);
-  } else {
-    weeklyFood.meals[mealIndex][mealType].ratings.push(ratingObject);
-  }
-
-  await weeklyFood.save();
+  const mealData = weeklyFood.meals[0][mealType];
 
   return res.status(200).json(
     new ApiResponse(
@@ -413,12 +450,10 @@ export const rateMeal = asyncHandler(async (req, res) => {
         day,
         mealType,
         rating,
-        averageRating: weeklyFood.meals[mealIndex][mealType].averageRating,
-        ratingCount: weeklyFood.meals[mealIndex][mealType].ratingCount,
+        averageRating: mealData.averageRating,
+        ratingCount: mealData.ratingCount,
       },
-      ratingIndex !== -1
-        ? "Rating updated successfully"
-        : "Meal rated successfully"
+      "Rating updated successfully"
     )
   );
 });
@@ -438,34 +473,26 @@ export const getStudentMealRatings = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Mess not found");
   }
 
-  // Now, find the weekly food record using the mess id
-  const weeklyFood = await WeeklyFood.findOne({ mess: mess._id }).populate(
-    "mess"
-  );
-
+  // Use aggregation pipeline for more efficient data extraction
+  const weeklyFood = await WeeklyFood.findOne({ mess: mess._id });
   if (!weeklyFood) {
     throw new ApiError(404, "Weekly food schedule not found for this mess");
   }
 
-  // Extract user's ratings for each meal
-  const userRatings = {};
+  // Extract user's ratings using reduce for better performance
+  const userRatings = weeklyFood.meals.reduce((result, meal) => {
+    const mealTypes = ["breakfast", "lunch", "eveningSnacks", "dinner"];
 
-  weeklyFood.meals.forEach((meal) => {
-    userRatings[meal.day] = {
-      breakfast: meal.breakfast.ratings.find(
-        (r) => r.user.toString() === userId.toString()
-      ),
-      lunch: meal.lunch.ratings.find(
-        (r) => r.user.toString() === userId.toString()
-      ),
-      eveningSnacks: meal.eveningSnacks.ratings.find(
-        (r) => r.user.toString() === userId.toString()
-      ),
-      dinner: meal.dinner.ratings.find(
-        (r) => r.user.toString() === userId.toString()
-      ),
-    };
-  });
+    result[meal.day] = mealTypes.reduce((mealResult, type) => {
+      mealResult[type] =
+        meal[type]?.ratings.find(
+          (r) => r.user.toString() === userId.toString()
+        ) || null;
+      return mealResult;
+    }, {});
+
+    return result;
+  }, {});
 
   return res
     .status(200)
@@ -483,10 +510,18 @@ export const getMessDetailsForStudent = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Mess code is required");
   }
 
-  // Find the mess
-  const mess = await Mess.findOne({ code: messCode })
-    .populate("hostel", "name")
-    .select("name location capacity notice workers");
+  // Find the mess and weekly food in parallel
+  const [mess, weeklyFood] = await Promise.all([
+    Mess.findOne({ code: messCode })
+      .populate("hostel", "name")
+      .select("name location capacity notice workers")
+      .lean(),
+
+    WeeklyFood.findOne()
+      .where("mess")
+      .equals(Mess.findOne({ code: messCode }).select("_id"))
+      .lean(),
+  ]);
 
   if (!mess) {
     return res.status(250).json({
@@ -495,9 +530,6 @@ export const getMessDetailsForStudent = asyncHandler(async (req, res) => {
     });
   }
 
-  // Find the weekly food record for the mess
-  const weeklyFood = await WeeklyFood.findOne({ mess: mess._id });
-
   if (!weeklyFood) {
     throw new ApiError(404, "Weekly food schedule not found for this mess");
   }
@@ -505,19 +537,13 @@ export const getMessDetailsForStudent = asyncHandler(async (req, res) => {
   // Get current day and meal info
   const { currentDay, currentMeal, nextMeal } = getCurrentMealInfo();
 
-  // Find the meal for the current day
+  // Find the meals using array methods instead of multiple lookups
   const todayMeal = weeklyFood.meals.find((meal) => meal.day === currentDay);
-
   if (!todayMeal) {
     throw new ApiError(404, `Meal schedule for ${currentDay} not found`);
   }
 
-  // Find user's rating for current meal if exists
-  const userCurrentMealRating = todayMeal[currentMeal].ratings.find(
-    (r) => r.user.toString() === userId.toString()
-  );
-
-  // Define days array for calculating next day
+  // Define days array and calculate next day
   const days = [
     "Sunday",
     "Monday",
@@ -527,18 +553,19 @@ export const getMessDetailsForStudent = asyncHandler(async (req, res) => {
     "Friday",
     "Saturday",
   ];
-
-  // Get next day if next meal is breakfast (i.e. next day’s breakfast)
-  let nextDayIndex = days.indexOf(currentDay);
-  let nextDay = currentDay;
-
-  if (nextMeal === "breakfast") {
-    nextDayIndex = (nextDayIndex + 1) % 7;
-    nextDay = days[nextDayIndex];
-  }
+  const nextDayIndex =
+    nextMeal === "breakfast"
+      ? (days.indexOf(currentDay) + 1) % 7
+      : days.indexOf(currentDay);
+  const nextDay = days[nextDayIndex];
 
   // Find next meal data
   const nextDayMeal = weeklyFood.meals.find((meal) => meal.day === nextDay);
+
+  // Find user's rating for current meal
+  const userCurrentMealRating = todayMeal[currentMeal]?.ratings?.find(
+    (r) => r.user.toString() === userId.toString()
+  );
 
   return res.status(200).json(
     new ApiResponse(

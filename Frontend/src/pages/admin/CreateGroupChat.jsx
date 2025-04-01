@@ -26,7 +26,7 @@ export const CreateGroupChat = () => {
             hostelId,
           }
         );
-
+        console.log(response.data);
         if (response.status === 201) {
           navigate(`/hostel/groupChat/${code}`, {
             state: { userId, hostelId },
@@ -34,8 +34,8 @@ export const CreateGroupChat = () => {
           setGroupCreated(true);
         }
       } catch (error) {
-        setMessage("Failed to create group. Please try again.");
         console.error("Error creating group:", error);
+        setMessage("Failed to create group. Please try again.");
       }
     }
   };

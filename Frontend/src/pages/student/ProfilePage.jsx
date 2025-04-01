@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import {
   FaUser,
@@ -16,13 +17,23 @@ import Header from "../../components/Header";
 import hostelService from "../../utils/hostelCheck";
 
 const ProfilePage = () => {
-  const [user, setUser] = useState(null);
+  // Get user data from Redux store instead of making API call
+  const { user: reduxUser, isAuthenticated } = useSelector(
+    (state) => state.auth
+  );
+
   const [college, setCollege] = useState(null);
   const [hostelMess, setHostelMess] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
+    // If not authenticated, redirect to login
+    if (!isAuthenticated) {
+      navigate("/student/login");
+      return;
+    }
+
     const verifyHostel = async () => {
       try {
         const data = await hostelService.checkHostelAssignment();
@@ -47,17 +58,16 @@ const ProfilePage = () => {
       }
     };
     verifyHostel();
-  }, []);
+  }, [isAuthenticated, navigate]);
 
-  // Fetch user data, college and hostel/mess details
+  // Fetch college and hostel/mess details using existing user data
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        // Verify token and get user data
-        const userRes = await api.post("/api/student/verify-token");
-        const userInfo = userRes.data.userInfo;
-        setUser(userInfo);
+      if (!isAuthenticated || !reduxUser) {
+        return;
+      }
 
+      try {
         // Fetch college data
         const collegeRes = await api.get("/api/college/getCollege");
         setCollege(collegeRes.data.college);
@@ -74,9 +84,9 @@ const ProfilePage = () => {
     };
 
     fetchData();
-  }, []);
+  }, [isAuthenticated, reduxUser]);
 
-  if (loading || !user || !college || !hostelMess) {
+  if (loading || !reduxUser || !college || !hostelMess) {
     return (
       <div>
         <Header />
@@ -97,10 +107,18 @@ const ProfilePage = () => {
     {
       icon: <FaUser />,
       label: "Roll Number",
-      value: user.rollNumber || "Not set",
+      value: reduxUser.rollNumber || "Not set",
     },
-    { icon: <FaPhone />, label: "Phone", value: user.phoneNumber || "Not set" },
-    { icon: <FaEnvelope />, label: "Email", value: user.email || "Not set" },
+    {
+      icon: <FaPhone />,
+      label: "Phone",
+      value: reduxUser.phoneNumber || "Not set",
+    },
+    {
+      icon: <FaEnvelope />,
+      label: "Email",
+      value: reduxUser.email || "Not set",
+    },
   ];
 
   const academicInfo = [
@@ -112,12 +130,12 @@ const ProfilePage = () => {
     {
       icon: <FaGraduationCap />,
       label: "Branch",
-      value: user.branch || "Not set",
+      value: reduxUser.branch || "Not set",
     },
     {
       icon: <FaGraduationCap />,
       label: "Year",
-      value: user.year ? `${user.year} Year` : "Not set",
+      value: reduxUser.year ? `${reduxUser.year} Year` : "Not set",
     },
   ];
 
@@ -132,12 +150,16 @@ const ProfilePage = () => {
       label: "Mess",
       value: hostelMess?.mess?.name || "Not assigned",
     },
-    { icon: <FaDoorOpen />, label: "Room", value: user.room || "Not assigned" },
+    {
+      icon: <FaDoorOpen />,
+      label: "Room",
+      value: reduxUser.room || "Not assigned",
+    },
   ];
 
   let role = "Student";
-  if (user.role === "messManager") role = "Mess Manager";
-  if (user.role === "hostelManager") role = "Hostel Manager";
+  if (reduxUser.role === "messManager") role = "Mess Manager";
+  if (reduxUser.role === "hostelManager") role = "Hostel Manager";
 
   return (
     <div className="bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 min-h-screen text-white">
@@ -150,9 +172,9 @@ const ProfilePage = () => {
           <div className="relative z-10 p-8 flex flex-col md:flex-row items-center">
             {/* Profile picture */}
             <div className="mb-6 md:mb-0 md:mr-8">
-              {user.profilePicture ? (
+              {reduxUser.profilePicture ? (
                 <img
-                  src={user.profilePicture}
+                  src={reduxUser.profilePicture}
                   alt="Profile"
                   className="w-36 h-36 rounded-full object-cover border-4 border-blue-500 shadow-lg"
                 />
@@ -166,7 +188,7 @@ const ProfilePage = () => {
             {/* Profile title */}
             <div className="text-center md:text-left">
               <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-blue-600">
-                {user.name}
+                {reduxUser.name}
               </h1>
               <p className="text-lg text-gray-300 mt-2">{role}</p>
               <button

@@ -1,37 +1,39 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-// Try to load the user from localStorage for persistence
-const userInfoRaw = localStorage.getItem("userInfo");
-const userInfo =
-  userInfoRaw && userInfoRaw !== "undefined" && userInfoRaw !== "null"
-    ? JSON.parse(userInfoRaw)
-    : null;
-
 const initialState = {
-  user: userInfo || null,
+  user: null,
   isAuthenticated: false,
-  isLoading: false,
+  loading: false,
   error: null,
+  code: null,
 };
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    // Set user on login
     setUser: (state, action) => {
       state.user = action.payload;
-      console.log(action.payload);
-      localStorage.setItem("userInfo", JSON.stringify(action.payload));
+      state.isAuthenticated = true;
+      state.error = null;
     },
-    // Remove user on logout
     logout: (state) => {
       state.user = null;
       state.isAuthenticated = false;
-      localStorage.removeItem("userInfo");
+      state.error = null;
+    },
+    setLoading: (state, action) => {
+      state.loading = action.payload;
+    },
+    setError: (state, action) => {
+      state.error = action.payload;
+    },
+    setCode: (state, action) => {
+      state.code = action.payload;
     },
   },
 });
 
-export const { setUser, logout } = authSlice.actions;
+export const { setUser, logout, setLoading, setError, setCode } =
+  authSlice.actions;
 export default authSlice.reducer;

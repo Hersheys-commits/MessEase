@@ -1,5 +1,6 @@
 // controllers/adminController.js
 import User from "../model/user.model.js";
+import Hostel from "../model/hostel.model.js";
 import College from "../model/college.model.js";
 import { OAuth2Client } from "google-auth-library";
 import { ApiResponse } from "../util/ApiResponse.js";
@@ -584,6 +585,7 @@ export const createGroupChat = async (req, res) => {
     const { code, userId, groupName, hostelId } = req.body;
     // Check if a group already exists for this hostel
     const existingGroup = await GroupChat.findOne({ hostelId });
+    console.log(existingGroup);
 
     if (existingGroup) {
       return res

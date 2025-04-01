@@ -14,6 +14,8 @@ import {
   StopCircle,
   Mic,
 } from "lucide-react";
+import Header from "../../components/Header";
+import AdminHeader from "../../components/AdminHeader";
 
 // Replace this with the specific user ID that should have pinning privileges
 // const PINNING_ALLOWED_USER_ID = "admin_user_id_here";
@@ -21,11 +23,13 @@ import {
 const socket = io("http://localhost:4001");
 
 export const GroupChat = () => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  console.log("aggags", user);
   const { code } = useParams();
   const location = useLocation();
-  const { hostelId } = location.state || "";
-  const { userId } = location.state || "";
-  const { userName } = location.state || " ";
+  const hostelId = user?.userInfo?.hostel || location.state.hostelId || "";
+  const userId = user?.userInfo?._id || user?.user?._id || "";
+  const userName = user?.userInfo?.name || user?.user?.name || " ";
   const [chats, setChats] = useState([]);
   const [message, setMessage] = useState("");
   const [imageFile, setImageFile] = useState(null);
@@ -52,6 +56,8 @@ export const GroupChat = () => {
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   //
+
+  console.log("ahyrhyr", user);
 
   const startRecording = async () => {
     try {
@@ -767,466 +773,479 @@ export const GroupChat = () => {
   const pollStats = calculatePollStats();
 
   return (
-    <div className="min-h-screen bg-gray-900 flex flex-col transition-colors duration-300">
-      <div className="container mx-auto p-4 flex">
-        {/* Main Chat Panel */}
-        <div
-          className={`bg-gray-800 shadow-md rounded-lg ${showStarredMessages ? "w-2/3" : "w-full"} ${showStarredMessages ? "mr-4" : ""}`}
-        >
-          <div className="flex items-center mb-4 border-b border-gray-700 pb-2 px-4 pt-4">
-            <MessageCircle className="w-8 h-8 text-blue-400 mr-2" />
-            <h2 className="text-2xl font-bold text-gray-200">Group Chat</h2>
-            <div className="ml-auto flex items-center space-x-4">
-              <button
-                onClick={togglePollCreator}
-                className="flex items-center text-blue-400 hover:text-blue-500"
-                disabled={activePoll !== null}
-                title={
-                  activePoll ? "A poll is already active" : "Create a poll"
-                }
-              >
-                <BarChart2 className="w-5 h-5 mr-1" />
-                <span className="text-sm">Poll</span>
-              </button>
-              <button
-                onClick={toggleStarredMessages}
-                className="flex items-center text-yellow-400 hover:text-yellow-500"
-              >
-                <Star
-                  className="w-5 h-5 mr-1"
-                  fill={showStarredMessages ? "#FBBF24" : "none"}
-                />
-                <span className="text-sm">
-                  {showStarredMessages ? "Hide Starred" : "Show Starred"}
-                </span>
-              </button>
-            </div>
-          </div>
-
-          {/* Pinned Message Section */}
-          {pinnedMessage && (
-            <div className="mb-4 bg-yellow-900 bg-opacity-30 p-2 rounded-md relative mx-4">
-              <div className="flex items-center mb-1">
-                <Pin className="w-4 h-4 text-yellow-500 mr-2" />
-                <span className="text-sm text-yellow-300">Pinned Message</span>
-                {canPin && (
-                  <button
-                    onClick={unpinMessage}
-                    className="ml-auto text-sm text-red-400 hover:text-red-500"
-                  >
-                    Unpin
-                  </button>
-                )}
-              </div>
-              <div className="flex">
-                <div className="flex-grow">
-                  <strong className="block text-sm text-gray-300 mb-1">
-                    {pinnedMessage.sender._id === userId
-                      ? "You"
-                      : pinnedMessage.sender.name}
-                  </strong>
-                  {pinnedMessage.message && (
-                    <p className="text-gray-200">{pinnedMessage.message}</p>
-                  )}
-                  {pinnedMessage.image && (
-                    <img
-                      src={pinnedMessage.image}
-                      alt="Pinned image"
-                      className="max-w-full h-auto rounded-md mt-2"
-                    />
-                  )}
-                  {pinnedMessage.audio && (
-                    <div className="mt-2">
-                      <audio controls className="w-96">
-                        <source src={pinnedMessage.audio} type="audio/mp3" />
-                        Your browser does not support the audio element.
-                      </audio>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Active Poll Display */}
-          {activePoll && (
-            <div className="mb-4 bg-blue-900 bg-opacity-30 p-4 rounded-md relative mx-4">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center">
-                  <BarChart2 className="w-5 h-5 text-blue-400 mr-2" />
-                  <span className="text-md font-medium text-blue-300">
-                    Active Poll
-                  </span>
-                </div>
-                {activePoll.createdBy === userId && (
-                  <button
-                    onClick={endPoll}
-                    className="text-sm text-red-400 hover:text-red-500 flex items-center"
-                  >
-                    <X className="w-4 h-4 mr-1" />
-                    End Poll
-                  </button>
-                )}
-              </div>
-
-              <div className="mb-3">
-                <h3 className="text-lg font-bold text-gray-200 mb-1">
-                  {activePoll.question}
-                </h3>
-                <p className="text-xs text-gray-400">
-                  Started by{" "}
-                  {activePoll.createdBy === userId
-                    ? "you"
-                    : activePoll.createdByName}{" "}
-                  • {pollStats.totalVotes} vote
-                  {pollStats.totalVotes !== 1 ? "s" : ""}
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                {activePoll.options.map((option, index) => {
-                  const isSelected = userVote === index;
-                  const percentage = pollStats.percentages[index];
-
-                  return (
-                    <div
-                      key={index}
-                      className={`relative overflow-hidden rounded-md transition-all ${
-                        isSelected
-                          ? "bg-blue-600"
-                          : userVote !== null
-                            ? "bg-gray-700"
-                            : "bg-gray-700 hover:bg-gray-600 cursor-pointer"
-                      }`}
-                      onClick={() => {
-                        if (userVote === null) {
-                          voteOnPoll(index);
-                        }
-                      }}
-                    >
-                      {/* Progress bar background */}
-                      {userVote !== null && (
-                        <div
-                          className="absolute top-0 left-0 h-full bg-blue-800 bg-opacity-50 z-0"
-                          style={{ width: `${percentage}%` }}
-                        ></div>
-                      )}
-
-                      {/* Option text and percentage */}
-                      <div className="relative z-10 flex justify-between items-center p-2">
-                        <span className={`${isSelected ? "font-bold" : ""}`}>
-                          {isSelected && "✓ "}
-                          {option}
-                        </span>
-                        {userVote !== null && (
-                          <span className="text-sm font-medium">
-                            {percentage}%
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
+    <div>
+      {user?.userInfo?.role === "admin" ? <AdminHeader /> : <Header />}
+      <div className="min-h-screen bg-gray-900 flex flex-col transition-colors duration-300">
+        <div className="container mx-auto p-4 flex">
+          {/* Main Chat Panel */}
           <div
-            ref={chatContainerRef}
-            className="mb-4 overflow-y-auto max-h-[500px] scroll-smooth px-4"
+            className={`bg-gray-800 shadow-md rounded-lg ${showStarredMessages ? "w-2/3" : "w-full"} ${showStarredMessages ? "mr-4" : ""}`}
           >
-            {chats.length === 0 ? (
-              <p className="text-center text-gray-400 italic">
-                No messages yet.
-              </p>
-            ) : (
-              <ul className="space-y-2">
-                {chats.map((chat, index) => {
-                  const isStarred = isMessageStarred(chat._id);
-                  return (
-                    <li
-                      key={index}
-                      className={`p-2 rounded-md flex ${
-                        chat.sender._id === userId
-                          ? "justify-end"
-                          : "justify-start"
-                      } `}
+            <div className="flex items-center mb-4 border-b border-gray-700 pb-2 px-4 pt-4">
+              <MessageCircle className="w-8 h-8 text-blue-400 mr-2" />
+              <h2 className="text-2xl font-bold text-gray-200">Group Chat</h2>
+              <div className="ml-auto flex items-center space-x-4">
+                <button
+                  onClick={togglePollCreator}
+                  className="flex items-center text-blue-400 hover:text-blue-500"
+                  disabled={activePoll !== null}
+                  title={
+                    activePoll ? "A poll is already active" : "Create a poll"
+                  }
+                >
+                  <BarChart2 className="w-5 h-5 mr-1" />
+                  <span className="text-sm">Poll</span>
+                </button>
+                <button
+                  onClick={toggleStarredMessages}
+                  className="flex items-center text-yellow-400 hover:text-yellow-500"
+                >
+                  <Star
+                    className="w-5 h-5 mr-1"
+                    fill={showStarredMessages ? "#FBBF24" : "none"}
+                  />
+                  <span className="text-sm">
+                    {showStarredMessages ? "Hide Starred" : "Show Starred"}
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            {/* Pinned Message Section */}
+            {pinnedMessage && (
+              <div className="mb-4 bg-yellow-900 bg-opacity-30 p-2 rounded-md relative mx-4">
+                <div className="flex items-center mb-1">
+                  <Pin className="w-4 h-4 text-yellow-500 mr-2" />
+                  <span className="text-sm text-yellow-300">
+                    Pinned Message
+                  </span>
+                  {canPin && (
+                    <button
+                      onClick={unpinMessage}
+                      className="ml-auto text-sm text-red-400 hover:text-red-500"
                     >
+                      Unpin
+                    </button>
+                  )}
+                </div>
+                <div className="flex">
+                  <div className="flex-grow">
+                    <strong className="block text-sm text-gray-300 mb-1">
+                      {pinnedMessage.sender._id === userId
+                        ? "You"
+                        : pinnedMessage.sender.name}
+                    </strong>
+                    {pinnedMessage.message && (
+                      <p className="text-gray-200">{pinnedMessage.message}</p>
+                    )}
+                    {pinnedMessage.image && (
+                      <img
+                        src={pinnedMessage.image}
+                        alt="Pinned image"
+                        className="max-w-full h-auto rounded-md mt-2"
+                      />
+                    )}
+                    {pinnedMessage.audio && (
+                      <div className="mt-2">
+                        <audio controls className="w-96">
+                          <source src={pinnedMessage.audio} type="audio/mp3" />
+                          Your browser does not support the audio element.
+                        </audio>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Active Poll Display */}
+            {activePoll && (
+              <div className="mb-4 bg-blue-900 bg-opacity-30 p-4 rounded-md relative mx-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center">
+                    <BarChart2 className="w-5 h-5 text-blue-400 mr-2" />
+                    <span className="text-md font-medium text-blue-300">
+                      Active Poll
+                    </span>
+                  </div>
+                  {activePoll.createdBy === userId && (
+                    <button
+                      onClick={endPoll}
+                      className="text-sm text-red-400 hover:text-red-500 flex items-center"
+                    >
+                      <X className="w-4 h-4 mr-1" />
+                      End Poll
+                    </button>
+                  )}
+                </div>
+
+                <div className="mb-3">
+                  <h3 className="text-lg font-bold text-gray-200 mb-1">
+                    {activePoll.question}
+                  </h3>
+                  <p className="text-xs text-gray-400">
+                    Started by{" "}
+                    {activePoll.createdBy === userId
+                      ? "you"
+                      : activePoll.createdByName}{" "}
+                    • {pollStats.totalVotes} vote
+                    {pollStats.totalVotes !== 1 ? "s" : ""}
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  {activePoll.options.map((option, index) => {
+                    const isSelected = userVote === index;
+                    const percentage = pollStats.percentages[index];
+
+                    return (
                       <div
-                        className={`max-w-[80%] ${
-                          chat.sender._id === userId
-                            ? "bg-blue-900 text-right"
-                            : "bg-gray-700 text-left"
-                        } p-2 rounded-md relative group`}
+                        key={index}
+                        className={`relative overflow-hidden rounded-md transition-all ${
+                          isSelected
+                            ? "bg-blue-600"
+                            : userVote !== null
+                              ? "bg-gray-700"
+                              : "bg-gray-700 hover:bg-gray-600 cursor-pointer"
+                        }`}
+                        onClick={() => {
+                          if (userVote === null) {
+                            voteOnPoll(index);
+                          }
+                        }}
                       >
-                        <strong className="block text-sm text-gray-300 mb-1">
-                          {chat.sender._id === userId
-                            ? "You"
-                            : chat.sender.name}
-                        </strong>
-                        {chat.message && <p>{chat.message}</p>}
-                        {chat.image && (
-                          <img
-                            src={chat.image}
-                            alt="Sent image"
-                            className="max-w-full h-auto rounded-md mt-2"
-                          />
+                        {/* Progress bar background */}
+                        {userVote !== null && (
+                          <div
+                            className="absolute top-0 left-0 h-full bg-blue-800 bg-opacity-50 z-0"
+                            style={{ width: `${percentage}%` }}
+                          ></div>
                         )}
-                        {/* Audio file rendering */}
-                        {chat.audio && (
-                          <div className="mt-2">
-                            <audio controls className="w-96">
-                              <source src={chat.audio} type="audio/mpeg" />
-                              Your browser does not support the audio element.
-                            </audio>
-                          </div>
-                        )}
-                        {/* Message action buttons container */}
-                        <div className="absolute top-1 right-1 flex space-x-1">
-                          {/* Delete button - only for user's own messages */}
-                          {(canPin || chat.sender._id === userId) && (
-                            <button
-                              onClick={() => deleteMessage(chat._id)}
-                              className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                              title="Delete message"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          )}
-                          {/* Star button for any user - now with filled star when active */}
-                          <button
-                            onClick={() => starMessage(chat)}
-                            className={`${
-                              isStarred
-                                ? "text-yellow-400"
-                                : "text-gray-400 hover:text-yellow-400"
-                            } ${isStarred ? "" : "opacity-0 group-hover:opacity-100"} transition-opacity`}
-                            title={
-                              isStarred ? "Unstar message" : "Star message"
-                            }
-                          >
-                            <Star
-                              className="w-4 h-4"
-                              fill={isStarred ? "#FBBF24" : "none"}
-                            />
-                          </button>
-                          {/* Pin button only for authorized user */}
-                          {canPin && (
-                            <button
-                              onClick={() => pinMessage(chat)}
-                              className="text-gray-400 hover:text-yellow-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                              title="Pin message"
-                            >
-                              <Pin className="w-4 h-4" />
-                            </button>
+
+                        {/* Option text and percentage */}
+                        <div className="relative z-10 flex justify-between items-center p-2">
+                          <span className={`${isSelected ? "font-bold" : ""}`}>
+                            {isSelected && "✓ "}
+                            {option}
+                          </span>
+                          {userVote !== null && (
+                            <span className="text-sm font-medium">
+                              {percentage}%
+                            </span>
                           )}
                         </div>
                       </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </div>
-
-          {/* Form for sending messages */}
-
-          <form onSubmit={sendMessage} className="p-4 border-t border-gray-700">
-            {/* Media previews */}
-            <div className="mb-2 flex flex-wrap gap-2">
-              {imagePreview && (
-                <div className="relative inline-block">
-                  <img
-                    src={imagePreview}
-                    alt="Upload preview"
-                    className="h-20 rounded-md border border-gray-600"
-                  />
-                  <button
-                    type="button"
-                    onClick={clearImagePreview}
-                    className="absolute top-0 right-0 bg-red-500 rounded-full p-1 transform translate-x-1/2 -translate-y-1/2"
-                  >
-                    <X className="w-3 h-3 text-white" />
-                  </button>
+                    );
+                  })}
                 </div>
-              )}
-
-              {audioPreview && (
-                <div className="relative inline-block">
-                  <audio
-                    src={audioPreview}
-                    controls
-                    className="h-10 rounded-md border border-gray-600"
-                  />
-                  <button
-                    type="button"
-                    onClick={clearAudioPreview}
-                    className="absolute top-0 right-0 bg-red-500 rounded-full p-1 transform translate-x-1/2 -translate-y-1/2"
-                  >
-                    <X className="w-3 h-3 text-white" />
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div className="flex items-center">
-              <input
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Type a message..."
-                className="flex-grow bg-gray-700 text-gray-200 p-2 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-
-              <label className="p-2 bg-gray-700 cursor-pointer hover:bg-gray-600 transition-colors">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="hidden"
-                />
-                <ImageIcon className="w-5 h-5 text-gray-400 hover:text-gray-300" />
-              </label>
-
-              <button
-                type="button"
-                onClick={isRecording ? stopRecording : startRecording}
-                className={`p-2 bg-gray-700 cursor-pointer hover:bg-gray-600 transition-colors ${isRecording ? "text-red-500" : "text-gray-400 hover:text-gray-300"}`}
-              >
-                {isRecording ? (
-                  <StopCircle className="w-5 h-5" />
-                ) : (
-                  <Mic className="w-5 h-5" />
-                )}
-              </button>
-
-              <button
-                type="submit"
-                disabled={message.trim() === "" && !imageFile && !audioFile}
-                className="bg-blue-600 p-2 rounded-r-md hover:bg-blue-700 transition-colors disabled:bg-blue-800 disabled:opacity-50"
-              >
-                <Send className="w-5 h-5 text-white" />
-              </button>
-            </div>
-          </form>
-        </div>
-
-        {/* Starred Messages Sidebar */}
-        {showStarredMessages && (
-          <div className="w-1/3 bg-gray-800 shadow-md rounded-lg overflow-hidden">
-            <div className="p-4 border-b border-gray-700 flex items-center justify-between">
-              <div className="flex items-center">
-                <Star className="w-5 h-5 text-yellow-400 mr-2" fill="#FBBF24" />
-                <h3 className="text-xl font-bold text-gray-200">
-                  Starred Messages
-                </h3>
               </div>
-              <button
-                onClick={clearAllStarredMessages}
-                className="text-sm text-red-400 hover:text-red-500"
-                disabled={starredMessages.length === 0}
-              >
-                Clear All
-              </button>
-            </div>
+            )}
 
-            <div className="overflow-y-auto max-h-[570px] p-4">
-              {starredMessages.length === 0 ? (
+            <div
+              ref={chatContainerRef}
+              className="mb-4 overflow-y-auto max-h-[500px] scroll-smooth px-4"
+            >
+              {chats.length === 0 ? (
                 <p className="text-center text-gray-400 italic">
-                  No starred messages.
+                  No messages yet.
                 </p>
               ) : (
-                <ul className="space-y-4">
-                  {starredMessages.map((msg, index) => (
-                    <li
-                      key={index}
-                      className="bg-gray-700 p-3 rounded-md relative group"
-                    >
-                      <strong className="block text-sm text-gray-300 mb-1">
-                        {msg.sender._id === userId ? "You" : msg.sender.name}
-                      </strong>
-                      {msg.message && (
-                        <p className="text-gray-200">{msg.message}</p>
-                      )}
-                      {msg.image && (
-                        <img
-                          src={msg.image}
-                          alt="Starred image"
-                          className="max-w-full h-auto rounded-md mt-2"
-                        />
-                      )}
-                      <button
-                        onClick={() => starMessage(msg)}
-                        className="absolute top-2 right-2 text-yellow-400 hover:text-yellow-500"
-                        title="Unstar message"
+                <ul className="space-y-2">
+                  {chats.map((chat, index) => {
+                    const isStarred = isMessageStarred(chat._id);
+                    return (
+                      <li
+                        key={index}
+                        className={`p-2 rounded-md flex ${
+                          chat.sender._id === userId
+                            ? "justify-end"
+                            : "justify-start"
+                        } `}
                       >
-                        <Star className="w-4 h-4" fill="#FBBF24" />
-                      </button>
-                      <span className="text-xs text-gray-400 mt-2 block">
-                        {new Date(msg.createdAt).toLocaleString()}
-                      </span>
-                    </li>
-                  ))}
+                        <div
+                          className={`max-w-[80%] ${
+                            chat.sender._id === userId
+                              ? "bg-blue-900 text-right"
+                              : "bg-gray-700 text-left"
+                          } p-2 rounded-md relative group`}
+                        >
+                          <strong className="block text-sm text-gray-300 mb-1">
+                            {chat.sender._id === userId
+                              ? "You"
+                              : chat.sender.name}
+                          </strong>
+                          {chat.message && <p>{chat.message}</p>}
+                          {chat.image && (
+                            <img
+                              src={chat.image}
+                              alt="Sent image"
+                              className="max-w-full h-auto rounded-md mt-2"
+                            />
+                          )}
+                          {/* Audio file rendering */}
+                          {chat.audio && (
+                            <div className="mt-2">
+                              <audio controls className="w-96">
+                                <source src={chat.audio} type="audio/mpeg" />
+                                Your browser does not support the audio element.
+                              </audio>
+                            </div>
+                          )}
+                          {/* Message action buttons container */}
+                          <div className="absolute top-1 right-1 flex space-x-1">
+                            {/* Delete button - only for user's own messages */}
+                            {(canPin || chat.sender._id === userId) && (
+                              <button
+                                onClick={() => deleteMessage(chat._id)}
+                                className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                title="Delete message"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            )}
+                            {/* Star button for any user - now with filled star when active */}
+                            <button
+                              onClick={() => starMessage(chat)}
+                              className={`${
+                                isStarred
+                                  ? "text-yellow-400"
+                                  : "text-gray-400 hover:text-yellow-400"
+                              } ${isStarred ? "" : "opacity-0 group-hover:opacity-100"} transition-opacity`}
+                              title={
+                                isStarred ? "Unstar message" : "Star message"
+                              }
+                            >
+                              <Star
+                                className="w-4 h-4"
+                                fill={isStarred ? "#FBBF24" : "none"}
+                              />
+                            </button>
+                            {/* Pin button only for authorized user */}
+                            {canPin && (
+                              <button
+                                onClick={() => pinMessage(chat)}
+                                className="text-gray-400 hover:text-yellow-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                title="Pin message"
+                              >
+                                <Pin className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
+            </div>
+
+            {/* Form for sending messages */}
+
+            <form
+              onSubmit={sendMessage}
+              className="p-4 border-t border-gray-700"
+            >
+              {/* Media previews */}
+              <div className="mb-2 flex flex-wrap gap-2">
+                {imagePreview && (
+                  <div className="relative inline-block">
+                    <img
+                      src={imagePreview}
+                      alt="Upload preview"
+                      className="h-20 rounded-md border border-gray-600"
+                    />
+                    <button
+                      type="button"
+                      onClick={clearImagePreview}
+                      className="absolute top-0 right-0 bg-red-500 rounded-full p-1 transform translate-x-1/2 -translate-y-1/2"
+                    >
+                      <X className="w-3 h-3 text-white" />
+                    </button>
+                  </div>
+                )}
+
+                {audioPreview && (
+                  <div className="relative inline-block">
+                    <audio
+                      src={audioPreview}
+                      controls
+                      className="h-10 rounded-md border border-gray-600"
+                    />
+                    <button
+                      type="button"
+                      onClick={clearAudioPreview}
+                      className="absolute top-0 right-0 bg-red-500 rounded-full p-1 transform translate-x-1/2 -translate-y-1/2"
+                    >
+                      <X className="w-3 h-3 text-white" />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  type="text"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Type a message..."
+                  className="flex-grow bg-gray-700 text-gray-200 p-2 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+
+                <label className="p-2 bg-gray-700 cursor-pointer hover:bg-gray-600 transition-colors">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                  <ImageIcon className="w-5 h-5 text-gray-400 hover:text-gray-300" />
+                </label>
+
+                <button
+                  type="button"
+                  onClick={isRecording ? stopRecording : startRecording}
+                  className={`p-2 bg-gray-700 cursor-pointer hover:bg-gray-600 transition-colors ${isRecording ? "text-red-500" : "text-gray-400 hover:text-gray-300"}`}
+                >
+                  {isRecording ? (
+                    <StopCircle className="w-5 h-5" />
+                  ) : (
+                    <Mic className="w-5 h-5" />
+                  )}
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={message.trim() === "" && !imageFile && !audioFile}
+                  className="bg-blue-600 p-2 rounded-r-md hover:bg-blue-700 transition-colors disabled:bg-blue-800 disabled:opacity-50"
+                >
+                  <Send className="w-5 h-5 text-white" />
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Starred Messages Sidebar */}
+          {showStarredMessages && (
+            <div className="w-1/3 bg-gray-800 shadow-md rounded-lg overflow-hidden">
+              <div className="p-4 border-b border-gray-700 flex items-center justify-between">
+                <div className="flex items-center">
+                  <Star
+                    className="w-5 h-5 text-yellow-400 mr-2"
+                    fill="#FBBF24"
+                  />
+                  <h3 className="text-xl font-bold text-gray-200">
+                    Starred Messages
+                  </h3>
+                </div>
+                <button
+                  onClick={clearAllStarredMessages}
+                  className="text-sm text-red-400 hover:text-red-500"
+                  disabled={starredMessages.length === 0}
+                >
+                  Clear All
+                </button>
+              </div>
+
+              <div className="overflow-y-auto max-h-[570px] p-4">
+                {starredMessages.length === 0 ? (
+                  <p className="text-center text-gray-400 italic">
+                    No starred messages.
+                  </p>
+                ) : (
+                  <ul className="space-y-4">
+                    {starredMessages.map((msg, index) => (
+                      <li
+                        key={index}
+                        className="bg-gray-700 p-3 rounded-md relative group"
+                      >
+                        <strong className="block text-sm text-gray-300 mb-1">
+                          {msg.sender._id === userId ? "You" : msg.sender.name}
+                        </strong>
+                        {msg.message && (
+                          <p className="text-gray-200">{msg.message}</p>
+                        )}
+                        {msg.image && (
+                          <img
+                            src={msg.image}
+                            alt="Starred image"
+                            className="max-w-full h-auto rounded-md mt-2"
+                          />
+                        )}
+                        <button
+                          onClick={() => starMessage(msg)}
+                          className="absolute top-2 right-2 text-yellow-400 hover:text-yellow-500"
+                          title="Unstar message"
+                        >
+                          <Star className="w-4 h-4" fill="#FBBF24" />
+                        </button>
+                        <span className="text-xs text-gray-400 mt-2 block">
+                          {new Date(msg.createdAt).toLocaleString()}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Poll Creator Modal */}
+        {showPollCreator && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold text-gray-200">
+                  Create a Poll
+                </h3>
+                <button
+                  onClick={togglePollCreator}
+                  className="text-gray-400 hover:text-gray-300"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-gray-300 mb-2">Question</label>
+                <input
+                  type="text"
+                  value={pollQuestion}
+                  onChange={(e) => setPollQuestion(e.target.value)}
+                  placeholder="Enter your question..."
+                  className="w-full bg-gray-700 text-gray-200 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-gray-300 mb-2">Options</label>
+                {pollOptions.map((option, index) => (
+                  <input
+                    key={index}
+                    type="text"
+                    value={option}
+                    onChange={(e) =>
+                      handlePollOptionChange(index, e.target.value)
+                    }
+                    placeholder={`Option ${index + 1}`}
+                    className="w-full bg-gray-700 text-gray-200 p-2 rounded-md mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                ))}
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  onClick={createPoll}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  Create Poll
+                </button>
+              </div>
             </div>
           </div>
         )}
       </div>
-
-      {/* Poll Creator Modal */}
-      {showPollCreator && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-gray-200">Create a Poll</h3>
-              <button
-                onClick={togglePollCreator}
-                className="text-gray-400 hover:text-gray-300"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-gray-300 mb-2">Question</label>
-              <input
-                type="text"
-                value={pollQuestion}
-                onChange={(e) => setPollQuestion(e.target.value)}
-                placeholder="Enter your question..."
-                className="w-full bg-gray-700 text-gray-200 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-gray-300 mb-2">Options</label>
-              {pollOptions.map((option, index) => (
-                <input
-                  key={index}
-                  type="text"
-                  value={option}
-                  onChange={(e) =>
-                    handlePollOptionChange(index, e.target.value)
-                  }
-                  placeholder={`Option ${index + 1}`}
-                  className="w-full bg-gray-700 text-gray-200 p-2 rounded-md mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              ))}
-            </div>
-
-            <div className="flex justify-end">
-              <button
-                onClick={createPoll}
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
-              >
-                Create Poll
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

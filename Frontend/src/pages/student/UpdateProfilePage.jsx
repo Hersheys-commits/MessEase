@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { setUser } from "../../store/authSlice"; // Adjust path as needed
 import api from "../../utils/axiosRequest";
 import {
   FaUser,
@@ -16,10 +18,15 @@ import toast from "react-hot-toast";
 const UpdateProfile = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  // Get user data from Redux store
+  const userData = useSelector((state) => state.auth.user);
+
   const redirectPath = location.state?.redirect || "/student/home";
   const alertMessage = location.state?.message || "";
 
-  const [user, setUser] = useState({
+  const [user, setUserState] = useState({
     name: "",
     branch: "",
     year: "",
@@ -27,7 +34,7 @@ const UpdateProfile = () => {
     phoneNumber: "",
     hostel: "",
     profilePicture: "",
-    rollNumber: "", // Added rollNumber field
+    rollNumber: "",
   });
 
   const [hostels, setHostels] = useState([]);
@@ -38,37 +45,58 @@ const UpdateProfile = () => {
   const [previewUrl, setPreviewUrl] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
 
+  // Populate form with user data from Redux
+  useEffect(() => {
+    if (userData) {
+      setUserState({
+        name: userData.name || "",
+        branch: userData.branch || "",
+        year: userData.year || "",
+        room: userData.room || "",
+        phoneNumber: userData.phoneNumber || "",
+        hostel: userData.hostel || "",
+        profilePicture: userData.profilePicture || "",
+        rollNumber: userData.rollNumber || "",
+      });
+    }
+  }, [userData]);
+
   // Fetch user data and hostels
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Get user data
         const userResponse = await api.post("/api/student/verify-token");
-        setUser({
-          name: userResponse?.data?.userInfo?.name || "",
-          branch: userResponse?.data?.userInfo?.branch || "",
-          year: userResponse?.data?.userInfo?.year || "",
-          room: userResponse?.data?.userInfo?.room || "",
-          phoneNumber: userResponse?.data?.userInfo?.phoneNumber || "",
-          hostel: userResponse?.data?.userInfo?.hostel || "",
-          profilePicture: userResponse?.data?.userInfo?.profilePicture || "",
-          rollNumber: userResponse?.data?.userInfo?.rollNumber || "", // Set rollNumber
+        const userInfo = userResponse?.data?.userInfo;
+
+        // Update Redux store with user data
+        dispatch(setUser(userInfo));
+
+        // Update local state with user data
+        setUserState({
+          name: userInfo?.name || "",
+          branch: userInfo?.branch || "",
+          year: userInfo?.year || "",
+          room: userInfo?.room || "",
+          phoneNumber: userInfo?.phoneNumber || "",
+          hostel: userInfo?.hostel || "",
+          profilePicture: userInfo?.profilePicture || "",
+          rollNumber: userInfo?.rollNumber || "",
         });
 
         // Get hostels for the user's college
         const hostelResponse = await api.post("/api/hostel/fetchAllHostels");
-        console.log("hostel", hostelResponse);
         setHostels(hostelResponse.data.hostels);
         setLoading(false);
       } catch (err) {
-        console.log("hostel", err.response);
+        console.log("Error fetching data:", err.response);
         setError(err.response?.data?.message || "Failed to load data");
         setLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [dispatch]);
 
   // Preview profile picture
   useEffect(() => {
@@ -84,7 +112,7 @@ const UpdateProfile = () => {
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setUser((prev) => ({
+    setUserState((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -124,7 +152,7 @@ const UpdateProfile = () => {
         room: user.room,
         phoneNumber: user.phoneNumber,
         hostelId: user.hostel,
-        rollNumber: user.rollNumber, // Include rollNumber in update data
+        rollNumber: user.rollNumber,
       };
 
       await api.patch("/api/student/update-profile", updateData);
@@ -144,9 +172,17 @@ const UpdateProfile = () => {
         });
       }
 
+      // After successful update, fetch the updated user data
+      const userResponse = await api.post("/api/student/verify-token");
+      const updatedUserInfo = userResponse?.data?.userInfo;
+
+      // Update Redux store with the latest user data
+      dispatch(setUser(updatedUserInfo));
+
       setSuccess("Profile updated successfully!");
       toast.success("Profile updated successfully");
       navigate("/student/profile");
+
       // Redirect after successful update if there was a redirect path
       if (location.state?.redirect) {
         setTimeout(() => navigate(redirectPath), 1500);

@@ -1,10 +1,10 @@
-import { useDispatch } from "react-redux";
 import { useNavigate, NavLink, useLocation } from "react-router-dom";
-import { logout } from "../store/authSlice";
 import api from "../utils/axiosRequest";
 import toast from "react-hot-toast";
 import { FaMoneyBillWave } from "react-icons/fa";
 import { useEffect, useState, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setUser, logout } from "../store/authSlice";
 import Logo from "./Logo";
 
 const AdminHeader = () => {
@@ -16,6 +16,7 @@ const AdminHeader = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -48,7 +49,7 @@ const AdminHeader = () => {
 
   const handleLogout = async () => {
     try {
-      const res = await api.post("/api/admin/logout", {});
+      await api.post("/api/admin/logout");
       dispatch(logout());
       toast.success("Logged out successfully!");
       navigate("/admin/login");
@@ -57,6 +58,22 @@ const AdminHeader = () => {
       toast.error("Logout failed. Please try again.");
     }
   };
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!isAuthenticated) {
+        try {
+          const res = await api.post("/api/admin/verify-token");
+          console.log("header call to save data in redux auth", res.data);
+          dispatch(setUser(res.data.userInfo));
+        } catch (err) {
+          console.error("Token verification failed", err);
+          navigate("/admin/login");
+        }
+      }
+    };
+    fetchUser();
+  }, [dispatch, navigate, user]);
 
   // Navigation links with their paths
   const navLinks = [
@@ -130,7 +147,7 @@ const AdminHeader = () => {
 
       {/* Mobile Menu Button */}
       <div className="md:hidden relative" ref={menuRef}>
-        <button 
+        <button
           onClick={toggleMenu}
           className="p-2 rounded-md hover:bg-gray-800 transition-colors duration-200"
           aria-label="Toggle menu"
@@ -150,7 +167,7 @@ const AdminHeader = () => {
             />
           </svg>
         </button>
-        
+
         {/* Mobile Menu Dropdown */}
         {isMenuOpen && (
           <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-xl z-50 animate-fadeIn">
@@ -200,7 +217,9 @@ const AdminHeader = () => {
                         />
                       </svg>
                     )}
-                    {link.icon === "money" && <FaMoneyBillWave className="mr-2" />}
+                    {link.icon === "money" && (
+                      <FaMoneyBillWave className="mr-2" />
+                    )}
                     {link.title}
                   </div>
                 </NavLink>

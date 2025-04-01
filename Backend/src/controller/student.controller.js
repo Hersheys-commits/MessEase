@@ -732,7 +732,7 @@ export const getFilterOptions = asyncHandler(async (req, res) => {
       college: collegeId,
       year: { $ne: null },
     });
-    
+
     // Get unique hostels
     const hostels = await Hostel.find({ college: collegeId })
       .select("name")
