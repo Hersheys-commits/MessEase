@@ -16,7 +16,7 @@ function BookRooms() {
   } = location.state || {};
 
   const [selectedRoom, setSelectedRoom] = useState("");
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
   const { loadingCheck } = useHostelCheck();
   const isBlocked = useSelector((state) => state.auth.isBlocked);
@@ -74,7 +74,7 @@ function BookRooms() {
     }
   };
 
-  if (loading || loadingCheck) {
+  if (bookingLoading || loadingCheck) {
     return (
       <div className="bg-gray-900 min-h-screen text-gray-100">
         <Header />

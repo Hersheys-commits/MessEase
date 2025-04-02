@@ -46,6 +46,7 @@ import HostelComplaintsPage from "./pages/admin/HostelComplaints.jsx";
 import MessComplaintsPage from "./pages/admin/MessComplaints.jsx";
 import { CreateGroupChat } from "./pages/admin/CreateGroupChat";
 import { GroupChat } from "./pages/hostel/GroupChat";
+import CustomCursor from "./components/CustomCursor.jsx";
 
 function App() {
   useEffect(() => {
@@ -177,6 +178,7 @@ function App() {
         position="top-right"
       /> */}
       <CustomToaster />
+      <CustomCursor />
     </>
   );
 }

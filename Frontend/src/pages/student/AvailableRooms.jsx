@@ -10,7 +10,7 @@ function AvailableRooms() {
   const [checkInDate, setCheckInDate] = useState("");
   const [checkOutDate, setCheckOutDate] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { loadingCheck } = useHostelCheck();
   const isBlocked = useSelector((state) => state.auth.isBlocked);
@@ -60,7 +60,7 @@ function AvailableRooms() {
     }
   };
 
-  if (loading || loadingCheck) {
+  if (loadingCheck) {
     return (
       <div className="bg-gray-900 min-h-screen text-gray-100">
         <Header />
