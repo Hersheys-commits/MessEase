@@ -6,6 +6,7 @@ const initialState = {
   loading: false,
   error: null,
   code: null,
+  isBlocked: false,
 };
 
 const authSlice = createSlice({
@@ -31,9 +32,12 @@ const authSlice = createSlice({
     setCode: (state, action) => {
       state.code = action.payload;
     },
+    setIsBlocked: (state, action) => {
+      state.isBlocked = action.payload;
+    },
   },
 });
 
-export const { setUser, logout, setLoading, setError, setCode } =
+export const { setUser, logout, setLoading, setError, setCode, setIsBlocked } =
   authSlice.actions;
 export default authSlice.reducer;

@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import api from "../../utils/axiosRequest";
 import Header from "../../components/Header";
-import hostelService from "../../utils/hostelCheck";
 import toast from "react-hot-toast";
+import useHostelCheck from "../../hooks/useHostelCheck";
+import { useSelector } from "react-redux";
 
 function BookRooms() {
   const location = useLocation();
@@ -17,6 +18,14 @@ function BookRooms() {
   const [selectedRoom, setSelectedRoom] = useState("");
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
+  const { loadingCheck } = useHostelCheck();
+  const isBlocked = useSelector((state) => state.auth.isBlocked);
+  useEffect(() => {
+    if (isBlocked) {
+      toast.error("You are blocked by admin.");
+      navigate("/student/home");
+    }
+  }, [isBlocked]);
 
   // Redirect if missing required data
   useEffect(() => {
@@ -30,37 +39,6 @@ function BookRooms() {
       navigate("/available-rooms");
     }
   }, [location.state, checkInDate, checkOutDate, availableRooms, navigate]);
-
-  useEffect(() => {
-    const verifyHostel = async () => {
-      try {
-        const data = await hostelService.checkHostelAssignment();
-        if (data.data.user.isBlocked === true) {
-          toast.error("You are blocked by Admin.");
-          navigate("/student/home");
-        }
-        if (
-          !(
-            data.data.user.role === "student" ||
-            data.data.user.role === "messManager" ||
-            data.data.user.role === "hostelManager"
-          )
-        ) {
-          toast.error("You are not authorized to access this page.");
-          navigate("/admin/home");
-        }
-        if (data.data.user.role === "student" && !data.data.user.hostel) {
-          toast.error("Hostel must be assigned.");
-          navigate("/student/update-profile");
-        }
-        setLoading(false);
-      } catch (err) {
-        setLoading(false);
-        navigate("/student/login");
-      }
-    };
-    verifyHostel();
-  }, [navigate]);
 
   const handleRoomSelection = (room) => {
     setSelectedRoom(room);
@@ -96,7 +74,7 @@ function BookRooms() {
     }
   };
 
-  if (loading) {
+  if (loading || loadingCheck) {
     return (
       <div className="bg-gray-900 min-h-screen text-gray-100">
         <Header />

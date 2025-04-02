@@ -14,7 +14,7 @@ import {
 } from "react-icons/fa";
 import api from "../../utils/axiosRequest";
 import Header from "../../components/Header";
-import hostelService from "../../utils/hostelCheck";
+import useHostelCheck from "../../hooks/useHostelCheck";
 
 const ProfilePage = () => {
   // Get user data from Redux store instead of making API call
@@ -26,6 +26,7 @@ const ProfilePage = () => {
   const [hostelMess, setHostelMess] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { loadingCheck } = useHostelCheck();
 
   useEffect(() => {
     // If not authenticated, redirect to login
@@ -33,31 +34,6 @@ const ProfilePage = () => {
       navigate("/student/login");
       return;
     }
-
-    const verifyHostel = async () => {
-      try {
-        const data = await hostelService.checkHostelAssignment();
-        if (
-          !(
-            data.data.user.role === "student" ||
-            data.data.user.role === "messManager" ||
-            data.data.user.role === "hostelManager"
-          )
-        ) {
-          toast.error("You are not authorized to access this page.");
-          navigate("/admin/home");
-        }
-        if (data.data.user.role === "student" && !data.data.user.hostel) {
-          toast.error("Hostel must be assigned.");
-          navigate("/student/update-profile");
-        }
-        setLoading(false);
-      } catch (err) {
-        setLoading(false);
-        navigate("/student/login");
-      }
-    };
-    verifyHostel();
   }, [isAuthenticated, navigate]);
 
   // Fetch college and hostel/mess details using existing user data
@@ -86,7 +62,7 @@ const ProfilePage = () => {
     fetchData();
   }, [isAuthenticated, reduxUser]);
 
-  if (loading || !reduxUser || !college || !hostelMess) {
+  if (loading || !reduxUser || !college || !hostelMess || loadingCheck) {
     return (
       <div>
         <Header />

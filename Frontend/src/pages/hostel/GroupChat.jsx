@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import Header from "../../components/Header";
 import AdminHeader from "../../components/AdminHeader";
+import { useSelector } from "react-redux";
 
 // Replace this with the specific user ID that should have pinning privileges
 // const PINNING_ALLOWED_USER_ID = "admin_user_id_here";
@@ -24,12 +25,13 @@ const socket = io("http://localhost:4001");
 
 export const GroupChat = () => {
   const user = JSON.parse(localStorage.getItem("user"));
-  console.log("aggags", user);
+  const { user: reduxUser } = useSelector((state) => state.auth);
+  console.log("aggags", reduxUser);
   const { code } = useParams();
   const location = useLocation();
-  const hostelId = user?.userInfo?.hostel || location.state.hostelId || "";
-  const userId = user?.userInfo?._id || user?.user?._id || "";
-  const userName = user?.userInfo?.name || user?.user?.name || " ";
+  const hostelId = reduxUser.hostel || location.state.hostelId || "";
+  const userId = reduxUser._id || "";
+  const userName = reduxUser.name || " ";
   const [chats, setChats] = useState([]);
   const [message, setMessage] = useState("");
   const [imageFile, setImageFile] = useState(null);
@@ -774,7 +776,7 @@ export const GroupChat = () => {
 
   return (
     <div>
-      {user?.userInfo?.role === "admin" ? <AdminHeader /> : <Header />}
+      {reduxUser?.role === "admin" ? <AdminHeader /> : <Header />}
       <div className="min-h-screen bg-gray-900 flex flex-col transition-colors duration-300">
         <div className="container mx-auto p-4 flex">
           {/* Main Chat Panel */}

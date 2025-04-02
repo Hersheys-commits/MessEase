@@ -3,42 +3,21 @@ import { Link, useNavigate } from "react-router-dom";
 import api from "../../utils/axiosRequest";
 import toast from "react-hot-toast";
 import Header from "../../components/Header";
-import hostelService from "../../utils/hostelCheck";
+import useHostelCheck from "../../hooks/useHostelCheck";
+import { useSelector } from "react-redux";
 
 const StudentElectionsPage = () => {
   const [elections, setElections] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
+  const { loadingCheck } = useHostelCheck();
+  const isBlocked = useSelector((state) => state.auth.isBlocked);
   useEffect(() => {
-    const verifyHostel = async () => {
-      try {
-        const data = await hostelService.checkHostelAssignment();
-        if (data.data.user.isBlocked === true) {
-          toast.error("You are blocked by Admin.");
-          navigate("/student/home");
-        }
-        if (
-          !(
-            data.data.user.role === "student" ||
-            data.data.user.role === "messManager" ||
-            data.data.user.role === "hostelManager"
-          )
-        ) {
-          toast.error("You are not authorized to access this page.");
-          navigate("/admin/home");
-        }
-        if (data.data.user.role === "student" && !data.data.user.hostel) {
-          navigate("/student/update-profile");
-        }
-        setLoading(false);
-      } catch (err) {
-        setLoading(false);
-        navigate("/student/login");
-      }
-    };
-    verifyHostel();
-  }, []);
+    if (isBlocked) {
+      toast.error("You are blocked by admin.");
+      navigate("/student/home");
+    }
+  }, [isBlocked]);
 
   useEffect(() => {
     const fetchElections = async () => {
@@ -89,7 +68,7 @@ const StudentElectionsPage = () => {
     });
   };
 
-  if (loading || !elections) {
+  if (loading || !elections || loadingCheck) {
     return (
       <div className="bg-gray-900 min-h-screen text-gray-100">
         <Header />

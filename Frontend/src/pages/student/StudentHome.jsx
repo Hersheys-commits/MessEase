@@ -3,21 +3,21 @@ import { useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
 import api from "../../utils/axiosRequest";
 import toast from "react-hot-toast";
-import hostelService from "../../utils/hostelCheck";
+import { useSelector } from "react-redux";
 
 function StudentHome() {
   const [loading, setLoading] = useState(true);
   const [studentName, setStudentName] = useState("");
   const [isBlocked, setIsBlocked] = useState(false);
-  const user = JSON.parse(localStorage.getItem("user"));
-  console.log(user);
+  const { user, code } = useSelector((state) => state.auth);
   const [userId, setUserId] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
     const verifyHostel = async () => {
       try {
-        const data = await hostelService.checkHostelAssignment();
+        const response = await api.get("/api/student/check-hostel-assignment");
+        const data = response.data;
         setStudentName(data.data.user.name);
         setUserId(data.data.user._id);
         setIsBlocked(data.data.user.isBlocked);
@@ -462,11 +462,11 @@ function StudentHome() {
       <button
         className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
         onClick={() => {
-          navigate(`/hostel/groupChat/${user.code}`, {
+          navigate(`/hostel/groupChat/${code}`, {
             state: {
-              hostelId: user.userInfo.hostel,
-              userId: user.userInfo._id,
-              userName: user.userInfo.name,
+              hostelId: user.hostel,
+              userId: user._id,
+              userName: user.name,
             },
           });
         }}

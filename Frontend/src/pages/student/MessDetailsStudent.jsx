@@ -13,7 +13,8 @@ import {
 } from "lucide-react";
 import Header from "../../components/Header";
 import toast from "react-hot-toast";
-import hostelService from "../../utils/hostelCheck";
+import useHostelCheck from "../../hooks/useHostelCheck";
+import { useSelector } from "react-redux";
 
 const MessDetailsStudent = () => {
   const { messCode } = useParams();
@@ -22,37 +23,14 @@ const MessDetailsStudent = () => {
   const [error, setError] = useState(null);
   const [userRating, setUserRating] = useState(0);
   const navigate = useNavigate();
-
+  const { loadingCheck } = useHostelCheck();
+  const isBlocked = useSelector((state) => state.auth.isBlocked);
   useEffect(() => {
-    const verifyHostel = async () => {
-      try {
-        const data = await hostelService.checkHostelAssignment();
-        if (data.data.user.isBlocked === true) {
-          toast.error("You are blocked by Admin.");
-          navigate("/student/home");
-        }
-        if (
-          !(
-            data.data.user.role === "student" ||
-            data.data.user.role === "messManager" ||
-            data.data.user.role === "hostelManager"
-          )
-        ) {
-          toast.error("You are not authorized to access this page.");
-          navigate("/admin/home");
-        }
-        if (data.data.user.role === "student" && !data.data.user.hostel) {
-          toast.error("Hostel must be assigned.");
-          navigate("/student/update-profile");
-        }
-        setLoading(false);
-      } catch (err) {
-        setLoading(false);
-        navigate("/student/login");
-      }
-    };
-    verifyHostel();
-  }, []);
+    if (isBlocked) {
+      toast.error("You are blocked by admin.");
+      navigate("/student/home");
+    }
+  }, [isBlocked]);
 
   useEffect(() => {
     const fetchMessDetails = async () => {
@@ -133,7 +111,7 @@ const MessDetailsStudent = () => {
     return mealType?.charAt(0).toUpperCase() + mealType?.slice(1);
   };
 
-  if (loading || (!messData && !error)) {
+  if (loading || (!messData && !error) || loadingCheck) {
     return (
       <div className="min-h-screen bg-gray-900 text-gray-100">
         <Header />
