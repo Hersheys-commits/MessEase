@@ -12,6 +12,8 @@ import messRoutes from "./route/mess.route.js";
 import electionRoutes from "./route/election.route.js";
 import paymentRoutes from "./route/payment.route.js";
 import complaintRoutes from "./route/complaint.route.js";
+import marketplaceRoutes from "./route/market.route.js";
+import marketchatRoute from "./route/market.chat.route.js";
 import RazorPay from "razorpay";
 
 export const instance = new RazorPay({
@@ -57,6 +59,8 @@ app.use("/api/mess", messRoutes);
 app.use("/api/election", electionRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/complaint", complaintRoutes);
+app.use("/api/marketplace",marketplaceRoutes);
+app.use("/api/marketchat",marketchatRoute);
 
 // Global Error Handling Middleware
 app.use((err, req, res, next) => {

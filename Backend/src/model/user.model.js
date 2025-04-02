@@ -27,6 +27,10 @@ const userSchema = new Schema(
       unique: true,
       sparse: true, // This makes the index ignore documents where googleId is not set
     },
+    wishlist:[{
+      type: mongoose.Schema.Types.ObjectId,
+      ref:"Product"
+    }],
     role: {
       type: String,
       enum: [
