@@ -1,4 +1,4 @@
-import Product from "../model/product.model";
+// import Product from "../model/product.model";
 import User from "../model/user.model";
 
 export const addToWishlist = async (req, res) => {
@@ -46,3 +46,10 @@ export const removeFromWishlist = async (req, res) => {
     }
   };
   
+
+
+  export default {
+    addToWishlist,
+    removeFromWishlist,
+    getWishlist
+  }

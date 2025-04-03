@@ -224,3 +224,17 @@ export const verifyPayment = async(req,res)=>{
         res.status(500).json({message:"Internal server error in verifying payment"});
     }
 }
+
+
+export default {
+    createProduct,
+    updateProduct,
+    deleteProduct,
+    getMyListings,
+    getProductById,
+    getAllProducts,
+    markProductsAsSold,
+    buyNow,
+    verifyPayment,
+    getUserOrders
+}
