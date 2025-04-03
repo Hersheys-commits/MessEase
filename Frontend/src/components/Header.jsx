@@ -86,14 +86,14 @@ const Header = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  if(code === "000"){
+  if (code === "000") {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
         <div className="flex justify-center items-center h-96">
           <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -163,7 +163,7 @@ const Header = () => {
 
       {/* Mobile Menu Button */}
       <div className="md:hidden relative" ref={menuRef}>
-        <button 
+        <button
           onClick={toggleMenu}
           className="p-2 rounded-md hover:bg-gray-800 transition-colors duration-200"
           aria-label="Toggle menu"
@@ -183,7 +183,7 @@ const Header = () => {
             />
           </svg>
         </button>
-        
+
         {/* Mobile Menu Dropdown */}
         {isMenuOpen && (
           <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-xl z-50 animate-fadeIn">
@@ -233,7 +233,9 @@ const Header = () => {
                         />
                       </svg>
                     )}
-                    {link.icon === "money" && <FaMoneyBillWave className="mr-2" />}
+                    {link.icon === "money" && (
+                      <FaMoneyBillWave className="mr-2" />
+                    )}
                     {link.icon === "mess" && code != "000" && (
                       <Utensils className="h-4 mr-2" />
                     )}

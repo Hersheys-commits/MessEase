@@ -130,7 +130,7 @@ const AdminHeader = () => {
 
       {/* Mobile Menu Button */}
       <div className="md:hidden relative" ref={menuRef}>
-        <button 
+        <button
           onClick={toggleMenu}
           className="p-2 rounded-md hover:bg-gray-800 transition-colors duration-200"
           aria-label="Toggle menu"
@@ -150,7 +150,7 @@ const AdminHeader = () => {
             />
           </svg>
         </button>
-        
+
         {/* Mobile Menu Dropdown */}
         {isMenuOpen && (
           <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-xl z-50 animate-fadeIn">
@@ -200,7 +200,9 @@ const AdminHeader = () => {
                         />
                       </svg>
                     )}
-                    {link.icon === "money" && <FaMoneyBillWave className="mr-2" />}
+                    {link.icon === "money" && (
+                      <FaMoneyBillWave className="mr-2" />
+                    )}
                     {link.title}
                   </div>
                 </NavLink>

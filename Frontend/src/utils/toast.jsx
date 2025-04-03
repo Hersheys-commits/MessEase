@@ -73,7 +73,7 @@ export const CustomToaster = () => {
         // Determine which icon to show based on toast type
         let IconComponent = Info;
         let iconColor = "#2196f3";
-        
+
         if (t.type === "success") {
           IconComponent = CheckCircle;
           iconColor = "#4caf50";
@@ -84,7 +84,7 @@ export const CustomToaster = () => {
           IconComponent = AlertTriangle;
           iconColor = "#ff9800";
         }
-        
+
         return (
           <div
             style={{

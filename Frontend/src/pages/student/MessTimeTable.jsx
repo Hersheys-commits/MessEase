@@ -53,14 +53,15 @@ const MessTimeTable = () => {
         // Fetch mess details with weekly schedule
         const messResponse = await api.get(`/api/mess/student/${messCode}`);
         console.log(messResponse);
-        if(messResponse.data?.messExists === false){
+        if (messResponse.data?.messExists === false) {
           toast.error("Mess not found");
           setError("Mess not found");
-        }
-        else{
+        } else {
           setWeeklyData(messResponse.data.data);
           // Fetch user's ratings
-          const ratingsResponse = await api.get(`/api/mess/ratings/${messCode}`);
+          const ratingsResponse = await api.get(
+            `/api/mess/ratings/${messCode}`
+          );
           setUserRatings(ratingsResponse.data.data.userRatings);
         }
       } catch (err) {
