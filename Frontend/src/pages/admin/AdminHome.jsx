@@ -4,6 +4,8 @@ import toast from "react-hot-toast";
 import api from "../../utils/axiosRequest";
 import AdminHeader from "../../components/AdminHeader";
 import useAdminAuth from "../../hooks/useAdminAuth";
+import Squares from "../../components/ui/Squares";
+import { FaBuilding } from "react-icons/fa";
 
 const AdminHome = () => {
   const [college, setCollege] = useState(null);
@@ -77,47 +79,63 @@ const AdminHome = () => {
   }
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-900 text-white relative">
+      {/* Squares background */}
+      <div className="fixed inset-0 z-0">
+        <Squares
+          speed={0.3}
+          squareSize={50}
+          direction="diagonal"
+          borderColor="#374151"
+          hoverFillColor="#4B5563"
+        />
+      </div>
+
       <AdminHeader />
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
         {collegeExists ? (
           <div className="p-8 max-w-7xl mx-auto">
             {/* Dashboard Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-              <h1 className="text-4xl font-bold mb-4 md:mb-0 text-indigo-300">
-                Admin Dashboard
-              </h1>
-              <div className="flex flex-wrap gap-3">
-                <button
-                  onClick={handleSeeStudents}
-                  className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg flex items-center transition-all shadow-lg hover:shadow-purple-500/20"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
+            <div className="relative mb-8">
+              {/* Background overlay */}
+              <div className="absolute inset-0 bg-black bg-opacity-60 rounded-xl"></div>
+              <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center p-4">
+                <h1 className="text-4xl font-bold mb-4 md:mb-0 text-indigo-300">
+                  Admin Dashboard
+                </h1>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    onClick={handleSeeStudents}
+                    className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg flex items-center transition-all shadow-lg hover:shadow-purple-500/20"
                   >
-                    <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
-                  </svg>
-                  See Students
-                </button>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 mr-2"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
+                    </svg>
+                    See Students
+                  </button>
+                </div>
               </div>
             </div>
 
             {/* College Info Card */}
             <div className="bg-gray-800 bg-opacity-80 backdrop-blur-lg rounded-xl shadow-xl p-6 mb-10 border border-gray-700 hover:border-indigo-500/50 transition-all duration-300">
               <div className="flex items-center mb-6">
-                <div className="p-3 bg-indigo-600 rounded-lg mr-4">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-8 w-8 text-white"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
-                  </svg>
-                </div>
+                {college.logo ? (
+                  <img
+                    src={college.logo}
+                    alt={`${college.name} logo`}
+                    className="w-24 h-24 object-contain rounded-lg mr-4"
+                  />
+                ) : (
+                  <div className="w-24 h-24 rounded-lg bg-gray-700 flex items-center justify-center mr-4">
+                    <FaBuilding className="text-gray-400" size={40} />
+                  </div>
+                )}
                 <h1 className="text-3xl font-bold text-indigo-300">
                   {college.name}
                 </h1>
@@ -313,35 +331,38 @@ const AdminHome = () => {
 
             {/* Hostels Section */}
             <div className="mb-10">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-100 flex items-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6 mr-2 text-indigo-400"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-                  </svg>
-                  Hostels Directory
-                </h2>
-                <Link to="/admin/create-hostel">
-                  <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg flex items-center shadow-lg hover:shadow-green-500/20 transition-all">
+              <div className="relative mb-10">
+                <div className="absolute inset-0 bg-gray-900 bg-opacity-70 rounded-lg"></div>
+                <div className="relative flex justify-between items-center mb-6 p-6 rounded-lg">
+                  <h2 className="text-2xl font-bold text-gray-100 flex items-center">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 mr-2"
+                      className="h-6 w-6 mr-2 text-indigo-400"
                       viewBox="0 0 20 20"
                       fill="currentColor"
                     >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                        clipRule="evenodd"
-                      />
+                      <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
                     </svg>
-                    Add Hostel
-                  </button>
-                </Link>
+                    Hostels Directory
+                  </h2>
+                  <Link to="/admin/create-hostel">
+                    <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg flex items-center shadow-lg hover:shadow-green-500/20 transition-all">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 mr-2"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      Add Hostel
+                    </button>
+                  </Link>
+                </div>
               </div>
 
               {/* Hostels Grid */}
@@ -350,7 +371,7 @@ const AdminHome = () => {
                   {hostels.map((hostel) => (
                     <div
                       key={hostel._id}
-                      className="bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-700 hover:border-indigo-500/50 overflow-hidden"
+                      className="bg-gray-800 bg-opacity-50 backdrop-blur-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-700 hover:border-indigo-500/50 overflow-hidden"
                       onClick={() => handleHostelClick(hostel.code)}
                     >
                       <div className="bg-gradient-to-r from-indigo-600 to-indigo-500 h-2"></div>
@@ -394,7 +415,7 @@ const AdminHome = () => {
                   ))}
                 </div>
               ) : (
-                <div className="bg-gray-800 rounded-xl shadow-lg p-8 text-center border border-gray-700">
+                <div className="bg-gray-800 bg-opacity-50 backdrop-blur-lg rounded-xl shadow-lg p-8 text-center border border-gray-700">
                   <div className="flex justify-center mb-4">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -417,41 +438,44 @@ const AdminHome = () => {
               )}
             </div>
 
-            {/* Messes Section */}
+            {/* Messes Section (Similar structure as Hostels) */}
             <div className="mb-10">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-100 flex items-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6 mr-2 text-orange-400"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M6 3a1 1 0 011-1h.01a1 1 0 010 2H7a1 1 0 01-1-1zm2 3a1 1 0 00-2 0v1a2 2 0 00-2 2v1a2 2 0 00-2 2v.683a3.7 3.7 0 011.055.485 1.704 1.704 0 001.89 0 3.704 3.704 0 014.11 0 1.704 1.704 0 001.89 0 3.704 3.704 0 014.11 0 1.704 1.704 0 001.89 0A3.7 3.7 0 0118 12.683V12a2 2 0 00-2-2V9a2 2 0 00-2-2V6a1 1 0 10-2 0v1h-1V6a1 1 0 10-2 0v1H8V6zm10 8.868a3.704 3.704 0 01-4.055-.036 1.704 1.704 0 00-1.89 0 3.704 3.704 0 01-4.11 0 1.704 1.704 0 00-1.89 0A3.704 3.704 0 012 14.868V17a1 1 0 001 1h14a1 1 0 001-1v-2.132zM9 3a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1zm3 0a1 1 0 011-1h.01a1 1 0 110 2H13a1 1 0 01-1-1z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  Messes Directory
-                </h2>
-                <Link to="/admin/mess/create">
-                  <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg flex items-center shadow-lg hover:shadow-green-500/20 transition-all">
+              <div className="relative mb-10">
+                <div className="absolute inset-0 bg-gray-900 bg-opacity-70 rounded-lg"></div>
+                <div className="relative flex justify-between items-center mb-6 p-6 rounded-lg">
+                  <h2 className="text-2xl font-bold text-gray-100 flex items-center">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 mr-2"
+                      className="h-6 w-6 mr-2 text-orange-400"
                       viewBox="0 0 20 20"
                       fill="currentColor"
                     >
                       <path
                         fillRule="evenodd"
-                        d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                        d="M6 3a1 1 0 011-1h.01a1 1 0 010 2H7a1 1 0 01-1-1zm2 3a1 1 0 00-2 0v1a2 2 0 00-2 2v1a2 2 0 00-2 2v.683a3.7 3.7 0 011.055.485 1.704 1.704 0 001.89 0 3.704 3.704 0 014.11 0 1.704 1.704 0 001.89 0 3.704 3.704 0 014.11 0 1.704 1.704 0 001.89 0A3.7 3.7 0 0118 12.683V12a2 2 0 00-2-2V9a2 2 0 00-2-2V6a1 1 0 10-2 0v1h-1V6a1 1 0 10-2 0v1H8V6zm10 8.868a3.704 3.704 0 01-4.055-.036 1.704 1.704 0 00-1.89 0 3.704 3.704 0 01-4.11 0 1.704 1.704 0 00-1.89 0A3.704 3.704 0 012 14.868V17a1 1 0 001 1h14a1 1 0 001-1v-2.132zM9 3a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1zm3 0a1 1 0 011-1h.01a1 1 0 110 2H13a1 1 0 01-1-1z"
                         clipRule="evenodd"
                       />
                     </svg>
-                    Add Mess
-                  </button>
-                </Link>
+                    Messes Directory
+                  </h2>
+                  <Link to="/admin/mess/create">
+                    <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg flex items-center shadow-lg hover:shadow-green-500/20 transition-all">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 mr-2"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      Add Mess
+                    </button>
+                  </Link>
+                </div>
               </div>
 
               {/* Messes Grid */}
@@ -460,7 +484,7 @@ const AdminHome = () => {
                   {messes.map((mess) => (
                     <div
                       key={mess._id}
-                      className="bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-700 hover:border-orange-500/50 overflow-hidden"
+                      className="bg-gray-800 bg-opacity-50 backdrop-blur-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-700 hover:border-orange-500/50 overflow-hidden"
                       onClick={() => handleMessClick(mess.code)}
                     >
                       <div className="bg-gradient-to-r from-orange-500 to-amber-500 h-2"></div>
@@ -513,99 +537,107 @@ const AdminHome = () => {
                   ))}
                 </div>
               ) : (
-                <div className="bg-gray-800 rounded-xl shadow-lg p-8 text-center border border-gray-700">
-                  <div className="flex justify-center mb-4">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-16 w-16 text-gray-600"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M6 3a1 1 0 011-1h.01a1 1 0 010 2H7a1 1 0 01-1-1zm2 3a1 1 0 00-2 0v1a2 2 0 00-2 2v1a2 2 0 00-2 2v.683a3.7 3.7 0 011.055.485 1.704 1.704 0 001.89 0 3.704 3.704 0 014.11 0 1.704 1.704 0 001.89 0 3.704 3.704 0 014.11 0 1.704 1.704 0 001.89 0A3.7 3.7 0 0118 12.683V12a2 2 0 00-2-2V9a2 2 0 00-2-2V6a1 1 0 10-2 0v1h-1V6a1 1 0 10-2 0v1H8V6zm10 8.868a3.704 3.704 0 01-4.055-.036 1.704 1.704 0 00-1.89 0 3.704 3.704 0 01-4.11 0 1.704 1.704 0 00-1.89 0A3.704 3.704 0 012 14.868V17a1 1 0 001 1h14a1 1 0 001-1v-2.132zM9 3a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1zm3 0a1 1 0 011-1h.01a1 1 0 110 2H13a1 1 0 01-1-1z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                <div className="relative">
+                  {/* Background overlay for the card */}
+                  <div className="absolute inset-0 bg-black bg-opacity-60 rounded-xl"></div>
+                  <div className="relative z-10 bg-gray-800 bg-opacity-50 backdrop-blur-lg rounded-xl shadow-lg p-8 text-center border border-gray-700">
+                    <div className="flex justify-center mb-4">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-16 w-16 text-gray-600"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M6 3a1 1 0 011-1h.01a1 1 0 010 2H7a1 1 0 01-1-1zm2 3a1 1 0 00-2 0v1a2 2 0 00-2 2v1a2 2 0 00-2 2v.683a3.7 3.7 0 011.055.485 1.704 1.704 0 001.89 0 3.704 3.704 0 014.11 0 1.704 1.704 0 001.89 0 3.704 3.704 0 014.11 0 1.704 1.704 0 001.89 0A3.7 3.7 0 0118 12.683V12a2 2 0 00-2-2V9a2 2 0 00-2-2V6a1 1 0 10-2 0v1h-1V6a1 1 0 10-2 0v1H8V6zm10 8.868a3.704 3.704 0 01-4.055-.036 1.704 1.704 0 00-1.89 0 3.704 3.704 0 01-4.11 0 1.704 1.704 0 00-1.89 0A3.704 3.704 0 012 14.868V17a1 1 0 001 1h14a1 1 0 001-1v-2.132zM9 3a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1zm3 0a1 1 0 011-1h.01a1 1 0 110 2H13a1 1 0 01-1-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                    <p className="text-gray-400 mb-4">
+                      No messes found for this college.
+                    </p>
+                    <Link to="/admin/mess/create">
+                      <button className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg shadow-lg hover:shadow-orange-500/20 transition-all">
+                        Create Your First Mess
+                      </button>
+                    </Link>
                   </div>
-                  <p className="text-gray-400 mb-4">
-                    No messes found for this college.
-                  </p>
-                  <Link to="/admin/mess/create">
-                    <button className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg shadow-lg hover:shadow-orange-500/20 transition-all">
-                      Create Your First Mess
-                    </button>
-                  </Link>
                 </div>
               )}
             </div>
           </div>
         ) : (
-          <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-gray-800">
-            {requestPending ? (
-              <div className="text-center p-8 bg-gray-800 rounded-xl shadow-lg border border-amber-500/30 max-w-md">
-                <div className="flex justify-center mb-6">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-16 w-16 text-amber-400"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+          <div className="relative min-h-screen flex items-center justify-center">
+            {/* Background overlay */}
+            <div className="absolute inset-0 bg-gradient-to-b from-gray-900 to-gray-800"></div>
+            <div className="relative z-10">
+              {requestPending ? (
+                <div className="text-center p-8 bg-gray-800 rounded-xl shadow-lg border border-amber-500/30 max-w-md">
+                  <div className="flex justify-center mb-6">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-16 w-16 text-amber-400"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <div className="mb-6 text-amber-400 text-xl font-semibold">
+                    Your college registration request is pending approval
+                  </div>
+                  <p className="text-gray-400 mb-6">
+                    Please wait while administrators review your request. You'll
+                    be notified once your college is approved.
+                  </p>
+                  <button className="bg-amber-600 text-white px-6 py-3 rounded-lg hover:bg-amber-700 cursor-not-allowed opacity-80">
+                    Request Pending
+                  </button>
                 </div>
-                <div className="mb-6 text-amber-400 text-xl font-semibold">
-                  Your college registration request is pending approval
+              ) : (
+                <div className="text-center p-8 bg-gray-800 rounded-xl shadow-lg border border-green-500/30 max-w-md">
+                  <div className="flex justify-center mb-6">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-16 w-16 text-green-500"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <div className="mb-4 text-xl font-semibold text-white">
+                    Welcome to the Admin Portal
+                  </div>
+                  <p className="text-gray-400 mb-6">
+                    You need to create a college before adding hostels, messes,
+                    or students.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <Link to="/admin/college/create">
+                      <button className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 shadow-lg hover:shadow-green-500/20 transition-all w-full sm:w-auto">
+                        Create College
+                      </button>
+                    </Link>
+                    <Link to="/admin/college/join">
+                      <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 shadow-lg hover:shadow-blue-500/20 transition-all w-full sm:w-auto">
+                        Join College
+                      </button>
+                    </Link>
+                  </div>
                 </div>
-                <p className="text-gray-400 mb-6">
-                  Please wait while administrators review your request. You'll
-                  be notified once your college is approved.
-                </p>
-                <button className="bg-amber-600 text-white px-6 py-3 rounded-lg hover:bg-amber-700 cursor-not-allowed opacity-80">
-                  Request Pending
-                </button>
-              </div>
-            ) : (
-              <div className="text-center p-8 bg-gray-800 rounded-xl shadow-lg border border-green-500/30 max-w-md">
-                <div className="flex justify-center mb-6">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-16 w-16 text-green-500"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <div className="mb-4 text-xl font-semibold text-white">
-                  Welcome to the Admin Portal
-                </div>
-                <p className="text-gray-400 mb-6">
-                  You need to create a college before adding hostels, messes, or
-                  students.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Link to="/admin/college/create">
-                    <button className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 shadow-lg hover:shadow-green-500/20 transition-all w-full sm:w-auto">
-                      Create College
-                    </button>
-                  </Link>
-                  <Link to="/admin/college/join">
-                    <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 shadow-lg hover:shadow-blue-500/20 transition-all w-full sm:w-auto">
-                      Join College
-                    </button>
-                  </Link>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
       </div>

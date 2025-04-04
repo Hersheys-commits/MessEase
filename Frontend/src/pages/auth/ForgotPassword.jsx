@@ -3,6 +3,8 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import api from "../../utils/axiosRequest";
 import toast from "react-hot-toast";
 import AuthForm from "../../components/auth/AuthForm";
+import Squares from "../../components/ui/Squares";
+import SpotlightCard from "../../components/ui/SpotlightCard";
 
 const ForgotPassword = ({ userType = "student" }) => {
   const navigate = useNavigate();
@@ -106,15 +108,38 @@ const ForgotPassword = ({ userType = "student" }) => {
     }
   };
 
+  // Base styles for both user types
+  const basePageStyle =
+    "min-h-screen flex items-center justify-center p-4 relative";
+
+  // Additional gradient only for admin users
   const pageStyle =
     userType === "admin"
-      ? "min-h-screen flex items-center justify-center bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900 p-6"
-      : "min-h-screen flex items-center justify-center bg-gray-900 p-4";
+      ? `${basePageStyle} bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900`
+      : basePageStyle;
+
+  const spotlightColor =
+    userType === "admin"
+      ? "rgba(59, 130, 246, 0.3)" // More blue for admin
+      : "rgba(125, 211, 252, 0.2)"; // Lighter blue for student
 
   return (
     <div className={pageStyle}>
-      <div className="bg-gray-800 p-6 md:p-8 rounded-lg shadow-xl border border-gray-700 w-full max-w-sm">
-        <h2 className="text-2xl font-bold mb-4 text-center text-blue-400">
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        <Squares
+          speed={0.2}
+          squareSize={40}
+          direction="diagonal"
+          borderColor="#374151" // gray-700
+          hoverFillColor="#4B5563" // gray-600
+        />
+      </div>
+
+      <SpotlightCard
+        className="w-full max-w-sm"
+        spotlightColor={spotlightColor}
+      >
+        <h2 className="text-2xl font-bold mb-6 text-center text-blue-400">
           {userType === "admin" ? "Admin" : "Student"} Password Reset
         </h2>
 
@@ -125,6 +150,7 @@ const ForgotPassword = ({ userType = "student" }) => {
             submitText="Send OTP"
             title=""
             darkMode={true}
+            containerless={true}
           />
         )}
 
@@ -139,6 +165,7 @@ const ForgotPassword = ({ userType = "student" }) => {
               submitText="Reset Password"
               title=""
               darkMode={true}
+              containerless={true}
             />
             <button
               onClick={() => handleEmailSubmit({ email })}
@@ -157,7 +184,7 @@ const ForgotPassword = ({ userType = "student" }) => {
             Back to Login
           </Link>
         </div>
-      </div>
+      </SpotlightCard>
     </div>
   );
 };

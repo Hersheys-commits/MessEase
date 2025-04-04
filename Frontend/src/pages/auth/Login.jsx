@@ -6,6 +6,8 @@ import api from "../../utils/axiosRequest";
 import toast from "react-hot-toast";
 import { useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import Squares from "../../components/ui/Squares";
+import SpotlightCard from "../../components/ui/SpotlightCard";
 
 const Login = ({ userType = "student" }) => {
   const navigate = useNavigate();
@@ -54,25 +56,51 @@ const Login = ({ userType = "student" }) => {
     }
   };
 
+  // Base styles for both user types
+  const basePageStyle =
+    "min-h-screen flex items-center justify-center p-4 relative";
+
+  // Additional gradient only for admin users
   const pageStyle =
     userType === "admin"
-      ? "min-h-screen flex items-center justify-center bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900 p-6"
-      : "min-h-screen flex items-center justify-center bg-gray-900 p-4";
+      ? `${basePageStyle} bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900`
+      : basePageStyle;
+
+  const spotlightColor =
+    userType === "admin"
+      ? "rgba(59, 130, 246, 0.3)" // More blue for admin
+      : "rgba(125, 211, 252, 0.2)"; // Lighter blue for student
 
   return (
     <div className={pageStyle}>
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        <Squares
+          speed={0.2}
+          squareSize={40}
+          direction="diagonal"
+          borderColor="#374151" // gray-700
+          hoverFillColor="#4B5563" // gray-600
+        />
+      </div>
+
       <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-        <div className="bg-gray-800 p-6 md:p-8 rounded-lg shadow-xl border border-gray-700 w-full max-w-sm">
-          <h2 className="text-2xl font-bold mb-4 text-center text-blue-400">
+        <SpotlightCard
+          className="w-full max-w-sm"
+          spotlightColor={spotlightColor}
+        >
+          <h2 className="text-2xl font-bold mb-6 text-center text-blue-400">
             {userType === "admin" ? "Admin" : "Student"} Login
           </h2>
+
           <AuthForm
             fields={loginFields}
             onSubmit={handleLoginSubmit}
             submitText={`Login as ${userType === "admin" ? "Admin" : "Student"}`}
             title=""
             darkMode={true}
+            containerless={true} // Important: Don't render the container
           />
+
           <div className="flex justify-between items-center mt-4 text-sm text-gray-400">
             {userType === "admin" ? (
               <Link to="/admin/forgot-password" className="hover:text-blue-400">
@@ -96,6 +124,7 @@ const Login = ({ userType = "student" }) => {
               </Link>
             )}
           </div>
+
           <div className="mt-6">
             <GoogleAuthButton
               userType={userType}
@@ -103,7 +132,7 @@ const Login = ({ userType = "student" }) => {
               darkMode={true}
             />
           </div>
-        </div>
+        </SpotlightCard>
       </GoogleOAuthProvider>
     </div>
   );
