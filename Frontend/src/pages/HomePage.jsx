@@ -22,7 +22,6 @@ import SpotlightCard from "../components/ui/SpotlightCard";
 
 const HomePage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("hero");
   const [activeFaq, setActiveFaq] = useState(null);
   const [scrollY, setScrollY] = useState(0);
@@ -327,11 +326,7 @@ const HomePage = () => {
 
       {/*Header*/}
       <header
-        className={`fixed w-full z-50 transition-all duration-300 ${
-          isScrolled
-            ? "bg-gray-900/95 backdrop-blur-sm shadow-lg shadow-cyan-900/20 border-b border-gray-800/80"
-            : "bg-transparent"
-        }`}
+        className="fixed w-full z-50 transition-all duration-300 bg-gray-900/95 backdrop-blur-sm shadow-lg shadow-cyan-900/20 border-b border-gray-800/80"
       >
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
