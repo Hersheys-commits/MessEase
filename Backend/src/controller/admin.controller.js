@@ -618,25 +618,33 @@ export const createGroupChat = async (req, res) => {
 
 export const getChats = async (req, res) => {
   try {
-    const { hostelId, userId, code } = req.query;
+    const { page = 1, limit = 100 } = req.query;
 
+    const { hostelId, userId, code } = req.query;
+    const skip = (page - 1) * limit;
     console.log("G", req.query);
     // Validate required fields
     if (!hostelId || !userId || !code) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    // Fetch group chat that belongs to the hostelId
+    const totalChats = await GroupChat.findOne({ hostelId }).select("chats");
+
     const groupChat = await GroupChat.findOne({ hostelId })
+      .select({ chats: { $slice: [-skip - limit, limit] } }) // Fetch required slice
       .populate({
-        path: "chats.sender", // Populate the sender field in the chats array
-        select: "name", // Select the fields you want from the sender (example: name, email)
+        path: "chats.sender",
+        select: "name", // Select required fields
       })
       .sort({ "chats.timestamp": 1 }); // Sort messages from oldest to newest
-
     console.log("CHAT2: ", groupChat);
-
-    return res.status(200).json({ success: true, chats: groupChat.chats });
+    return res
+      .status(200)
+      .json({
+        success: true,
+        chats: groupChat.chats,
+        totalPages: Math.ceil((totalChats?.chats?.length || 0) / limit),
+      });
   } catch (error) {
     console.error("Error fetching chats:", error);
     return res.status(500).json({ error: "Internal server error" });

@@ -522,7 +522,7 @@ const HostelDetailPage = () => {
                 )}
               </div>
 
-              <div>
+              <div className="flex justify-between items-center mt-6">
                 {hostel.mess ? (
                   <button
                     className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
@@ -542,25 +542,17 @@ const HostelDetailPage = () => {
                     Add Mess
                   </button>
                 )}
-                <div>
+                <div className="mt-4">
                   {groupChat ? (
                     <button
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-                      onClick={() => {
-                        navigate(`/hostel/groupChat/${hostel.code}`, {
-                          state: {
-                            userId: user._id,
-                            hostelId: hostel._id,
-                            userName: user.name,
-                          },
-                        });
-                      }}
-                    >
-                      See GroupChat
+                      className="y-5 display: inline bg-gray-500 text-white px-4 py-2 rounded"
+                      disabled
+                      >
+                       GroupChat Created
                     </button>
                   ) : (
                     <button
-                      className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded mt-5"
+                      className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
                       onClick={() => {
                         navigate("/admin/create-GroupChat", {
                           state: {
