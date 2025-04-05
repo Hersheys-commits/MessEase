@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import AuthForm from "../../components/auth/AuthForm";
 import GoogleAuthButton from "../../components/auth/GoogleAuthButton";
 import { GoogleOAuthProvider } from "@react-oauth/google";
@@ -14,6 +14,12 @@ const Login = ({ userType = "student" }) => {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   console.log("login state", user);
   console.log("login state", isAuthenticated);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(`/${userType}/home`);
+    }
+  }, [isAuthenticated, userType, navigate]);
 
   const loginFields = [
     {

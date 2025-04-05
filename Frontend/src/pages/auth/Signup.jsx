@@ -1,17 +1,26 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AuthForm from "../../components/auth/AuthForm";
 import OTPVerification from "../../components/auth/OTPVerification";
 import GoogleAuthButton from "../../components/auth/GoogleAuthButton";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import api from "../../utils/axiosRequest";
 import toast from "react-hot-toast";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Squares from "../../components/ui/Squares";
 import SpotlightCard from "../../components/ui/SpotlightCard";
+import { useSelector } from "react-redux";
 
 const Signup = ({ userType = "student" }) => {
   const [otpSent, setOtpSent] = useState(false);
   const [userData, setUserData] = useState(null);
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(`/${userType}/home`);
+    }
+  }, [isAuthenticated, userType, navigate]);
 
   const getFormFields = () => {
     const commonFields = [

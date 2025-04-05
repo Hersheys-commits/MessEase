@@ -125,6 +125,13 @@ const ElectionResultsPage = () => {
 
   const winner = getWinner();
   const totalVotes = getTotalVotes();
+  let voteCount = 0;
+  if (winner) {
+    const winnerResult = results.find(
+      (result) => result.candidate._id === winner._id
+    );
+    voteCount = winnerResult ? winnerResult.voteCount : 0;
+  }
 
   // Function to create a nice visual for vote percentage
   const renderVotePercentage = (votes) => {
@@ -282,19 +289,19 @@ const ElectionResultsPage = () => {
 
                 <div className="flex-1">
                   <div className="text-3xl font-bold text-yellow-500 mb-2">
-                    {((winner.voteCount / totalVotes) * 100).toFixed(1)}%
+                    {((voteCount / totalVotes) * 100).toFixed(1)}%
                   </div>
                   <div className="w-full bg-gray-700 rounded-full h-4 mb-2">
                     <div
                       className="bg-yellow-500 h-4 rounded-full"
                       style={{
-                        width: `${((winner.voteCount / totalVotes) * 100).toFixed(1)}%`,
+                        width: `${((voteCount / totalVotes) * 100).toFixed(1)}%`,
                       }}
                     ></div>
                   </div>
                   <div className="text-gray-300">
-                    <span className="font-medium">{winner.voteCount}</span> out
-                    of {totalVotes} votes
+                    <span className="font-medium">{voteCount}</span> out of{" "}
+                    {totalVotes} votes
                   </div>
                 </div>
               </div>

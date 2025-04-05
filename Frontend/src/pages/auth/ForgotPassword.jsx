@@ -1,15 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import api from "../../utils/axiosRequest";
 import toast from "react-hot-toast";
 import AuthForm from "../../components/auth/AuthForm";
 import Squares from "../../components/ui/Squares";
 import SpotlightCard from "../../components/ui/SpotlightCard";
+import { useSelector } from "react-redux";
 
 const ForgotPassword = ({ userType = "student" }) => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1); // 1: Email entry, 2: Password reset with OTP
   const [email, setEmail] = useState("");
+  const { isAuthenticated } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(`/${userType}/home`);
+    }
+  }, [isAuthenticated, userType, navigate]);
 
   // Form field configurations
   const emailFields = [

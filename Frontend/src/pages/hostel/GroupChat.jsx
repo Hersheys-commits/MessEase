@@ -57,6 +57,19 @@ export const GroupChat = () => {
   const [audioPreview, setAudioPreview] = useState(null);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
+
+  // First, let's create a state to track the preview area height
+  const [previewHeight, setPreviewHeight] = useState(0);
+  const previewRef = useRef(null);
+
+  // Add useEffect to measure the preview height when it changes
+  useEffect(() => {
+    if (previewRef.current) {
+      setPreviewHeight(previewRef.current.offsetHeight);
+    } else {
+      setPreviewHeight(0);
+    }
+  }, [imagePreview, audioPreview]);
   //
 
   console.log("ahyrhyr", user);
@@ -776,9 +789,9 @@ export const GroupChat = () => {
 
   return (
     <div>
-      {reduxUser?.role === "admin" ? <AdminHeader /> : <Header />}
       <div className="min-h-screen bg-gray-900 flex flex-col transition-colors duration-300">
-        <div className="container mx-auto p-4 flex">
+        {reduxUser?.role === "admin" ? <AdminHeader /> : <Header />}
+        <div className="container p-4 flex w-4/5 mx-auto">
           {/* Main Chat Panel */}
           <div
             className={`bg-gray-800 shadow-md rounded-lg ${showStarredMessages ? "w-2/3" : "w-full"} ${showStarredMessages ? "mr-4" : ""}`}
@@ -945,7 +958,12 @@ export const GroupChat = () => {
 
             <div
               ref={chatContainerRef}
-              className="mb-4 overflow-y-auto max-h-[500px] scroll-smooth px-4"
+              className="overflow-y-auto scroll-smooth px-4"
+              style={{
+                maxHeight: `calc(440px - ${previewHeight}px)`,
+                height: `calc(440px - ${previewHeight}px)`,
+                transition: "height 0.2s ease-in-out",
+              }}
             >
               {chats.length === 0 ? (
                 <p className="text-center text-gray-400 italic">
@@ -1042,24 +1060,29 @@ export const GroupChat = () => {
             </div>
 
             {/* Form for sending messages */}
-
             <form
               onSubmit={sendMessage}
-              className="p-4 border-t border-gray-700"
+              className="p-4 border-t border-gray-700 bg-gray-800 rounded-b-lg shadow-inner"
             >
               {/* Media previews */}
-              <div className="mb-2 flex flex-wrap gap-2">
+              <div
+                ref={previewRef}
+                className="flex flex-wrap gap-2"
+                style={{
+                  marginBottom: previewHeight > 0 ? "0.75rem" : "0",
+                }}
+              >
                 {imagePreview && (
-                  <div className="relative inline-block">
+                  <div className="relative inline-block group">
                     <img
                       src={imagePreview}
                       alt="Upload preview"
-                      className="h-20 rounded-md border border-gray-600"
+                      className="h-20 rounded-md border border-gray-600 shadow-md hover:opacity-90 transition-opacity"
                     />
                     <button
                       type="button"
                       onClick={clearImagePreview}
-                      className="absolute top-0 right-0 bg-red-500 rounded-full p-1 transform translate-x-1/2 -translate-y-1/2"
+                      className="absolute top-0 right-0 bg-red-500 hover:bg-red-600 rounded-full p-1 transform translate-x-1/2 -translate-y-1/2 shadow-lg transition-colors"
                     >
                       <X className="w-3 h-3 text-white" />
                     </button>
@@ -1071,12 +1094,12 @@ export const GroupChat = () => {
                     <audio
                       src={audioPreview}
                       controls
-                      className="h-10 rounded-md border border-gray-600"
+                      className="h-10 rounded-md border border-gray-600 bg-gray-700"
                     />
                     <button
                       type="button"
                       onClick={clearAudioPreview}
-                      className="absolute top-0 right-0 bg-red-500 rounded-full p-1 transform translate-x-1/2 -translate-y-1/2"
+                      className="absolute top-0 right-0 bg-red-500 hover:bg-red-600 rounded-full p-1 transform translate-x-1/2 -translate-y-1/2 shadow-lg transition-colors"
                     >
                       <X className="w-3 h-3 text-white" />
                     </button>
@@ -1084,45 +1107,51 @@ export const GroupChat = () => {
                 )}
               </div>
 
-              <div className="flex items-center">
+              <div className="flex items-center bg-gray-700 rounded-lg overflow-hidden ring-1 ring-gray-600 focus-within:ring-blue-500 shadow-md">
                 <input
                   type="text"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Type a message..."
-                  className="flex-grow bg-gray-700 text-gray-200 p-2 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-grow bg-transparent text-gray-200 p-3 focus:outline-none placeholder-gray-400"
                 />
 
-                <label className="p-2 bg-gray-700 cursor-pointer hover:bg-gray-600 transition-colors">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="hidden"
-                  />
-                  <ImageIcon className="w-5 h-5 text-gray-400 hover:text-gray-300" />
-                </label>
+                <div className="flex items-center border-l border-gray-600">
+                  <label className="p-3 cursor-pointer hover:bg-gray-600 transition-colors">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
+                    />
+                    <ImageIcon className="w-5 h-5 text-gray-300 hover:text-blue-400 transition-colors" />
+                  </label>
 
-                <button
-                  type="button"
-                  onClick={isRecording ? stopRecording : startRecording}
-                  className={`p-2 bg-gray-700 cursor-pointer hover:bg-gray-600 transition-colors ${isRecording ? "text-red-500" : "text-gray-400 hover:text-gray-300"}`}
-                >
-                  {isRecording ? (
-                    <StopCircle className="w-5 h-5" />
-                  ) : (
-                    <Mic className="w-5 h-5" />
-                  )}
-                </button>
+                  <button
+                    type="button"
+                    onClick={isRecording ? stopRecording : startRecording}
+                    className={`p-3 cursor-pointer hover:bg-gray-600 transition-all ${
+                      isRecording
+                        ? "text-red-500 animate-pulse"
+                        : "text-gray-300 hover:text-blue-400"
+                    }`}
+                  >
+                    {isRecording ? (
+                      <StopCircle className="w-5 h-5" />
+                    ) : (
+                      <Mic className="w-5 h-5" />
+                    )}
+                  </button>
 
-                <button
-                  type="submit"
-                  disabled={message.trim() === "" && !imageFile && !audioFile}
-                  className="bg-blue-600 p-2 rounded-r-md hover:bg-blue-700 transition-colors disabled:bg-blue-800 disabled:opacity-50"
-                >
-                  <Send className="w-5 h-5 text-white" />
-                </button>
+                  <button
+                    type="submit"
+                    disabled={message.trim() === "" && !imageFile && !audioFile}
+                    className="bg-blue-600 p-3 hover:bg-blue-700 transition-colors disabled:bg-gray-600 disabled:text-gray-400 text-white"
+                  >
+                    <Send className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
             </form>
           </div>

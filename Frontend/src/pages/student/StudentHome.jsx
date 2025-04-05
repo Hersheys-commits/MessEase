@@ -479,21 +479,6 @@ function StudentHome() {
             </div>
           </div>
         </div>
-
-        <button
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-          onClick={() => {
-            navigate(`/hostel/groupChat/${code}`, {
-              state: {
-                hostelId: user.hostel,
-                userId: user._id,
-                userName: user.name,
-              },
-            });
-          }}
-        >
-          See GroupChat
-        </button>
       </div>
     </div>
   );

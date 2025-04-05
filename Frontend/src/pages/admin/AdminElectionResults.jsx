@@ -29,12 +29,12 @@ const AdminElectionResults = () => {
       try {
         const electionResponse = await api.get(`/api/election/${electionId}`);
         setElection(electionResponse.data.data);
-        console.log(electionResponse);
+        console.log("sgs", electionResponse);
 
         const resultsResponse = await api.get(
           `/api/election/${electionId}/results`
         );
-        console.log(resultsResponse);
+        console.log("res", resultsResponse);
         setResults(resultsResponse.data.data);
         setLoading(false);
       } catch (error) {
@@ -125,6 +125,13 @@ const AdminElectionResults = () => {
 
   const winner = election?.result?.winnerId;
   const totalVotes = getTotalVotes();
+  let voteCount = 0;
+  if (winner) {
+    const winnerResult = results.find(
+      (result) => result.candidate._id === winner._id
+    );
+    voteCount = winnerResult ? winnerResult.voteCount : 0;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
@@ -330,8 +337,8 @@ const AdminElectionResults = () => {
                 </div>
                 <div className="mt-4 bg-green-800 py-2 px-4 rounded-lg inline-block">
                   <p className="text-xl font-bold text-green-200">
-                    {winner.voteCount} votes (
-                    {((winner.voteCount / totalVotes) * 100).toFixed(1)}%)
+                    {voteCount} votes (
+                    {((voteCount / totalVotes) * 100).toFixed(1)}%)
                   </p>
                 </div>
               </div>

@@ -149,10 +149,10 @@ const MessDetailsStudent = () => {
               {messData?.mess.name}
             </h1>
             <Link
-              className="text-blue-200 ml-[90%] bg-red-700 p-2 rounded"
+              className="ml-[90%] bg-red-700 p-2 rounded hover:bg-red-800 transition duration-200"
               to={`/student/mess/${messCode}/complaints`}
             >
-              complaints
+              Complaints
             </Link>
 
             <div className="flex items-center text-blue-200">

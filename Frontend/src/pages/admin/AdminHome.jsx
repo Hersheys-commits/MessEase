@@ -6,6 +6,7 @@ import AdminHeader from "../../components/AdminHeader";
 import useAdminAuth from "../../hooks/useAdminAuth";
 import Squares from "../../components/ui/Squares";
 import { FaBuilding } from "react-icons/fa";
+import SpotlightCard from "../../components/ui/SpotlightCard";
 
 const AdminHome = () => {
   const [college, setCollege] = useState(null);
@@ -123,7 +124,11 @@ const AdminHome = () => {
             </div>
 
             {/* College Info Card */}
-            <div className="bg-gray-800 bg-opacity-80 backdrop-blur-lg rounded-xl shadow-xl p-6 mb-10 border border-gray-700 hover:border-indigo-500/50 transition-all duration-300">
+            {/* <div className="bg-gray-800 bg-opacity-80 backdrop-blur-lg rounded-xl shadow-xl p-6 mb-10 border border-gray-700 hover:border-indigo-500/50 transition-all duration-300"> */}
+            <SpotlightCard
+              className="w-full custom-spotlight-card bg-gray-800/60 backdrop-blur-lg shadow-lg p-6 mb-10 overflow-hidden border border-gray-700/50 hover:border-blue-500/30 transition-all duration-300"
+              spotlightColor="rgba(0, 229, 255, 0.2)"
+            >
               <div className="flex items-center mb-6">
                 {college.logo ? (
                   <img
@@ -241,7 +246,8 @@ const AdminHome = () => {
                   </div>
                 </div>
               </div>
-            </div>
+              {/* </div> */}
+            </SpotlightCard>
 
             {/* Hostels & Students Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">

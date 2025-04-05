@@ -7,6 +7,7 @@ import { setUser, logout, setCode } from "../store/authSlice";
 import api from "../utils/axiosRequest";
 import toast from "react-hot-toast";
 import Logo from "./Logo";
+import { IoChatbubbleEllipses } from "react-icons/io5";
 
 const Header = () => {
   const dispatch = useDispatch();
@@ -86,6 +87,7 @@ const Header = () => {
     { title: "Profile", path: "/student/profile", icon: "user" },
     { title: "Fees", path: "/student/fees", icon: "money" },
     { title: "Mess", path: `/student/mess/${code}`, icon: "mess" },
+    { title: "Chat", path: `/hostel/groupChat/${code}`, icon: "chat" },
   ];
 
   const toggleMenu = () => {
@@ -147,6 +149,9 @@ const Header = () => {
             {link.icon === "money" && <FaMoneyBillWave className="mr-2" />}
             {link.icon === "mess" && code != "000" && (
               <Utensils className="h-4 mr-1" />
+            )}
+            {link.icon === "chat" && (
+              <IoChatbubbleEllipses className="h-4 mr-1" />
             )}
             {link.icon === "mess"
               ? code !== "000"
@@ -230,10 +235,13 @@ const Header = () => {
                       </svg>
                     )}
                     {link.icon === "money" && (
-                      <FaMoneyBillWave className="mr-2" />
+                      <FaMoneyBillWave className="mr-2 ml-1" />
                     )}
                     {link.icon === "mess" && code != "000" && (
-                      <Utensils className="h-4 mr-2" />
+                      <Utensils className="h-4 mr-1" />
+                    )}
+                    {link.icon === "chat" && (
+                      <IoChatbubbleEllipses className="h-4 w-4 mr-2 ml-1" />
                     )}
                     {link.icon === "mess"
                       ? code !== "000"
