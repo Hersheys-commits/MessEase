@@ -522,20 +522,11 @@ const HostelDetailPage = () => {
                 )}
                 <div>
                   {groupChat ? (
-                    <button
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-                      onClick={() => {
-                        navigate(`/hostel/groupChat/${hostel.code}`, {
-                          state: {
-                            userId: user._id,
-                            hostelId: hostel._id,
-                            userName: user.name,
-                          },
-                        });
-                      }}
-                    >
-                      See GroupChat
-                    </button>
+                    <div
+                      className="display: inline bg-blue-500 text-white px-4 py-2 rounded"
+                      >
+                       GroupChat Created
+                    </div>
                   ) : (
                     <button
                       className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded mt-5"

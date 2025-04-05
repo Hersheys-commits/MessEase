@@ -352,6 +352,7 @@ function StudentHome() {
               hostelId: user.userInfo.hostel,
               userId: user.user,
               userName: user.userInfo.name,
+              user:user
             },
           });
         }}

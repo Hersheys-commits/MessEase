@@ -13,6 +13,7 @@ import {
   X,
   StopCircle,
   Mic,
+  ChevronUp,
 } from "lucide-react";
 
 // Replace this with the specific user ID that should have pinning privileges
@@ -26,11 +27,13 @@ export const GroupChat = () => {
   const { hostelId } = location.state || "";
   const { userId } = location.state || "";
   const { userName } = location.state || " ";
+  const {user}=location.state || {};
+  const role=user.userInfo.role;
+  const PINNING_ALLOWED_USER_ID = (role == "messManager" ) || (role=="hostelManager") ;
   const [chats, setChats] = useState([]);
   const [message, setMessage] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  const PINNING_ALLOWED_USER_ID = userId;
   const [showStarredMessages, setShowStarredMessages] = useState(false);
   const [starredMessages, setStarredMessages] = useState([]);
 
@@ -52,6 +55,10 @@ export const GroupChat = () => {
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   //
+
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [totalPage, setTotalPage] = useState(0);
 
   const startRecording = async () => {
     try {
@@ -96,7 +103,7 @@ export const GroupChat = () => {
   };
 
   // Check if current user has pinning privileges
-  const canPin = userId === PINNING_ALLOWED_USER_ID;
+  const canPin = PINNING_ALLOWED_USER_ID;
   useEffect(() => {
     // Permanently add dark mode class
     document.documentElement.classList.add("dark");
@@ -109,7 +116,7 @@ export const GroupChat = () => {
 
   useEffect(() => {
     // Scroll to bottom smoothly whenever chats change
-    if (chatContainerRef.current) {
+    if ( chatContainerRef.current) {
       chatContainerRef.current.scrollTo({
         top: chatContainerRef.current.scrollHeight,
         behavior: "smooth",
@@ -128,9 +135,20 @@ export const GroupChat = () => {
         const response = await axios.get(
           "http://localhost:4001/api/admin/getChats",
           {
-            params: { hostelId, userId, code },
+            params: { hostelId, userId, code, page },
           }
         );
+        setTotalPage(response.data.totalPages);
+        const pV = page;
+        if (response.data.chats.length > 0) setPage(page + 1);
+
+        if (pV == response.data.totalPages) setHasMore(false);
+        else {
+          setTotalPage(response.data.totalPages);
+          setHasMore(true);
+        }
+
+        console.log(response.data.totalPages);
         console.log("ALL CHATS: ", response.data); // data.chats.sender.pinned
         setChats(response.data.chats);
 
@@ -366,6 +384,71 @@ export const GroupChat = () => {
     }
   };
 
+  const getMoreChats = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:4001/api/admin/getChats",
+        {
+          params: { hostelId, userId, code, page },
+        }
+      );
+      const pV = page;
+      if (response.data.chats.length > 0) {
+        setChats((prev) => [...response.data.chats, ...prev]); // Add at the beginning
+        setPage(page + 1);
+      } else {
+        setHasMore(false); // No more chats to load
+      }
+
+      if (pV == response.data.totalPages) {
+        setHasMore(false);
+      } else {
+        setHasMore(true);
+        setTotalPage(response.data.totalPages);
+      }
+      // Check for any starred messages in local storage
+      const savedStarredMessages = localStorage.getItem(
+        `starredMessages-${hostelId}-${userId}`
+      );
+      if (savedStarredMessages) {
+        try {
+          const parsed = JSON.parse(savedStarredMessages);
+          setStarredMessages(parsed);
+        } catch (error) {
+          console.error(
+            "Error parsing starred messages from local storage:",
+            error
+          );
+          setStarredMessages([]);
+        }
+      }
+
+      // Check for any active poll in local storage
+      const savedActivePoll = localStorage.getItem(`activePoll-${hostelId}`);
+      if (savedActivePoll) {
+        try {
+          const parsed = JSON.parse(savedActivePoll);
+          setActivePoll(parsed);
+
+          // Check if current user has already voted
+          const userVotes = localStorage.getItem(
+            `pollVotes-${hostelId}-${parsed.id}`
+          );
+          if (userVotes) {
+            const votesMap = JSON.parse(userVotes);
+            if (votesMap[userId]) {
+              setUserVote(votesMap[userId]);
+            }
+          }
+        } catch (error) {
+          console.error("Error parsing active poll from local storage:", error);
+        }
+      }
+    } catch (error) {
+      console.log(error.message);
+      console.error("Error fetching chats:", error);
+    }
+  };
   // Star a message
   const starMessage = (chat) => {
     const isAlreadyStarred = starredMessages.some(
@@ -803,6 +886,17 @@ export const GroupChat = () => {
             </div>
           </div>
 
+          {hasMore && (
+            <div className="px-4 mb-2">
+              <button
+                onClick={getMoreChats}
+                className="w-full bg-gray-700 hover:bg-gray-600 text-gray-200 py-2 rounded-md flex items-center justify-center transition-colors"
+              >
+                <ChevronUp className="w-4 h-4 mr-2" />
+                Load More Messages
+              </button>
+            </div>
+          )}
           {/* Pinned Message Section */}
           {pinnedMessage && (
             <div className="mb-4 bg-yellow-900 bg-opacity-30 p-2 rounded-md relative mx-4">
