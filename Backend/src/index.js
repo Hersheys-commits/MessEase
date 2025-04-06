@@ -60,7 +60,7 @@ app.use("/api/election", electionRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/complaint", complaintRoutes);
 app.use("/api/marketplace",marketplaceRoutes);
-app.use("/api/marketchat",marketchatRoute);
+app.use("/api/chat",marketchatRoute);
 
 // Global Error Handling Middleware
 app.use((err, req, res, next) => {

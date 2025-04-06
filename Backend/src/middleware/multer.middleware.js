@@ -42,3 +42,5 @@ export const upload = multer({
     fileSize: 20 * 1024 * 1024, // 20MB in bytes
   },
 });
+
+export default upload;

@@ -275,11 +275,20 @@ export const loginStudent = async (req, res) => {
     maxAge: 24 * 60 * 60 * 1000,
   };
 
+  const userData = {
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role, // if exists
+    // add more fields if needed
+  };
+
   res
     .status(200)
     .cookie("accessToken", accessToken, options)
     .cookie("refreshToken", refreshToken, options)
-    .json({ message: "Login successful", accessToken, refreshToken });
+    .json({ message: "Login successful", accessToken, refreshToken,user:userData});
+    
 };
 
 export const googleAuth = async (req, res) => {

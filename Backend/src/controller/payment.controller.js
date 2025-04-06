@@ -215,7 +215,7 @@ export const createPaymentOrder = async (req, res) => {
         orderId: order.id,
         amount: payment.amount,
         currency: order.currency,
-        keyId: process.env.RAZORPAY_KEY_ID,
+        keyId: process.env.RAZORPAY_API_KEY,
       },
     });
   } catch (error) {

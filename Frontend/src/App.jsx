@@ -44,9 +44,25 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 import MessComplaints from "./pages/student/MessComplaints.jsx";
 import HostelComplaintsPage from "./pages/admin/HostelComplaints.jsx";
 import MessComplaintsPage from "./pages/admin/MessComplaints.jsx";
+import Marketplace from "./pages/student/MarketPlace.jsx";
+import AddEditProduct from "./pages/student/AddEditProduct.jsx";
+import MyListings from "./pages/student/MyListings.jsx";
+import MyOrders from "./pages/student/MyOrders.jsx";
+import Wishlist from "./pages/student/Wishlist.jsx";
+import SellerChatPage from "./pages/student/SellerChatPage.jsx";
+import ChatInbox from "./pages/student/ChatInbox.jsx";
+import ProductDetails from "./pages/student/ProductDetails.jsx";
+import { useDispatch } from "react-redux";
+import { setUser } from "./store/authSlice.js";
+
+
 
 function App() {
+  const  dispatch=useDispatch();
+
   useEffect(() => {
+
+
     const loadRazorpayScript = async () => {
       const res = await loadRazorpay();
       if (!res) {
@@ -56,6 +72,14 @@ function App() {
 
     loadRazorpayScript();
   }, []);
+
+  useEffect(()=>{
+    const userInfo=localStorage.getItem("userInfo");
+    console.log(userInfo);
+    if(userInfo){
+      dispatch(setUser(JSON.parse(userInfo)));
+    }
+  },[]);
 
   return (
     <>
@@ -123,6 +147,19 @@ function App() {
         />
         // Student routes
         <Route path="/student/fees" element={<FeesPaymentPage />} />
+        {/* marketplace routes */}
+
+        <Route path="/marketplace" element={<Marketplace />} />
+        <Route path="/marketplace/:id" element={<ProductDetails />} />
+        <Route path="/marketplace/add" element={<AddEditProduct />} />
+        <Route path="/marketplace/edit/:id" element={<AddEditProduct />} />
+        <Route path="/marketplace/wishlist" element={<Wishlist />} />
+        <Route path="/marketplace/listings" element={<MyListings />} />
+        <Route path="/marketplace/orders" element={<MyOrders />} />
+        <Route path="/chat/:sellerId" element={<SellerChatPage />} />
+        <Route path="/chat/inbox" element={<ChatInbox/>} />
+
+
         {/* Election Routes */}
         <Route path="/student/election" element={<StudentElectionsPage />} />
         <Route

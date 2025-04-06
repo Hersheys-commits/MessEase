@@ -39,7 +39,8 @@ const Login = ({ userType = "student" }) => {
       localStorage.setItem("refreshToken", response.data.refreshToken);
 
       // Update Redux state
-      dispatch(setUser(response.data));
+      console.log(response.data);
+      dispatch(setUser(response.data.user));
 
       toast.success(
         `${userType === "admin" ? "Admin" : "Student"} login successful!`
