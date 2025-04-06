@@ -6,18 +6,29 @@ import AuthForm from "../../components/auth/AuthForm";
 import Squares from "../../components/ui/Squares";
 import SpotlightCard from "../../components/ui/SpotlightCard";
 import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import logout from "../../store/authSlice";
 
 const ForgotPassword = ({ userType = "student" }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [step, setStep] = useState(1); // 1: Email entry, 2: Password reset with OTP
   const [email, setEmail] = useState("");
   const { isAuthenticated } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate(`/${userType}/home`);
-    }
-  }, [isAuthenticated, userType, navigate]);
+    const checkUser = async () => {
+      try {
+        const res = await api.post("/api/student/verify-token");
+        console.log(res);
+      } catch (error) {
+        console.log(error);
+        dispatch(logout());
+        console.log("user after logout: ", user);
+      }
+    };
+    checkUser();
+  }, [ userType, navigate]);
 
   // Form field configurations
   const emailFields = [

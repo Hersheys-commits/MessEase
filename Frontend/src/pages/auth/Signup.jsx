@@ -8,19 +8,29 @@ import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import Squares from "../../components/ui/Squares";
 import SpotlightCard from "../../components/ui/SpotlightCard";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../../store/authSlice";
 
 const Signup = ({ userType = "student" }) => {
   const [otpSent, setOtpSent] = useState(false);
+  const dispatch = useDispatch();
   const [userData, setUserData] = useState(null);
   const { isAuthenticated } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate(`/${userType}/home`);
-    }
-  }, [isAuthenticated, userType, navigate]);
+    const checkUser = async () => {
+      try {
+        const res = await api.post("/api/student/verify-token");
+        console.log(res);
+      } catch (error) {
+        console.log(error);
+        dispatch(logout());
+        console.log("user after logout: ", user);
+      }
+    };
+    checkUser();
+  }, [ userType, navigate]);
 
   const getFormFields = () => {
     const commonFields = [

@@ -8,18 +8,30 @@ import { useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import Squares from "../../components/ui/Squares";
 import SpotlightCard from "../../components/ui/SpotlightCard";
+import { logout } from "../../store/authSlice";
+import { setUser } from "../../store/authSlice"
 
 const Login = ({ userType = "student" }) => {
   const navigate = useNavigate();
+  const dispatch= useDispatch();
+
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   console.log("login state", user);
   console.log("login state", isAuthenticated);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate(`/${userType}/home`);
-    }
-  }, [isAuthenticated, userType, navigate]);
+    const checkUser = async () => {
+      try {
+        const res = await api.post("/api/student/verify-token");
+        console.log(res);
+      } catch (error) {
+        console.log(error);
+        dispatch(logout());
+        console.log("user after logout: ", user);
+      }
+    };
+    checkUser();
+  }, [ userType, navigate]);
 
   const loginFields = [
     {

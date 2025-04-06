@@ -360,8 +360,8 @@ app.use("/api/mess", messRoutes);
 app.use("/api/election", electionRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/complaint", complaintRoutes);
-app.use("/api/marketplace",marketplaceRoutes);
-app.use("/api/chat",marketchatRoute);
+app.use("/api/marketplace", marketplaceRoutes);
+app.use("/api/chat", marketchatRoute);
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {

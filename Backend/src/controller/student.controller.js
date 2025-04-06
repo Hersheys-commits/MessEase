@@ -287,8 +287,12 @@ export const loginStudent = async (req, res) => {
     .status(200)
     .cookie("accessToken", accessToken, options)
     .cookie("refreshToken", refreshToken, options)
-    .json({ message: "Login successful", accessToken, refreshToken,user:userData});
-    
+    .json({
+      message: "Login successful",
+      accessToken,
+      refreshToken,
+      user: userData,
+    });
 };
 
 export const googleAuth = async (req, res) => {
@@ -401,6 +405,7 @@ export const googleAuth = async (req, res) => {
  */
 export const logout = async (req, res) => {
   try {
+    console.log("yyhg");
     await User.findByIdAndUpdate(
       req.user._id,
       { $unset: { refreshToken: 1 } },

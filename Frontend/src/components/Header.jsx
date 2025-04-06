@@ -8,6 +8,8 @@ import api from "../utils/axiosRequest";
 import toast from "react-hot-toast";
 import Logo from "./Logo";
 import { IoChatbubbleEllipses } from "react-icons/io5";
+import { FaCartShopping } from "react-icons/fa6";
+import { persistor } from "../store/store";
 
 const Header = () => {
   const dispatch = useDispatch();
@@ -56,6 +58,7 @@ const Header = () => {
     try {
       await api.post("/api/student/logout");
       dispatch(logout());
+      persistor.purge();
       toast.success("Logged out successfully!");
       navigate("/student/login");
     } catch (error) {
@@ -88,6 +91,7 @@ const Header = () => {
     { title: "Fees", path: "/student/fees", icon: "money" },
     { title: "Mess", path: `/student/mess/${code}`, icon: "mess" },
     { title: "Chat", path: `/hostel/groupChat/${code}`, icon: "chat" },
+    { title: "Marketplace", path: "/marketplace", icon: "cart" },
   ];
 
   const toggleMenu = () => {
@@ -153,6 +157,7 @@ const Header = () => {
             {link.icon === "chat" && (
               <IoChatbubbleEllipses className="h-4 mr-1" />
             )}
+            {link.icon === "cart" && <FaCartShopping className="h-4 mr-1" />}
             {link.icon === "mess"
               ? code !== "000"
                 ? link.title

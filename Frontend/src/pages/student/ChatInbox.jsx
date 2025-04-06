@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import api from "../../utils/axiosRequest";
 import { Link } from "react-router-dom";
+import Header from "../../components/Header";
 
 const ChatInbox = () => {
   const user = useSelector((state) => state.auth.user);
@@ -27,29 +28,59 @@ const ChatInbox = () => {
     fetchChats();
   }, [userId]);
 
-  if (loading) return <p className="text-gray-400 text-center">Loading chats...</p>;
-  if (chats.length === 0) return <p className="text-gray-400 text-center">No conversations yet.</p>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-gray-100">
+        <Header />
+        <div className="flex justify-center items-center h-96">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (chats.length === 0)
+    return (
+      <div>
+        <Header />
+        <div className="min-h-screen flex flex-col justify-center items-center bg-gray-900">
+          <p className="text-gray-400">You have no chats yet.</p>
+          <Link
+            to="/marketplace"
+            className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+          >
+            Back to Marketplace
+          </Link>
+        </div>
+      </div>
+    );
 
   return (
-    <div className="p-6 bg-gray-900 min-h-screen text-white">
-      <h2 className="text-3xl font-bold mb-6 text-center">Chat Inbox</h2>
-      <div className="space-y-4">
-        {chats.map((chat) => {
-          // Determine the other party in the chat
-          const otherParty = chat.buyerId === userId ? chat.seller : chat.buyer;
-          return (
-            <Link
-              to={`/chat/${otherParty._id}`}
-              key={chat._id}
-              className="bg-gray-800 p-4 rounded-lg shadow hover:bg-gray-700 transition-colors flex items-center justify-between"
-            >
-              <p className="text-xl font-semibold">{otherParty.username}</p>
-              {chat.unreadCount > 0 && (
-                <span className="bg-red-500 rounded-full px-3 py-1 text-sm">{chat.unreadCount}</span>
-              )}
-            </Link>
-          );
-        })}
+    <div>
+      <Header />
+      <div className="p-6 bg-gray-900 min-h-screen text-white">
+        <h2 className="text-3xl font-bold mb-6 text-center">Chat Inbox</h2>
+        <div className="space-y-4">
+          {chats.map((chat) => {
+            // Determine the other party in the chat
+            const otherParty =
+              chat.buyerId === userId ? chat.seller : chat.buyer;
+            return (
+              <Link
+                to={`/chat/${otherParty._id}`}
+                key={chat._id}
+                className="bg-gray-800 p-4 rounded-lg shadow hover:bg-gray-700 transition-colors flex items-center justify-between"
+              >
+                <p className="text-xl font-semibold">{otherParty.username}</p>
+                {chat.unreadCount > 0 && (
+                  <span className="bg-red-500 rounded-full px-3 py-1 text-sm">
+                    {chat.unreadCount}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

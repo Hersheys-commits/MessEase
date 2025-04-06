@@ -638,13 +638,11 @@ export const getChats = async (req, res) => {
       })
       .sort({ "chats.timestamp": 1 }); // Sort messages from oldest to newest
     console.log("CHAT2: ", groupChat);
-    return res
-      .status(200)
-      .json({
-        success: true,
-        chats: groupChat.chats,
-        totalPages: Math.ceil((totalChats?.chats?.length || 0) / limit),
-      });
+    return res.status(200).json({
+      success: true,
+      chats: groupChat.chats,
+      totalPages: Math.ceil((totalChats?.chats?.length || 0) / limit),
+    });
   } catch (error) {
     console.error("Error fetching chats:", error);
     return res.status(500).json({ error: "Internal server error" });

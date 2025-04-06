@@ -33,8 +33,9 @@ export const GroupChat = () => {
   const hostelId = reduxUser.hostel || location.state.hostelId || "";
   const userId = reduxUser._id || "";
   const userName = reduxUser.name || " ";
-  const role=reduxUser.role;
-  const PINNING_ALLOWED_USER_ID = (role == "messManager" ) || (role=="hostelManager") ;
+  const role = reduxUser.role;
+  const PINNING_ALLOWED_USER_ID =
+    role == "messManager" || role == "hostelManager";
   const [chats, setChats] = useState([]);
   const [message, setMessage] = useState("");
   const [imageFile, setImageFile] = useState(null);
@@ -136,7 +137,7 @@ export const GroupChat = () => {
 
   useEffect(() => {
     // Scroll to bottom smoothly whenever chats change
-    if ( chatContainerRef.current) {
+    if (chatContainerRef.current) {
       chatContainerRef.current.scrollTo({
         top: chatContainerRef.current.scrollHeight,
         behavior: "smooth",
@@ -908,17 +909,17 @@ export const GroupChat = () => {
               </div>
             </div>
 
-          {hasMore && (
-            <div className="px-4 mb-2">
-              <button
-                onClick={getMoreChats}
-                className="w-full bg-gray-700 hover:bg-gray-600 text-gray-200 py-2 rounded-md flex items-center justify-center transition-colors"
-              >
-                <ChevronUp className="w-4 h-4 mr-2" />
-                Load More Messages
-              </button>
-            </div>
-          )}
+            {hasMore && (
+              <div className="px-4 mb-2">
+                <button
+                  onClick={getMoreChats}
+                  className="w-full bg-gray-700 hover:bg-gray-600 text-gray-200 py-2 rounded-md flex items-center justify-center transition-colors"
+                >
+                  <ChevronUp className="w-4 h-4 mr-2" />
+                  Load More Messages
+                </button>
+              </div>
+            )}
             {/* Pinned Message Section */}
             {pinnedMessage && (
               <div className="mb-4 bg-yellow-900 bg-opacity-30 p-2 rounded-md relative mx-4">

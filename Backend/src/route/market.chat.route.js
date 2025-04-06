@@ -21,14 +21,20 @@ router.get("/inbox", verifyJwt, async (req, res) => {
     // For each chat, compute last message and unread count based on last read timestamp.
     const chatSummaries = chats.map((chat) => {
       const lastMessageObj = chat.messages[chat.messages.length - 1];
-      const lastMessage = lastMessageObj ? lastMessageObj.text : "No messages yet";
+      const lastMessage = lastMessageObj
+        ? lastMessageObj.text
+        : "No messages yet";
       let unreadCount = 0;
       if (chat.buyerId._id.toString() === userId.toString()) {
         const lastRead = chat.buyerLastRead || new Date(0);
-        unreadCount = chat.messages.filter((msg) => msg.timestamp > lastRead).length;
+        unreadCount = chat.messages.filter(
+          (msg) => msg.timestamp > lastRead
+        ).length;
       } else if (chat.sellerId._id.toString() === userId.toString()) {
         const lastRead = chat.sellerLastRead || new Date(0);
-        unreadCount = chat.messages.filter((msg) => msg.timestamp > lastRead).length;
+        unreadCount = chat.messages.filter(
+          (msg) => msg.timestamp > lastRead
+        ).length;
       }
       return {
         _id: chat._id,
@@ -100,7 +106,9 @@ router.post("/send", verifyJwt, async (req, res) => {
     await chat.save();
 
     // Emit event to notify the receiver (sender's room should be managed via socket connection)
-    req.io.to(receiverId.toString()).emit("newMessage", { chatId, senderId, text });
+    req.io
+      .to(receiverId.toString())
+      .emit("newMessage", { chatId, senderId, text });
 
     res.status(201).json(newMessage);
   } catch (error) {
@@ -115,7 +123,9 @@ router.put("/mark-read", verifyJwt, async (req, res) => {
     const { chatId } = req.body;
     const userId = req.user?._id;
     if (!chatId || !userId) {
-      return res.status(400).json({ error: "Chat ID and User ID are required" });
+      return res
+        .status(400)
+        .json({ error: "Chat ID and User ID are required" });
     }
 
     const chat = await Chat.findById(chatId);
@@ -126,7 +136,9 @@ router.put("/mark-read", verifyJwt, async (req, res) => {
     } else if (chat.sellerId.toString() === userId.toString()) {
       chat.sellerLastRead = new Date();
     } else {
-      return res.status(400).json({ error: "User is not a participant in this chat" });
+      return res
+        .status(400)
+        .json({ error: "User is not a participant in this chat" });
     }
 
     await chat.save();

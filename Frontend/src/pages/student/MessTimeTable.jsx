@@ -161,6 +161,7 @@ const MessTimeTable = () => {
       </div>
     );
   }
+
   if (error) {
     return (
       <div>

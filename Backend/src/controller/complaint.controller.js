@@ -14,7 +14,7 @@ export const createComplaint = async (req, res) => {
   try {
     // console.log("Request body:", req.body);
     // console.log("Request files:", req.files);
-    
+
     const { description, category } = req.body;
     const files = req.files;
     const user = req.user;

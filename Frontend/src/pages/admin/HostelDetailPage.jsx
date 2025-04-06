@@ -547,8 +547,8 @@ const HostelDetailPage = () => {
                     <button
                       className="y-5 display: inline bg-gray-500 text-white px-4 py-2 rounded"
                       disabled
-                      >
-                       GroupChat Created
+                    >
+                      GroupChat Created
                     </button>
                   ) : (
                     <button

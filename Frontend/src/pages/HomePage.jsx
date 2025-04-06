@@ -325,9 +325,7 @@ const HomePage = () => {
       `}</style>
 
       {/*Header*/}
-      <header
-        className="fixed w-full z-50 transition-all duration-300 bg-gray-900/95 backdrop-blur-sm shadow-lg shadow-cyan-900/20 border-b border-gray-800/80"
-      >
+      <header className="fixed w-full z-50 transition-all duration-300 bg-gray-900/95 backdrop-blur-sm shadow-lg shadow-cyan-900/20 border-b border-gray-800/80">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             {/* Logo with hover effect */}
