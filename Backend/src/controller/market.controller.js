@@ -49,6 +49,7 @@ export const createProduct = async (req, res) => {
     // Build and save the product
     const newProduct = new Product({
       title,
+      college: req.user.college,
       description,
       price,
       category,
@@ -210,7 +211,7 @@ export const getProductById = async (req, res) => {
 
 export const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find({ sold: false }).populate(
+    const products = await Product.find({ sold: false, college: req.user.college  }).populate(
       "sellerId",
       "name email"
     );
@@ -242,6 +243,9 @@ export const buyNow = async (req, res) => {
     const buyerId = req.body;
     const userId = req.user._id;
     const product = await Product.findById(productId);
+    if(product.college!=req.user.college){
+      return res.status(400).json({ message: "Product not available in your college" });
+    }
     if (!product) return res.status(404).json({ message: "Product not found" });
     if (product.sold)
       return res.status(400).json({ message: "Product already sold" });

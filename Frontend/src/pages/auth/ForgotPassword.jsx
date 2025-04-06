@@ -15,20 +15,32 @@ const ForgotPassword = ({ userType = "student" }) => {
   const [step, setStep] = useState(1); // 1: Email entry, 2: Password reset with OTP
   const [email, setEmail] = useState("");
   const { isAuthenticated } = useSelector((state) => state.auth);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const checkUser = async () => {
+      // Check if the user is authenticated first
+      if (!isAuthenticated) {
+        dispatch(logout());
+        setLoading(false);
+        return;
+      }
+  
       try {
         const res = await api.post("/api/student/verify-token");
         console.log(res);
+        navigate("/student/home");
       } catch (error) {
         console.log(error);
         dispatch(logout());
-        console.log("user after logout: ", user);
+      } finally {
+        setLoading(false);
       }
     };
+  
     checkUser();
-  }, [ userType, navigate]);
+  }, [isAuthenticated, navigate, dispatch]);
+  
 
   // Form field configurations
   const emailFields = [
@@ -98,7 +110,7 @@ const ForgotPassword = ({ userType = "student" }) => {
       setStep(2);
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to send OTP");
-    }
+    } 
   };
 
   // Handle password reset with OTP verification
@@ -141,6 +153,16 @@ const ForgotPassword = ({ userType = "student" }) => {
     userType === "admin"
       ? "rgba(59, 130, 246, 0.3)" // More blue for admin
       : "rgba(125, 211, 252, 0.2)"; // Lighter blue for student
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-gray-100">
+        <div className="flex justify-center items-center h-96">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={pageStyle}>

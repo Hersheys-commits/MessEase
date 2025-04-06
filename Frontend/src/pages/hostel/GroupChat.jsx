@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useLocation, useParams } from "react-router-dom";
-import axios from "axios";
+import api from "../../utils/axiosRequest";
 import { io } from "socket.io-client";
 import {
   Send,
@@ -53,6 +53,7 @@ export const GroupChat = () => {
   // Create a ref for the chat messages container
   const chatContainerRef = useRef(null);
   const fileInputRef = useRef(null);
+  const [created,setCreated] = useState(true);
 
   //
   const [isRecording, setIsRecording] = useState(false);
@@ -153,7 +154,7 @@ export const GroupChat = () => {
     // Fetch initial chats
     const fetchChats = async () => {
       try {
-        const response = await axios.get(
+        const response = await api.get(
           "http://localhost:4001/api/admin/getChats",
           {
             params: { hostelId, userId, code, page },
@@ -215,8 +216,10 @@ export const GroupChat = () => {
           }
         }
       } catch (error) {
-        console.log(error.message);
-        console.error("Error fetching chats:", error);
+        if(!error.response.data.groupChat) {
+          setCreated(false);
+        }
+        console.log("Error fetching chats:", error);
       }
     };
     fetchChats();
@@ -407,7 +410,7 @@ export const GroupChat = () => {
 
   const getMoreChats = async () => {
     try {
-      const response = await axios.get(
+      const response = await api.get(
         "http://localhost:4001/api/admin/getChats",
         {
           params: { hostelId, userId, code, page },
@@ -589,7 +592,7 @@ export const GroupChat = () => {
         console.log(imageFile);
         console.log([...formData.entries()]);
         // Upload image to server
-        const uploadResponse = await axios.post(
+        const uploadResponse = await api.post(
           "http://localhost:4001/api/admin/uploadImage",
           formData,
           {
@@ -623,7 +626,7 @@ export const GroupChat = () => {
         console.log(newAudioFile);
         console.log([...formData.entries()]);
         // Upload image to server
-        const uploadResponse = await axios.post(
+        const uploadResponse = await api.post(
           "http://localhost:4001/api/admin/uploadAudio",
           formData,
           {
@@ -869,6 +872,17 @@ export const GroupChat = () => {
   };
 
   const pollStats = calculatePollStats();
+
+  if(!created){
+    return (<div className="min-h-screen bg-gray-900 flex flex-col transition-colors duration-300">
+      <Header/>
+      <div className="container p-4 flex w-4/5 mx-auto">
+        <div className="bg-gray-800 shadow-md rounded-lg w-full p-4">
+          <h1 className="text-2xl text-center text-red-500">Group Chat Not Created</h1>
+        </div>
+      </div>
+    </div>)
+  }
 
   return (
     <div>

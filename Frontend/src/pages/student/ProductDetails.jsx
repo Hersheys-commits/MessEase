@@ -24,6 +24,7 @@ const ProductDetails = () => {
   const fetchReviews = async () => {
     try {
       const response = await api.get(`/api/marketplace/products/${id}/reviews`);
+      console.log(response.data);
       setReviews(response.data);
     } catch (error) {
       console.error("Error fetching reviews:", error);
@@ -352,11 +353,19 @@ const ProductDetails = () => {
                     >
                       <div className="flex justify-between items-start">
                         <div className="flex items-center mb-2">
+                        {review.user?.profilePicture ? (
+                          <img
+                            src={review.user.profilePicture}
+                            alt={review.user?.name || "User"}
+                            className="w-8 h-8 rounded-full mr-2 object-cover"
+                          />
+                        ) : (
                           <div className="bg-gray-600 rounded-full w-8 h-8 flex items-center justify-center mr-2">
-                            {review.user?.username?.[0]?.toUpperCase() || "?"}
+                            {review.user?.name?.[0]?.toUpperCase() || "?"}
                           </div>
+                        )}
                           <span className="text-gray-300 font-medium">
-                            {review.user?.username || "Anonymous"}
+                            {review.user?.name || "Anonymous"}
                           </span>
                         </div>
                         <div className="flex items-center text-yellow-400">

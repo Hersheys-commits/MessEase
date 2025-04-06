@@ -24,6 +24,11 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  college: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "College",
+    required: true,
+  },
   description: {
     type: String,
   },

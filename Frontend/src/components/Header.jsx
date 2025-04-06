@@ -72,6 +72,7 @@ const Header = () => {
         try {
           const res = await api.post("/api/student/verify-token");
           console.log("header call to save data in redux auth", res.data);
+          console.log(res.data)
           dispatch(setCode(res.data.code));
           dispatch(setUser(res.data.userInfo));
         } catch (err) {

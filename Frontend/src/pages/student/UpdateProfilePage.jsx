@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { setUser } from "../../store/authSlice"; // Adjust path as needed
+import { setUser, setCode } from "../../store/authSlice"; // Adjust path as needed
 import api from "../../utils/axiosRequest";
 import {
   FaUser,
@@ -71,6 +71,7 @@ const UpdateProfile = () => {
 
         // Update Redux store with user data
         dispatch(setUser(userInfo));
+        dispatch(setCode(userResponse?.data?.code));
 
         // Update local state with user data
         setUserState({
@@ -178,6 +179,7 @@ const UpdateProfile = () => {
 
       // Update Redux store with the latest user data
       dispatch(setUser(updatedUserInfo));
+      dispatch(setCode(userResponse?.data?.code));
 
       setSuccess("Profile updated successfully!");
       toast.success("Profile updated successfully");

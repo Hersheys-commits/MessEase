@@ -637,7 +637,11 @@ export const getChats = async (req, res) => {
         select: "name", // Select required fields
       })
       .sort({ "chats.timestamp": 1 }); // Sort messages from oldest to newest
-    console.log("CHAT2: ", groupChat);
+
+    if(!groupChat){
+      return res.status(404).json({ message: "Group chat not found", groupChat: false, });
+    }
+    // console.log("CHAT2: ", groupChat);
     return res.status(200).json({
       success: true,
       chats: groupChat.chats,
