@@ -10,6 +10,53 @@
   animation: fadeIn 0.2s ease-out forwards;
 }
 
+/* Custom scrollbar for dark theme */
+/* For Webkit browsers (Chrome, Safari, etc.) */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #1a202c; /* bg-gray-900 */
+  border-radius: 9999px; /* rounded-full */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #6d28d9; /* bg-purple-700 */
+  border-radius: 9999px; /* rounded-full */
+  transition: all 0.3s ease-in-out;
+  border: 2px solid #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #7c3aed; /* bg-purple-600 */
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #6d28d9 #1a202c; /* purple-700 gray-900 */
+}
+
+/* For Edge */
+::-webkit-scrollbar-corner {
+  background-color: #1a202c; /* bg-gray-900 */
+}
+
+/* For dark theme specific styling */
+.dark ::-webkit-scrollbar-track {
+  background-color: #1a202c; /* bg-gray-900 */
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background-color: #6d28d9; /* bg-purple-700 */
+  border: 2px solid #1a1a1a;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background-color: #7c3aed; /* bg-purple-600 */
+}
 
 /* 
 :root {

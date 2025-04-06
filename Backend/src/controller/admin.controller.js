@@ -1,5 +1,6 @@
 // controllers/adminController.js
 import User from "../model/user.model.js";
+import Hostel from "../model/hostel.model.js";
 import College from "../model/college.model.js";
 import { OAuth2Client } from "google-auth-library";
 import { ApiResponse } from "../util/ApiResponse.js";
@@ -8,6 +9,7 @@ import { asyncHandler } from "../util/asyncHandler.js";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 import { uploadOnCloudinary } from "../util/cloudinary.js";
+import GroupChat from "../model/groupchat.model.js";
 import { v2 as cloudinary } from "cloudinary";
 import { createOtpMailOptions } from "../util/mailTemplateOTP.js";
 import { createOtpMailOptions as registerMail } from "../util/mailTemplateRegistration.js";
@@ -575,7 +577,102 @@ export const updateAdminProfile = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(
-      new ApiResponse(200, updatedUser, "Avatar image updated successfully")
-    );
+    .json(new ApiResponse(200, user, "Admin profile updated successfully"));
+});
+
+export const createGroupChat = async (req, res) => {
+  try {
+    const { code, userId, groupName, hostelId } = req.body;
+    // Check if a group already exists for this hostel
+    const existingGroup = await GroupChat.findOne({ hostelId });
+    console.log(existingGroup);
+
+    if (existingGroup) {
+      return res
+        .status(400)
+        .json({ message: "Group chat already exists for this hostel." });
+    }
+
+    // Create a new group chat
+    const newGroup = new GroupChat({
+      code,
+      userId,
+      groupName,
+      hostelId,
+    });
+
+    await newGroup.save();
+
+    await Hostel.findByIdAndUpdate(hostelId, { chatCreated: true });
+
+    return res
+      .status(201)
+      .json({ message: "Group chat created successfully.", group: newGroup });
+
+    // return res.status(201).json({ message: "Group chat created successfully.", group: newGroup });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+export const getChats = async (req, res) => {
+  try {
+    const { page = 1, limit = 100 } = req.query;
+
+    const { hostelId, userId, code } = req.query;
+    const skip = (page - 1) * limit;
+    console.log("G", req.query);
+    // Validate required fields
+    if (!hostelId || !userId || !code) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    const totalChats = await GroupChat.findOne({ hostelId }).select("chats");
+
+    const groupChat = await GroupChat.findOne({ hostelId })
+      .select({ chats: { $slice: [-skip - limit, limit] } }) // Fetch required slice
+      .populate({
+        path: "chats.sender",
+        select: "name", // Select required fields
+      })
+      .sort({ "chats.timestamp": 1 }); // Sort messages from oldest to newest
+    console.log("CHAT2: ", groupChat);
+    return res
+      .status(200)
+      .json({
+        success: true,
+        chats: groupChat.chats,
+        totalPages: Math.ceil((totalChats?.chats?.length || 0) / limit),
+      });
+  } catch (error) {
+    console.error("Error fetching chats:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const uploadImage = asyncHandler(async (req, res) => {
+  try {
+    console.log("UPLOAD IMAGE BODY: ", req.body);
+    console.log("UPLOAD IMAGE FINAL: ", req.file);
+    const chatImage = await uploadOnCloudinary(req.file.path);
+    console.log("profilePicture", chatImage);
+    return res.status(200).send({ imageUrl: chatImage.secure_url });
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ error: "Upload failed" });
+  }
+});
+
+export const uploadAudio = asyncHandler(async (req, res) => {
+  try {
+    console.log("UPLOAD Audio BODY: ", req.body);
+    console.log("UPLOAD Audio FINAL: ", req.file);
+    const chatAudio = await uploadOnCloudinary(req.file.path);
+    console.log("audioImage", chatAudio);
+    return res.status(200).send({ audioUrl: chatAudio.secure_url });
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ error: "Upload failed" });
+  }
 });

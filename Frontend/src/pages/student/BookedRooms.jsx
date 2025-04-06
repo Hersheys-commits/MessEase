@@ -2,45 +2,23 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../utils/axiosRequest";
 import Header from "../../components/Header";
-import hostelService from "../../utils/hostelCheck";
 import toast from "react-hot-toast";
+import useHostelCheck from "../../hooks/useHostelCheck";
+import { useSelector } from "react-redux";
 
 const BookedRooms = () => {
   const [bookedRooms, setBookedRooms] = useState([]);
   const [loadingId, setLoadingId] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
+  const { loadingCheck } = useHostelCheck();
+  const isBlocked = useSelector((state) => state.auth.isBlocked);
   useEffect(() => {
-    const verifyHostel = async () => {
-      try {
-        const data = await hostelService.checkHostelAssignment();
-        if (data.data.user.isBlocked === true) {
-          toast.error("You are blocked by Admin.");
-          navigate("/student/home");
-        }
-        if (
-          !(
-            data.data.user.role === "student" ||
-            data.data.user.role === "messManager" ||
-            data.data.user.role === "hostelManager"
-          )
-        ) {
-          toast.error("You are not authorized to access this page.");
-          navigate("/admin/home");
-        }
-        if (data.data.user.role === "student" && !data.data.user.hostel) {
-          toast.error("Hostel must be assigned.");
-          navigate("/student/update-profile");
-        }
-        setLoading(false);
-      } catch (err) {
-        setLoading(false);
-        navigate("/student/login");
-      }
-    };
-    verifyHostel();
-  }, [navigate]);
+    if (isBlocked) {
+      toast.error("You are blocked by admin.");
+      navigate("/student/home");
+    }
+  }, [isBlocked]);
 
   const fetchBookedRooms = async () => {
     try {
@@ -74,7 +52,7 @@ const BookedRooms = () => {
     }
   };
 
-  if (loading) {
+  if (loadingCheck) {
     return (
       <div className="bg-gray-900 min-h-screen text-gray-100">
         <Header />

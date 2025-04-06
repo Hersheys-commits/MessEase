@@ -130,7 +130,7 @@ const JoinCollegePage = () => {
 
   // Available roles
   const roles = [
-    { id: "messManager", label: "Mess Manager", icon: "🍽️" },
+    { id: "chiefWarden", label: "Chief Warden", icon: "🍽️" },
     { id: "admin", label: "Admin", icon: "🔑" },
     { id: "accountant", label: "Accountant", icon: "💼" },
   ];

@@ -99,9 +99,9 @@ export const getHostelByCode = async (req, res) => {
         message: "Hostel code is required",
       });
     }
-
+    // console.log("UUUUUUU ",req.user);
     const hostel = await Hostel.findOne({ code });
-
+    // console.log("HHHHHHHHHHHH: ",hostel);
     if (!hostel) {
       return res.status(404).json({
         success: false,
@@ -113,6 +113,7 @@ export const getHostelByCode = async (req, res) => {
       success: true,
       message: "Hostel fetched successfully",
       hostel,
+      user: req.user,
     });
   } catch (error) {
     console.error("Error fetching hostel:", error);
@@ -255,3 +256,35 @@ export const getHostelMess = async (req, res) => {
     return res.status(500).json({ message: "server error", success: false });
   }
 };
+
+// // getChats,
+
+// export const getChats = async (req, res) => {
+//   try {
+//     const { hostelId, userId, code } = req.query;
+
+//     console.log("G",req.query);
+//         // Validate required fields
+//     if (!hostelId || !userId || !code) {
+//       return res.status(400).json({ error: "All fields are required" });
+//     }
+
+//     // Fetch group chat that belongs to the hostelId
+//     const groupChat = await GroupChat.findOne({ hostelId }) .populate("chats.sender", "name email")
+//      // Populate sender details inside chats array
+//       .sort({ createdAt: 1 }); // Sort messages from oldest to newest
+
+//       console.log(groupChat);
+
+//       const groupChat2 = await GroupChat.findOne({ hostelId }) .populate("chats.sender", "name email")
+//       // Populate sender details inside chats array
+//        .sort({ createdAt: 1 }); // Sort messages from oldest to newest
+
+//        console.log(groupChat2);
+
+//     return res.status(200).json({ success: true, chats: groupChat.chats });
+//   } catch (error) {
+//     console.error("Error fetching chats:", error);
+//     return res.status(500).json({ error: "Internal server error" });
+//   }
+// };

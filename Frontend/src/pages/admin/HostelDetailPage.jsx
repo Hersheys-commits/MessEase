@@ -12,6 +12,7 @@ const HostelDetailPage = () => {
   const { code } = useParams();
   const navigate = useNavigate();
   const [hostel, setHostel] = useState(null);
+  const [groupChat, setGroupChat] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const { loadingAdmin, isAdmin, isVerified } = useAdminAuth();
@@ -20,7 +21,8 @@ const HostelDetailPage = () => {
     toast.error("Your College is not verified yet. Authorized access denied.");
     navigate("/admin/home");
   }
-
+  const [hostelId, setHostelId] = useState("");
+  const [user, setUser] = useState();
   const {
     register,
     handleSubmit,
@@ -48,8 +50,15 @@ const HostelDetailPage = () => {
     const fetchHostelDetails = async () => {
       try {
         const response = await api.get(`/api/hostel/${code}`);
+        console.log("data is here: ", response.data);
         setHostel(response.data.hostel);
         // Set form default values
+        setUser(response.data.user);
+        console.log("HD: ", response.data.user);
+        setHostelId(response.data.hostel._id);
+        // check if group chat is created or not  if not then show create else show see group chat
+        setGroupChat(response.data.hostel.chatCreated);
+
         reset({
           name: response.data.hostel.name,
           location: response.data.hostel.location,
@@ -513,7 +522,7 @@ const HostelDetailPage = () => {
                 )}
               </div>
 
-              <div>
+              <div className="flex justify-between items-center mt-6">
                 {hostel.mess ? (
                   <button
                     className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
@@ -533,6 +542,31 @@ const HostelDetailPage = () => {
                     Add Mess
                   </button>
                 )}
+                <div className="mt-4">
+                  {groupChat ? (
+                    <button
+                      className="y-5 display: inline bg-gray-500 text-white px-4 py-2 rounded"
+                      disabled
+                      >
+                       GroupChat Created
+                    </button>
+                  ) : (
+                    <button
+                      className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+                      onClick={() => {
+                        navigate("/admin/create-GroupChat", {
+                          state: {
+                            code,
+                            userId: user._id,
+                            hostelId: hostel._id,
+                          },
+                        });
+                      }}
+                    >
+                      Add Group Chat
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           )}

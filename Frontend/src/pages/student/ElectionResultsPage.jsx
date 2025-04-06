@@ -3,7 +3,8 @@ import api from "../../utils/axiosRequest";
 import { useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import Header from "../../components/Header";
-import hostelService from "../../utils/hostelCheck";
+import useHostelCheck from "../../hooks/useHostelCheck";
+import { useSelector } from "react-redux";
 
 const ElectionResultsPage = () => {
   const [results, setResults] = useState([]);
@@ -11,37 +12,14 @@ const ElectionResultsPage = () => {
   const [loading, setLoading] = useState(true);
   const { electionId } = useParams();
   const navigate = useNavigate();
-
+  const { loadingCheck } = useHostelCheck();
+  const isBlocked = useSelector((state) => state.auth.isBlocked);
   useEffect(() => {
-    const verifyHostel = async () => {
-      try {
-        const data = await hostelService.checkHostelAssignment();
-        if (data.data.user.isBlocked === true) {
-          toast.error("You are blocked by Admin.");
-          navigate("/student/home");
-        }
-        if (
-          !(
-            data.data.user.role === "student" ||
-            data.data.user.role === "messManager" ||
-            data.data.user.role === "hostelManager"
-          )
-        ) {
-          toast.error("You are not authorized to access this page.");
-          navigate("/admin/home");
-        }
-        if (data.data.user.role === "student" && !data.data.user.hostel) {
-          toast.error("Hostel must be assigned.");
-          navigate("/student/update-profile");
-        }
-        setLoading(false);
-      } catch (err) {
-        setLoading(false);
-        navigate("/student/login");
-      }
-    };
-    verifyHostel();
-  }, []);
+    if (isBlocked) {
+      toast.error("You are blocked by admin.");
+      navigate("/student/home");
+    }
+  }, [isBlocked]);
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -78,7 +56,7 @@ const ElectionResultsPage = () => {
     return results.reduce((sum, result) => sum + result.voteCount, 0);
   };
 
-  if (loading) {
+  if (loading || loadingCheck) {
     return (
       <div className="bg-gradient-to-b from-gray-900 to-gray-800 min-h-screen text-gray-100">
         <Header />
@@ -147,6 +125,13 @@ const ElectionResultsPage = () => {
 
   const winner = getWinner();
   const totalVotes = getTotalVotes();
+  let voteCount = 0;
+  if (winner) {
+    const winnerResult = results.find(
+      (result) => result.candidate._id === winner._id
+    );
+    voteCount = winnerResult ? winnerResult.voteCount : 0;
+  }
 
   // Function to create a nice visual for vote percentage
   const renderVotePercentage = (votes) => {
@@ -304,19 +289,19 @@ const ElectionResultsPage = () => {
 
                 <div className="flex-1">
                   <div className="text-3xl font-bold text-yellow-500 mb-2">
-                    {((winner.voteCount / totalVotes) * 100).toFixed(1)}%
+                    {((voteCount / totalVotes) * 100).toFixed(1)}%
                   </div>
                   <div className="w-full bg-gray-700 rounded-full h-4 mb-2">
                     <div
                       className="bg-yellow-500 h-4 rounded-full"
                       style={{
-                        width: `${((winner.voteCount / totalVotes) * 100).toFixed(1)}%`,
+                        width: `${((voteCount / totalVotes) * 100).toFixed(1)}%`,
                       }}
                     ></div>
                   </div>
                   <div className="text-gray-300">
-                    <span className="font-medium">{winner.voteCount}</span> out
-                    of {totalVotes} votes
+                    <span className="font-medium">{voteCount}</span> out of{" "}
+                    {totalVotes} votes
                   </div>
                 </div>
               </div>

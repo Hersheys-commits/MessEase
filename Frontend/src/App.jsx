@@ -44,6 +44,9 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 import MessComplaints from "./pages/student/MessComplaints.jsx";
 import HostelComplaintsPage from "./pages/admin/HostelComplaints.jsx";
 import MessComplaintsPage from "./pages/admin/MessComplaints.jsx";
+import { CreateGroupChat } from "./pages/admin/CreateGroupChat";
+import { GroupChat } from "./pages/hostel/GroupChat";
+import CustomCursor from "./components/CustomCursor.jsx";
 import Marketplace from "./pages/student/MarketPlace.jsx";
 import AddEditProduct from "./pages/student/AddEditProduct.jsx";
 import MyListings from "./pages/student/MyListings.jsx";
@@ -202,16 +205,17 @@ function App() {
             // </ProtectedRoute>
           }
         />
-        <Route path="/available-rooms" element={<AvailableRooms />}>
-          {" "}
-        </Route>
+        <Route path="/available-rooms" element={<AvailableRooms />} />
         <Route path="/book-rooms" element={<BookRooms />} />
         <Route path="/see-booking" element={<BookedRooms />} />
+        <Route path="/admin/create-GroupChat" element={<CreateGroupChat />} />
+        <Route path="/hostel/groupChat/:code" element={<GroupChat />} />
       </Routes>
       {/* <Toaster
         position="top-right"
       /> */}
       <CustomToaster />
+      <CustomCursor />
     </>
   );
 }

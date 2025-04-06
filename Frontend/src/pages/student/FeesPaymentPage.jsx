@@ -11,40 +11,14 @@ import {
 } from "react-icons/fa";
 import Header from "../../components/Header";
 import { jsPDF } from "jspdf";
-import hostelService from "../../utils/hostelCheck";
+import useHostelCheck from "../../hooks/useHostelCheck";
 
 const FeesPaymentPage = () => {
   const [paymentData, setPaymentData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [paymentProcessing, setPaymentProcessing] = useState(false);
-
-  useEffect(() => {
-    const verifyHostel = async () => {
-      try {
-        const data = await hostelService.checkHostelAssignment();
-        if (
-          !(
-            data.data.user.role === "student" ||
-            data.data.user.role === "messManager" ||
-            data.data.user.role === "hostelManager"
-          )
-        ) {
-          toast.error("You are not authorized to access this page.");
-          navigate("/admin/home");
-        }
-        if (data.data.user.role === "student" && !data.data.user.hostel) {
-          toast.error("Hostel must be assigned.");
-          navigate("/student/update-profile");
-        }
-        setLoading(false);
-      } catch (err) {
-        setLoading(false);
-        navigate("/student/login");
-      }
-    };
-    verifyHostel();
-  }, []);
+  const { loadingCheck } = useHostelCheck();
 
   useEffect(() => {
     const fetchPaymentDetails = async () => {
@@ -351,7 +325,7 @@ const FeesPaymentPage = () => {
     }
   };
 
-  if (loading) {
+  if (loading || loadingCheck) {
     return (
       <div className="min-h-screen bg-gray-900 text-gray-100">
         <Header />

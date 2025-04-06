@@ -15,6 +15,7 @@ import {
   FaUserTag,
   FaUserLock,
   FaCheckCircle,
+  FaUserCircle,
 } from "react-icons/fa";
 import toast from "react-hot-toast";
 import useAdminAuth from "../../hooks/useAdminAuth";
@@ -24,6 +25,7 @@ const StudentProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [student, setStudent] = useState(null);
   const [toggleLoading, setToggleLoading] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const { loadingAdmin, isAdmin, isVerified } = useAdminAuth();
   const navigate = useNavigate();
 
@@ -74,6 +76,10 @@ const StudentProfilePage = () => {
     }
   };
 
+  const handleImageError = () => {
+    setImageError(true);
+  };
+
   if (loading || loadingAdmin) {
     return (
       <div>
@@ -91,7 +97,7 @@ const StudentProfilePage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
       <AdminHeader />
-      <div className="w-3/5 container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
         {/* Back button */}
         <Link
           to="/admin/students"
@@ -113,20 +119,37 @@ const StudentProfilePage = () => {
         </Link>
 
         {/* Student Profile Card */}
-        <div className="bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-700">
-          {/* Header with student name and status */}
-          <div className="bg-gray-750 p-6 border-b border-gray-700">
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
-              <div className="flex items-center">
-                <div className="bg-indigo-600 p-3 rounded-full mr-4">
-                  <FaUser className="text-white text-xl" />
+        <div className="bg-gray-800 rounded-xl shadow-xl overflow-hidden border border-gray-700">
+          {/* Header with student name, photo and status */}
+          <div className="bg-gradient-to-r from-indigo-900/60 to-gray-800 p-8 border-b border-gray-700 relative overflow-hidden">
+            <div className="absolute inset-0 bg-pattern opacity-5"></div>
+            <div className="flex flex-col md:flex-row items-center md:items-center justify-between relative z-10">
+              <div className="flex flex-col md:flex-row items-center">
+                <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-indigo-500/50 shadow-lg shadow-indigo-500/20 mb-4 md:mb-0 md:mr-6">
+                  {student.profilePicture && !imageError ? (
+                    <img
+                      src={student.profilePicture}
+                      alt={student.name}
+                      className="w-full h-full object-cover"
+                      onError={handleImageError}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-700">
+                      <FaUserCircle className="text-gray-900 w-full h-full" />
+                    </div>
+                  )}
                 </div>
-                <h1 className="text-3xl font-bold text-white">
-                  {student.name || "N/A"}
-                </h1>
+                <div className="text-center md:text-left">
+                  <h1 className="text-3xl md:text-4xl font-bold text-white">
+                    {student.name || "N/A"}
+                  </h1>
+                  <p className="text-indigo-300 text-lg mt-1">
+                    {student.rollNumber || "No Roll Number"}
+                  </p>
+                </div>
               </div>
               <div
-                className={`mt-4 md:mt-0 px-4 py-2 rounded-full text-sm font-semibold flex items-center ${
+                className={`mt-4 md:mt-0 px-6 py-3 rounded-full text-sm font-semibold flex items-center ${
                   student.isBlocked
                     ? "bg-red-900/40 text-red-300 border border-red-700"
                     : "bg-green-900/40 text-green-300 border border-green-700"

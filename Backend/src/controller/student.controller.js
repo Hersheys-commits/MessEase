@@ -425,6 +425,7 @@ export const logout = async (req, res) => {
 
 export const verifyToken = async (req, res) => {
   const hostelCode = await Hostel.findById(req.user.hostel).select("code");
+  console.log("HostelCOde", hostelCode);
   if (!hostelCode?.code) {
     return res.status(250).json({
       user: req.user._id,
@@ -740,7 +741,7 @@ export const getFilterOptions = asyncHandler(async (req, res) => {
       college: collegeId,
       year: { $ne: null },
     });
-    
+
     // Get unique hostels
     const hostels = await Hostel.find({ college: collegeId })
       .select("name")

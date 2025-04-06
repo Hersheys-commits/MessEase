@@ -3,8 +3,9 @@ import api from "../../utils/axiosRequest";
 import { useParams } from "react-router-dom";
 import Header from "../../components/Header";
 import { useNavigate } from "react-router-dom";
-import hostelService from "../../utils/hostelCheck";
 import toast from "react-hot-toast";
+import useHostelCheck from "../../hooks/useHostelCheck";
+import { useSelector } from "react-redux";
 
 const MessComplaints = () => {
   const [description, setDescription] = useState("");
@@ -17,6 +18,7 @@ const MessComplaints = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
   const [showImageModal, setShowImageModal] = useState(false);
+  const { loadingCheck } = useHostelCheck();
 
   const fileInputRef = useRef(null);
   const notificationTimeout = useRef(null);
@@ -30,36 +32,13 @@ const MessComplaints = () => {
 
   const code = useParams();
 
+  const isBlocked = useSelector((state) => state.auth.isBlocked);
   useEffect(() => {
-    const verifyHostel = async () => {
-      try {
-        const data = await hostelService.checkHostelAssignment();
-        if (data.data.user.isBlocked === true) {
-          toast.error("You are blocked by Admin.");
-          navigate("/student/home");
-        }
-        if (
-          !(
-            data.data.user.role === "student" ||
-            data.data.user.role === "messManager" ||
-            data.data.user.role === "hostelManager"
-          )
-        ) {
-          toast.error("You are not authorized to access this page.");
-          navigate("/admin/home");
-        }
-        if (data.data.user.role === "student" && !data.data.user.hostel) {
-          toast.error("Hostel must be assigned.");
-          navigate("/student/update-profile");
-        }
-        setIsLoading(false);
-      } catch (err) {
-        setIsLoading(false);
-        navigate("/student/login");
-      }
-    };
-    verifyHostel();
-  }, []);
+    if (isBlocked) {
+      toast.error("You are blocked by admin.");
+      navigate("/student/home");
+    }
+  }, [isBlocked]);
 
   useEffect(() => {
     const fetchComplaints = async () => {
@@ -220,6 +199,17 @@ const MessComplaints = () => {
     setShowImageModal(false);
     setSelectedImage(null);
   };
+
+  if (loadingCheck) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-gray-100">
+        <Header />
+        <div className="flex justify-center items-center h-96">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
