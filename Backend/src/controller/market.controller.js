@@ -241,9 +241,13 @@ export const buyNow = async (req, res) => {
   try {
     const { productId } = req.params;
     const buyerId = req.body;
+    console.log(buyerId);
     const userId = req.user._id;
+    console.log(userId);
+    console.log("req.user.college",req.user.college._id);    
     const product = await Product.findById(productId);
-    if(product.college!=req.user.college){
+    console.log("product.college",product.college._id)
+    if(product.college._id.toString()!==req.user.college._id.toString()){
       return res.status(400).json({ message: "Product not available in your college" });
     }
     if (!product) return res.status(404).json({ message: "Product not found" });

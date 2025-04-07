@@ -3,11 +3,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../../utils/axiosRequest";
 import { useSelector } from "react-redux";
 import Header from "../../components/Header";
+// import { set } from "mongoose";
 
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const user = useSelector((state) => state.auth.user);
+  console.log(user);
   const userId = user?._id;
   console.log(userId);
 
@@ -44,27 +46,29 @@ const ProductDetails = () => {
       }
     };
 
-    const checkWishlist = async () => {
-      try {
-        const response = await api.get(`/api/marketplace/wishlist`, {
-          withCredentials: true,
-        });
-        // Assuming each wishlist item has a "productId" field
-        setIsInWishlist(response.data.some((item) => item.productId === id));
-      } catch (error) {
-        console.error("Error checking wishlist:", error);
-      }
-    };
-
     fetchProduct();
     fetchReviews();
-    checkWishlist();
   }, [id]);
+
+  useEffect(()=>{
+    const checkWishlistStatus = async()=>{
+      try {
+        const response = await api.get(`/api/marketplace/wishlist-check/${id}`);
+        console.log(response.data.isInWishlist);
+        setIsInWishlist(true);
+        console.log("gdfh",isInWishlist)
+      } catch (error) {
+        console.error("Error checking wishlist status:", error);
+      }
+    }
+    checkWishlistStatus();
+  },[id]);
 
   const addToWishlist = async () => {
     try {
       await api.post(`/api/marketplace/wishlist/${id}`);
       setIsInWishlist(true);
+      console.log("clicked");
     } catch (error) {
       console.error("Error adding to wishlist:", error);
     }
@@ -123,7 +127,7 @@ const ProductDetails = () => {
         key, // Razorpay Test Key ID from backend response
         amount, // Amount in paise
         currency,
-        name: "Campus Connect Marketplace",
+        name: "Mess Ease Marketplace",
         description: `Purchase of ${product.title}`,
         order_id: orderId,
         handler: async function (razorpayResponse) {
@@ -273,7 +277,7 @@ const ProductDetails = () => {
                 </p>
               </div>
 
-              {userId === product.sellerId._id ? (
+              {userId && userId.toString() === product.sellerId._id.toString() ? (
                 <div className="bg-yellow-500 bg-opacity-20 border border-yellow-600 rounded-lg p-3 text-center">
                   <p className="text-yellow-400">
                     You are the seller of this product
@@ -285,8 +289,9 @@ const ProductDetails = () => {
                     <p className="text-red-400">Product Sold</p>
                   </div>
                   <button
-                    onClick={addToWishlist}
                     disabled={isInWishlist}
+                    onClick={addToWishlist}
+                    
                     className={`px-4 py-3 rounded-lg w-full flex justify-center items-center space-x-2 transition-colors ${
                       isInWishlist
                         ? "bg-gray-700 text-gray-400 cursor-not-allowed"
