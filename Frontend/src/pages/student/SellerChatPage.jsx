@@ -4,6 +4,7 @@ import api from "../../utils/axiosRequest";
 import { io } from "socket.io-client";
 import { useSelector } from "react-redux";
 import Header from "../../components/Header";
+import { Toaster, toast } from "react-hot-toast";
 
 const SERVER_URL = "http://localhost:4001";
 
@@ -25,6 +26,7 @@ const SellerChatPage = () => {
     if (!userId) return;
     if (userId === sellerId) {
       setError("You cannot chat with yourself.");
+      toast.error("Invalid chat recipient");
       return;
     }
 
@@ -36,15 +38,21 @@ const SellerChatPage = () => {
       setMessages((prevMessages) => [...prevMessages, message]);
     });
 
-    const fetchChat = async () => {
+    const fetchOrCreateChat = async () => {
       try {
-        const response = await api.get(`/api/chat/${sellerId}`, {
+        const response = await api.get(`/api/chat/${sellerId}`,{
           withCredentials: true,
         });
+        console.log(response);
         if (response.data && response.data._id) {
           setChat(response.data);
           setMessages(response.data.messages);
         } else {
+          // const createResponse = await api.post(
+          //   `api/chat/create`,
+          //   { buyerId: userId, sellerId: sellerId },
+          //   { withCredentials: true }
+          // );
           setChat(null);
           setMessages([]);
         }
@@ -54,7 +62,7 @@ const SellerChatPage = () => {
       }
     };
 
-    fetchChat();
+    fetchOrCreateChat();
 
     return () => {
       socket.current.disconnect();
@@ -84,26 +92,59 @@ const SellerChatPage = () => {
       setError("Invalid message or you cannot chat with yourself.");
       return;
     }
-    setError("");
-
-    if (!chat || !chat._id) {
-      setError("Chat not found. Please try again later.");
-      return;
-    }
-
-    const messageData = {
-      chatId: chat._id,
-      senderId: userId,
-      receiverId: sellerId,
-      text: newMessage,
-    };
-
     try {
+      if(!chat || !chat._id) {
+        console.log("not chat")
+        const chatResponse= await api.get(`api/chat/${sellerId}`,{
+          withCredentials: true,
+        })
+
+        console.log(chatResponse);
+      
+
+        
+      if (!chatResponse.data || !chatResponse.data._id) {
+        throw new Error("Failed to create chat");
+      }
+
+      setChat(chatResponse.data);
+
+      const messageData = {
+        chatId: chatResponse.data._id,
+        senderId: userId,
+        receiverId: sellerId,
+        text: newMessage,
+      };
+      console.log("before send");
+
       await api.post(`api/chat/send`, messageData, {
         withCredentials: true,
       });
-      socket.current.emit("sendMessage", messageData);
+      console.log("after send");
+      
+      socket.current.emit("sendMarketMessage", messageData);
       setNewMessage("");
+      toast.success("Message sent!");
+
+
+    console.log(2)
+  }else{
+      const messageData = {
+        chatId: chat._id,
+        senderId: userId,
+        receiverId: sellerId,
+        text: newMessage,
+      };
+      console.log("before chat")
+      await api.post(`api/chat/send`, messageData, {
+        withCredentials: true,
+      });
+      console.log("after chat")
+      
+      socket.current.emit("sendMarketMessage", messageData);
+      setNewMessage("");
+      toast.success("Message sent!");
+    }
     } catch (err) {
       console.error("Error sending message:", err);
       setError("Error sending message. Please try again.");

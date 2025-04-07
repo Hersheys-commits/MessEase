@@ -46,6 +46,8 @@ app.use(
     credentials: true,
   })
 );
+// import marketchatRoute from "./route/market.chat.route.js";
+
 
 // Store online users in a Map -> { hostelId: [{ userId, socketId }] }
 const usersMap = new Map();
@@ -170,6 +172,30 @@ io.on("connection", (socket) => {
     }
   });
 
+  const handleMarketChatEvents = () => {
+    socket.on("joinChat", ({ buyerId, sellerId }) => {
+      // Create a consistent room name by sorting the IDs
+      const chatRoom = [buyerId, sellerId].sort().join("-");
+      socket.join(chatRoom);
+      console.log(`User joined chat: ${chatRoom}`);
+    });
+
+    socket.on("join", (userId) => {
+      socket.join(userId); // User joins their own room (userId)
+      console.log(`User ${userId} joined their personal room`);
+    });
+
+    socket.on("sendMarketMessage", (message) => {
+      console.log("in my socket");
+      const { senderId, receiverId } = message;
+      // Use the same room naming strategy
+      const chatRoom = [senderId, receiverId].sort().join("-");
+      io.to(chatRoom).emit("receiveMessage", message);
+    });
+  };
+  handleMarketChatEvents();
+
+
   socket.on(
     "sendMessage",
     async ({
@@ -190,6 +216,7 @@ io.on("connection", (socket) => {
         hasImage: !!image,
         hasAudio: !!audioUrl,
       });
+      console.log("in index.js")
 
       if (!hostelId) return;
 
@@ -350,6 +377,31 @@ connectDB()
     console.error("MongoDB connection failed: ", err);
   });
 
+
+  // const handleMarketChatEvents = () => {
+  //   socket.on("joinChat", ({ buyerId, sellerId }) => {
+  //     // Create a consistent room name by sorting the IDs
+  //     const chatRoom = [buyerId, sellerId].sort().join("-");
+  //     socket.join(chatRoom);
+  //     console.log(`User joined chat: ${chatRoom}`);
+  //   });
+
+  //   socket.on("join", (userId) => {
+  //     socket.join(userId); // User joins their own room (userId)
+  //     console.log(`User ${userId} joined their personal room`);
+  //   });
+
+  //   socket.on("sendMessage", (message) => {
+  //     const { senderId, receiverId } = message;
+  //     // Use the same room naming strategy
+  //     const chatRoom = [senderId, receiverId].sort().join("-");
+  //     io.to(chatRoom).emit("receiveMessage", message);
+  //   });
+  // };
+
+
+
+app.use('/api/chat',marketchatRoute(io));
 // Routes
 app.use("/api/admin", adminRoutes);
 app.use("/api/college", collegeRoutes);
@@ -361,7 +413,7 @@ app.use("/api/election", electionRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/complaint", complaintRoutes);
 app.use("/api/marketplace", marketplaceRoutes);
-app.use("/api/chat", marketchatRoute);
+// app.use("/api/chat", marketchatRoute);
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {
