@@ -22,7 +22,9 @@ import { useSelector } from "react-redux";
 // Replace this with the specific user ID that should have pinning privileges
 // const PINNING_ALLOWED_USER_ID = "admin_user_id_here";
 
-const socket = io("http://localhost:4001");
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:4001"; // Update this to your server URL
+
+const socket = io(SERVER_URL);
 
 export const GroupChat = () => {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -155,9 +157,9 @@ export const GroupChat = () => {
     const fetchChats = async () => {
       try {
         const response = await api.get(
-          "http://localhost:4001/api/admin/getChats",
+          "/api/admin/getChats",
           {
-            params: { hostelId, userId, code, page },
+            params: { hostelId, code, page },
           }
         );
         setTotalPage(response.data.totalPages);
@@ -411,9 +413,9 @@ export const GroupChat = () => {
   const getMoreChats = async () => {
     try {
       const response = await api.get(
-        "http://localhost:4001/api/admin/getChats",
+        "/api/admin/getChats",
         {
-          params: { hostelId, userId, code, page },
+          params: { hostelId, code, page },
         }
       );
       const pV = page;
@@ -593,13 +595,8 @@ export const GroupChat = () => {
         console.log([...formData.entries()]);
         // Upload image to server
         const uploadResponse = await api.post(
-          "http://localhost:4001/api/admin/uploadImage",
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
+          "/api/admin/uploadImage",
+          formData
         );
         console.log(uploadResponse.data.imageUrl);
         // If image upload is successful, use the returned image URL
@@ -627,13 +624,8 @@ export const GroupChat = () => {
         console.log([...formData.entries()]);
         // Upload image to server
         const uploadResponse = await api.post(
-          "http://localhost:4001/api/admin/uploadAudio",
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
+          "/api/admin/uploadAudio",
+          formData
         );
         console.log("AUDIO RETURN : ", uploadResponse.data);
 

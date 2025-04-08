@@ -361,6 +361,7 @@ export const googleAuth = async (req, res) => {
         fullName: name,
         googleId: sub,
         username: email,
+        college: college._id,
         email,
         profilePicture: picture,
         role: "student",

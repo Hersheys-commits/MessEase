@@ -1,15 +1,18 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../utils/axiosRequest";
 import { PlusCircle } from "lucide-react";
+import { useSelector } from "react-redux";
 
 export const CreateGroupChat = () => {
   const [groupName, setGroupName] = useState("");
+  const {user, code: reduxCode} = useSelector((state) => state.auth);
   const [message, setMessage] = useState(""); // Added message state for error handling
   const navigate = useNavigate();
   const location = useLocation();
-  const { code } = location.state || "";
-  const { userId } = location.state || "";
+  console.log(reduxCode);
+  const code  = reduxCode || location.state.code || "";
+  const userId  = user._id || location.state.userId || "";
   const { hostelId } = location.state || "";
   const createGroup = async (e) => {
     e.preventDefault();
@@ -17,20 +20,17 @@ export const CreateGroupChat = () => {
       setMessage("");
 
       try {
-        const response = await axios.post(
-          "http://localhost:4001/api/admin/createGroupChat",
+        const response = await api.post(
+          "/api/admin/createGroupChat",
           {
             code: code,
-            userId: userId,
             groupName,
             hostelId,
           }
         );
         console.log(response.data);
         if (response.status === 201) {
-          navigate(`/hostel/groupChat/${code}`, {
-            state: { userId, hostelId },
-          });
+          navigate(`/admin/hostel/${code}`);
           setGroupCreated(true);
         }
       } catch (error) {

@@ -26,6 +26,7 @@ import {
   toggleBlockStudent,
 } from "../controller/student.controller.js";
 import { uploadAudioMulter } from "../middleware/multer.audio.middleware.js";
+import { verify } from "crypto";
 
 const router = express.Router();
 
@@ -49,16 +50,18 @@ router.get("/students", verifyJWT, getAllStudents);
 router.get("/students/filter-options", verifyJWT, getFilterOptions);
 router.get("/students/:id", verifyJWT, getStudentById);
 router.put("/students/:id/toggle-block", verifyJWT, toggleBlockStudent);
-router.post("/createGroupChat", createGroupChat);
-router.get("/getChats", getChats);
+router.post("/createGroupChat",verifyJWT, createGroupChat);
+router.get("/getChats",verifyJWT, getChats);
 router.post(
   "/uploadImage",
+  verifyJWT,
   // upload.single("profilePicture"),
   upload.single("chatImage"),
   uploadImage
 );
 router.post(
   "/uploadAudio",
+  verifyJWT,
   // upload.single("profilePicture"),
   uploadAudioMulter.single("chatAudio"),
   uploadAudio

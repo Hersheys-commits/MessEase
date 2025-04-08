@@ -582,11 +582,14 @@ export const updateAdminProfile = asyncHandler(async (req, res) => {
 
 export const createGroupChat = async (req, res) => {
   try {
-    const { code, userId, groupName, hostelId } = req.body;
+    const userId = req.user._id; // Assuming you have user ID from the request
+    const { code, groupName, hostelId } = req.body;
     // Check if a group already exists for this hostel
     const existingGroup = await GroupChat.findOne({ hostelId });
     console.log(existingGroup);
 
+    console.log(existingGroup, "EXISTING GROUP");
+    
     if (existingGroup) {
       return res
         .status(400)
@@ -619,8 +622,8 @@ export const createGroupChat = async (req, res) => {
 export const getChats = async (req, res) => {
   try {
     const { page = 1, limit = 100 } = req.query;
-
-    const { hostelId, userId, code } = req.query;
+    const userId = req.user._id; // Assuming you have user ID from the request
+    const { hostelId, code } = req.query;
     const skip = (page - 1) * limit;
     console.log("G", req.query);
     // Validate required fields
