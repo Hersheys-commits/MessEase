@@ -121,7 +121,11 @@ const Login = ({ userType = "student" }) => {
         />
       </div>
 
-      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <GoogleOAuthProvider 
+        clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}
+        onScriptLoadError={() => console.log("Script load error")}
+        onScriptLoadSuccess={() => console.log("Script loaded successfully")}
+      >
         <SpotlightCard
           className="w-full max-w-sm"
           spotlightColor={spotlightColor}

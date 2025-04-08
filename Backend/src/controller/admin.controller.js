@@ -130,7 +130,7 @@ export const verifyAdminOTP = async (req, res) => {
     const options = {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      sameSite: "none",
       path: "/",
       maxAge: 24 * 60 * 60 * 1000,
     };
@@ -284,7 +284,7 @@ export const loginAdmin = async (req, res) => {
     const options = {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      sameSite: "none",
       path: "/",
       maxAge: 24 * 60 * 60 * 1000,
     };
@@ -379,7 +379,8 @@ export const googleAuth = async (req, res) => {
     const options = {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      // sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      sameSize: "none",
       path: "/",
       maxAge: 24 * 60 * 60 * 1000,
     };
@@ -445,7 +446,8 @@ export const logoutAdmin = asyncHandler(async (req, res) => {
   const options = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    // sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",/
+    sameSite: "none",
     path: "/",
   };
 
