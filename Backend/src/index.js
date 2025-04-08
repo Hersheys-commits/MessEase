@@ -39,10 +39,6 @@ const io = new Server(server, {
   },
 });
 
-app.use((req, res, next) => {
-  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
-  next();
-});
 
 
 // Middleware
@@ -55,6 +51,10 @@ app.use(
     credentials: true,
   })
 );
+app.use((req, res, next) => {
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+  next();
+});
 // import marketchatRoute from "./route/market.chat.route.js";
 
 // Store online users in a Map -> { hostelId: [{ userId, socketId }] }
