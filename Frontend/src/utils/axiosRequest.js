@@ -1,8 +1,9 @@
 // axiosInstance.js
 import axios from "axios";
+import { serverUrl } from "./constants";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_SERVER_URL || "http://localhost:4001", // automatically prepends this URL to all requests
+  baseURL: serverUrl || "http://localhost:4001", // automatically prepends this URL to all requests
   withCredentials: true, // automatically includes credentials (like cookies) with every request
 });
 

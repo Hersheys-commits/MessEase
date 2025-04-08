@@ -19,6 +19,7 @@ import marketchatRoute from "./route/market.chat.route.js";
 import RazorPay from "razorpay";
 import GroupChat from "./model/groupchat.model.js";
 import mongoose from "mongoose";
+import { CLIENT_URL } from "./constants.js";
 
 dotenv.config({ path: "./.env" });
 
@@ -27,11 +28,13 @@ export const instance = new RazorPay({
   key_secret: process.env.RAZORPAY_API_SECRET,
 });
 
+const clientUrl = CLIENT_URL || "http://localhost:8000";
+
 const app = express();
 const server = createServer(app); // Create an HTTP server
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: clientUrl,
     credentials: true,
   },
 });
@@ -42,7 +45,7 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(cookieParser());
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: clientUrl,
     credentials: true,
   })
 );

@@ -18,11 +18,12 @@ import {
 import Header from "../../components/Header";
 import AdminHeader from "../../components/AdminHeader";
 import { useSelector } from "react-redux";
+import { serverUrl } from "../../utils/constants";
 
 // Replace this with the specific user ID that should have pinning privileges
 // const PINNING_ALLOWED_USER_ID = "admin_user_id_here";
 
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:4001"; // Update this to your server URL
+const SERVER_URL = serverUrl || "http://localhost:4001"; // Update this to your server URL
 
 const socket = io(SERVER_URL);
 

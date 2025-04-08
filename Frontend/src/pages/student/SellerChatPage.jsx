@@ -5,8 +5,9 @@ import { io } from "socket.io-client";
 import { useSelector } from "react-redux";
 import Header from "../../components/Header";
 import { Toaster, toast } from "react-hot-toast";
+import { serverUrl } from "../../utils/constants";
 
-const SERVER_URL = import.meta.env.VITE_SERVER_URL;
+const SERVER_URL = serverUrl;
 
 const SellerChatPage = () => {
   const { sellerId } = useParams();

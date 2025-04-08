@@ -1,0 +1,1 @@
+export const serverUrl = "https://messease-bqbu.onrender.com";
