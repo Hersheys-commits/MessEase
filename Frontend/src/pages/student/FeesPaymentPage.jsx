@@ -231,7 +231,7 @@ const FeesPaymentPage = () => {
       const transactionId =
         (paymentData.paymentDetails &&
           paymentData.paymentDetails.transactionId) ||
-        paymentData.payment.transactionId ||
+        paymentData.paymentDetails.transactionId ||
         "N/A";
       doc.text(`Transaction ID: ${transactionId}`, 14, 138);
 

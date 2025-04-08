@@ -175,6 +175,7 @@ io.on("connection", (socket) => {
   const handleMarketChatEvents = () => {
     socket.on("joinChat", ({ buyerId, sellerId }) => {
       // Create a consistent room name by sorting the IDs
+      console.log("first", buyerId, sellerId);
       const chatRoom = [buyerId, sellerId].sort().join("-");
       socket.join(chatRoom);
       console.log(`User joined chat: ${chatRoom}`);

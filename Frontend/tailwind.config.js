@@ -16,6 +16,9 @@ export default {
       animation: {
         gradient: 'gradient 8s linear infinite'
       },
+      screens: {
+        'custom': {'min': '1000px'},
+      },
     },
   },
   plugins: [],

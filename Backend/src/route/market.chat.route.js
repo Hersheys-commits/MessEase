@@ -95,8 +95,8 @@ router.get("/inbox", verifyJwt, async (req, res) => {
     const chats = await Chat.find({
       $or: [{ buyerId: userId }, { sellerId: userId }],
     })
-      .populate("buyerId", "username")
-      .populate("sellerId", "username")
+      .populate("buyerId", "name profilePicture")
+      .populate("sellerId", "name profilePicture")
       .sort({ updatedAt: -1 });
     console.log(2);
     // Calculate unread messages for each chat and include last message details

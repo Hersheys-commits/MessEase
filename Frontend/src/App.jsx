@@ -72,14 +72,6 @@ function App() {
     loadRazorpayScript();
   }, []);
 
-  useEffect(() => {
-    const userInfo = localStorage.getItem("userInfo");
-    console.log(userInfo);
-    if (userInfo) {
-      dispatch(setUser(JSON.parse(userInfo)));
-    }
-  }, []);
-
   return (
     <>
       <Routes>

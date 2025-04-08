@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import Header from "../../components/Header";
 import { Toaster, toast } from "react-hot-toast";
 
-const SERVER_URL = "http://localhost:4001";
+const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 
 const SellerChatPage = () => {
   const { sellerId } = useParams();
@@ -165,7 +165,7 @@ const SellerChatPage = () => {
           <div className="flex justify-between items-center p-4 border-b border-gray-700">
             <h2 className="text-lg font-semibold text-white">Chat</h2>
             <button
-              onClick={() => navigate("/marketplace")}
+              onClick={() => navigate("/chat/inbox")}
               className="text-red-500 hover:text-red-400"
             >
               Leave

@@ -54,9 +54,7 @@ const ProductDetails = () => {
     const checkWishlistStatus = async()=>{
       try {
         const response = await api.get(`/api/marketplace/wishlist-check/${id}`);
-        console.log(response.data.isInWishlist);
-        setIsInWishlist(true);
-        console.log("gdfh",isInWishlist)
+        setIsInWishlist(response.data.isInWishlist);
       } catch (error) {
         console.error("Error checking wishlist status:", error);
       }
@@ -66,9 +64,8 @@ const ProductDetails = () => {
 
   const addToWishlist = async () => {
     try {
-      await api.post(`/api/marketplace/wishlist/${id}`);
+      const res= await api.post(`/api/marketplace/wishlist/${id}`);
       setIsInWishlist(true);
-      console.log("clicked");
     } catch (error) {
       console.error("Error adding to wishlist:", error);
     }
