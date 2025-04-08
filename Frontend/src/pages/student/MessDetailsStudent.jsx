@@ -10,6 +10,7 @@ import {
   MapPin,
   ChevronRight,
   Utensils,
+  AlertCircle,
 } from "lucide-react";
 import Header from "../../components/Header";
 import toast from "react-hot-toast";
@@ -141,33 +142,40 @@ const MessDetailsStudent = () => {
       <Header />
       <div className="w-4/5 mx-auto px-4 py-8">
         {/* Hero Section */}
-        <div className="relative w-full bg-gradient-to-r from-blue-900 to-indigo-900 rounded-xl overflow-hidden mb-8">
+        <div className="relative w-full bg-gradient-to-r from-blue-900 to-indigo-900 rounded-xl overflow-hidden mb-6 md:mb-8">
           <div className="absolute inset-0 bg-black/20"></div>
 
-          <div className="relative p-8 md:p-10 ">
-            <h1 className="text-3xl md:text-4xl font-bold mb-2">
-              {messData?.mess.name}
-            </h1>
-            <Link
-              className="ml-[90%] bg-red-700 p-2 rounded hover:bg-red-800 transition duration-200"
-              to={`/student/mess/${messCode}/complaints`}
-            >
-              Complaints
-            </Link>
+          <div className="relative p-5 md:p-10">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">
+                {messData?.mess.name}
+              </h1>
 
-            <div className="flex items-center text-blue-200">
-              <MapPin size={18} className="mr-2" />
-              <span>{messData?.mess.location || "Location not specified"}</span>
+              <Link
+                className="mt-3 sm:mt-0 self-start sm:self-auto bg-red-700 px-3 py-1.5 text-sm md:text-base rounded-lg hover:bg-red-800 transition duration-200 flex items-center justify-center"
+                to={`/student/mess/${messCode}/complaints`}
+              >
+                <AlertCircle size={16} className="mr-1 hidden sm:inline" />
+                Complaints
+              </Link>
             </div>
 
-            <div className="mt-6 flex">
+            <div className="flex items-center text-blue-200 mb-5">
+              <MapPin size={16} className="mr-2 flex-shrink-0" />
+              <span className="text-sm sm:text-base">
+                {messData?.mess.location || "Location not specified"}
+              </span>
+            </div>
+
+            <div className="mt-4 md:mt-6 flex">
               <Link
                 to={`/student/mess/${messCode}/time-table`}
-                className="inline-flex items-center px-5 py-2.5 bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-lg font-medium transition-all group"
+                className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 sm:px-5 sm:py-2.5 bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-lg font-medium transition-all group text-center"
               >
+                <Calendar size={16} className="mr-2 hidden sm:inline" />
                 View Weekly Schedule
                 <ChevronRight
-                  size={18}
+                  size={16}
                   className="ml-2 group-hover:translate-x-1 transition-transform"
                 />
               </Link>

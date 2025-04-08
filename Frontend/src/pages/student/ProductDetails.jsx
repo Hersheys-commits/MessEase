@@ -50,21 +50,21 @@ const ProductDetails = () => {
     fetchReviews();
   }, [id]);
 
-  useEffect(()=>{
-    const checkWishlistStatus = async()=>{
+  useEffect(() => {
+    const checkWishlistStatus = async () => {
       try {
         const response = await api.get(`/api/marketplace/wishlist-check/${id}`);
         setIsInWishlist(response.data.isInWishlist);
       } catch (error) {
         console.error("Error checking wishlist status:", error);
       }
-    }
+    };
     checkWishlistStatus();
-  },[id]);
+  }, [id]);
 
   const addToWishlist = async () => {
     try {
-      const res= await api.post(`/api/marketplace/wishlist/${id}`);
+      const res = await api.post(`/api/marketplace/wishlist/${id}`);
       setIsInWishlist(true);
     } catch (error) {
       console.error("Error adding to wishlist:", error);
@@ -274,7 +274,8 @@ const ProductDetails = () => {
                 </p>
               </div>
 
-              {userId && userId.toString() === product.sellerId._id.toString() ? (
+              {userId &&
+              userId.toString() === product.sellerId._id.toString() ? (
                 <div className="bg-yellow-500 bg-opacity-20 border border-yellow-600 rounded-lg p-3 text-center">
                   <p className="text-yellow-400">
                     You are the seller of this product
@@ -288,7 +289,6 @@ const ProductDetails = () => {
                   <button
                     disabled={isInWishlist}
                     onClick={addToWishlist}
-                    
                     className={`px-4 py-3 rounded-lg w-full flex justify-center items-center space-x-2 transition-colors ${
                       isInWishlist
                         ? "bg-gray-700 text-gray-400 cursor-not-allowed"
@@ -355,17 +355,17 @@ const ProductDetails = () => {
                     >
                       <div className="flex justify-between items-start">
                         <div className="flex items-center mb-2">
-                        {review.user?.profilePicture ? (
-                          <img
-                            src={review.user.profilePicture}
-                            alt={review.user?.name || "User"}
-                            className="w-8 h-8 rounded-full mr-2 object-cover"
-                          />
-                        ) : (
-                          <div className="bg-gray-600 rounded-full w-8 h-8 flex items-center justify-center mr-2">
-                            {review.user?.name?.[0]?.toUpperCase() || "?"}
-                          </div>
-                        )}
+                          {review.user?.profilePicture ? (
+                            <img
+                              src={review.user.profilePicture}
+                              alt={review.user?.name || "User"}
+                              className="w-8 h-8 rounded-full mr-2 object-cover"
+                            />
+                          ) : (
+                            <div className="bg-gray-600 rounded-full w-8 h-8 flex items-center justify-center mr-2">
+                              {review.user?.name?.[0]?.toUpperCase() || "?"}
+                            </div>
+                          )}
                           <span className="text-gray-300 font-medium">
                             {review.user?.name || "Anonymous"}
                           </span>

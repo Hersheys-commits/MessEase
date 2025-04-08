@@ -25,7 +25,7 @@ const ForgotPassword = ({ userType = "student" }) => {
         setLoading(false);
         return;
       }
-  
+
       try {
         const res = await api.post("/api/student/verify-token");
         console.log(res);
@@ -37,10 +37,9 @@ const ForgotPassword = ({ userType = "student" }) => {
         setLoading(false);
       }
     };
-  
+
     checkUser();
   }, [isAuthenticated, navigate, dispatch]);
-  
 
   // Form field configurations
   const emailFields = [
@@ -110,7 +109,7 @@ const ForgotPassword = ({ userType = "student" }) => {
       setStep(2);
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to send OTP");
-    } 
+    }
   };
 
   // Handle password reset with OTP verification

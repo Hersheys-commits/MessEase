@@ -50,8 +50,8 @@ router.get("/students", verifyJWT, getAllStudents);
 router.get("/students/filter-options", verifyJWT, getFilterOptions);
 router.get("/students/:id", verifyJWT, getStudentById);
 router.put("/students/:id/toggle-block", verifyJWT, toggleBlockStudent);
-router.post("/createGroupChat",verifyJWT, createGroupChat);
-router.get("/getChats",verifyJWT, getChats);
+router.post("/createGroupChat", verifyJWT, createGroupChat);
+router.get("/getChats", verifyJWT, getChats);
 router.post(
   "/uploadImage",
   verifyJWT,

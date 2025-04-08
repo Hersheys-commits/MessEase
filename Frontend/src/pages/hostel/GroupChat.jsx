@@ -19,6 +19,7 @@ import Header from "../../components/Header";
 import AdminHeader from "../../components/AdminHeader";
 import { useSelector } from "react-redux";
 import { serverUrl } from "../../utils/constants";
+import useHostelCheck from "../../hooks/useHostelCheck";
 
 // Replace this with the specific user ID that should have pinning privileges
 // const PINNING_ALLOWED_USER_ID = "admin_user_id_here";
@@ -30,7 +31,6 @@ const socket = io(SERVER_URL);
 export const GroupChat = () => {
   const user = JSON.parse(localStorage.getItem("user"));
   const { user: reduxUser } = useSelector((state) => state.auth);
-  console.log("aggags", reduxUser);
   const { code } = useParams();
   const location = useLocation();
   const hostelId = reduxUser.hostel || location.state.hostelId || "";
@@ -56,7 +56,7 @@ export const GroupChat = () => {
   // Create a ref for the chat messages container
   const chatContainerRef = useRef(null);
   const fileInputRef = useRef(null);
-  const [created,setCreated] = useState(true);
+  const [created, setCreated] = useState(true);
 
   //
   const [isRecording, setIsRecording] = useState(false);
@@ -68,6 +68,7 @@ export const GroupChat = () => {
   // First, let's create a state to track the preview area height
   const [previewHeight, setPreviewHeight] = useState(0);
   const previewRef = useRef(null);
+  const { loadingCheck } = useHostelCheck();
 
   // Add useEffect to measure the preview height when it changes
   useEffect(() => {
@@ -77,9 +78,6 @@ export const GroupChat = () => {
       setPreviewHeight(0);
     }
   }, [imagePreview, audioPreview]);
-  //
-
-  console.log("ahyrhyr", user);
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -157,12 +155,9 @@ export const GroupChat = () => {
     // Fetch initial chats
     const fetchChats = async () => {
       try {
-        const response = await api.get(
-          "/api/admin/getChats",
-          {
-            params: { hostelId, code, page },
-          }
-        );
+        const response = await api.get("/api/admin/getChats", {
+          params: { hostelId, code, page },
+        });
         setTotalPage(response.data.totalPages);
         const pV = page;
         if (response.data.chats.length > 0) setPage(page + 1);
@@ -219,7 +214,7 @@ export const GroupChat = () => {
           }
         }
       } catch (error) {
-        if(!error.response.data.groupChat) {
+        if (!error.response.data.groupChat) {
           setCreated(false);
         }
         console.log("Error fetching chats:", error);
@@ -413,12 +408,9 @@ export const GroupChat = () => {
 
   const getMoreChats = async () => {
     try {
-      const response = await api.get(
-        "/api/admin/getChats",
-        {
-          params: { hostelId, code, page },
-        }
-      );
+      const response = await api.get("/api/admin/getChats", {
+        params: { hostelId, code, page },
+      });
       const pV = page;
       if (response.data.chats.length > 0) {
         setChats((prev) => [...response.data.chats, ...prev]); // Add at the beginning
@@ -866,15 +858,30 @@ export const GroupChat = () => {
 
   const pollStats = calculatePollStats();
 
-  if(!created){
-    return (<div className="min-h-screen bg-gray-900 flex flex-col transition-colors duration-300">
-      <Header/>
-      <div className="container p-4 flex w-4/5 mx-auto">
-        <div className="bg-gray-800 shadow-md rounded-lg w-full p-4">
-          <h1 className="text-2xl text-center text-red-500">Group Chat Not Created</h1>
+  if (!created) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex flex-col transition-colors duration-300">
+        <Header />
+        <div className="container p-4 flex w-4/5 mx-auto">
+          <div className="bg-gray-800 shadow-md rounded-lg w-full p-4">
+            <h1 className="text-2xl text-center text-red-500">
+              Group Chat Not Created
+            </h1>
+          </div>
         </div>
       </div>
-    </div>)
+    );
+  }
+
+  if (loadingCheck) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-gray-100">
+        <Header />
+        <div className="flex justify-center items-center h-96">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -1163,7 +1170,7 @@ export const GroupChat = () => {
             {/* Form for sending messages */}
             <form
               onSubmit={sendMessage}
-              className="p-4 border-t border-gray-700 bg-gray-800 rounded-b-lg shadow-inner"
+              className="p-3 sm:p-4 border-t border-gray-700 bg-gray-800 rounded-b-lg shadow-inner"
             >
               {/* Media previews */}
               <div
@@ -1178,7 +1185,7 @@ export const GroupChat = () => {
                     <img
                       src={imagePreview}
                       alt="Upload preview"
-                      className="h-20 rounded-md border border-gray-600 shadow-md hover:opacity-90 transition-opacity"
+                      className="h-16 sm:h-20 rounded-md border border-gray-600 shadow-md hover:opacity-90 transition-opacity"
                     />
                     <button
                       type="button"
@@ -1191,11 +1198,11 @@ export const GroupChat = () => {
                 )}
 
                 {audioPreview && (
-                  <div className="relative inline-block">
+                  <div className="relative inline-block w-full sm:w-auto">
                     <audio
                       src={audioPreview}
                       controls
-                      className="h-10 rounded-md border border-gray-600 bg-gray-700"
+                      className="h-10 w-full sm:w-auto rounded-md border border-gray-600 bg-gray-700"
                     />
                     <button
                       type="button"
@@ -1208,17 +1215,17 @@ export const GroupChat = () => {
                 )}
               </div>
 
-              <div className="flex items-center bg-gray-700 rounded-lg overflow-hidden ring-1 ring-gray-600 focus-within:ring-blue-500 shadow-md">
+              <div className="flex flex-col sm:flex-row items-center bg-gray-700 rounded-lg overflow-hidden ring-1 ring-gray-600 focus-within:ring-blue-500 shadow-md">
                 <input
                   type="text"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Type a message..."
-                  className="flex-grow bg-transparent text-gray-200 p-3 focus:outline-none placeholder-gray-400"
+                  className="flex-grow w-full bg-transparent text-gray-200 p-2 sm:p-3 focus:outline-none placeholder-gray-400"
                 />
 
-                <div className="flex items-center border-l border-gray-600">
-                  <label className="p-3 cursor-pointer hover:bg-gray-600 transition-colors">
+                <div className="flex items-center justify-start w-full sm:w-auto sm:justify-between sm:border-l border-gray-600">
+                  <label className="p-2 sm:p-3 cursor-pointer hover:bg-gray-600 transition-colors">
                     <input
                       ref={fileInputRef}
                       type="file"
@@ -1232,7 +1239,7 @@ export const GroupChat = () => {
                   <button
                     type="button"
                     onClick={isRecording ? stopRecording : startRecording}
-                    className={`p-3 cursor-pointer hover:bg-gray-600 transition-all ${
+                    className={`p-2 sm:p-3 cursor-pointer hover:bg-gray-600 transition-all ${
                       isRecording
                         ? "text-red-500 animate-pulse"
                         : "text-gray-300 hover:text-blue-400"
@@ -1248,7 +1255,7 @@ export const GroupChat = () => {
                   <button
                     type="submit"
                     disabled={message.trim() === "" && !imageFile && !audioFile}
-                    className="bg-blue-600 p-3 hover:bg-blue-700 transition-colors disabled:bg-gray-600 disabled:text-gray-400 text-white"
+                    className="bg-blue-600 p-2 sm:p-3 hover:bg-blue-700 transition-colors disabled:bg-gray-600 disabled:text-gray-400 text-white w-12 sm:w-auto rounded-lg flex items-center justify-center"
                   >
                     <Send className="w-5 h-5" />
                   </button>

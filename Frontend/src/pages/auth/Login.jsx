@@ -1,4 +1,4 @@
-import React, { useEffect,useState } from "react";
+import React, { useEffect, useState } from "react";
 import AuthForm from "../../components/auth/AuthForm";
 import GoogleAuthButton from "../../components/auth/GoogleAuthButton";
 import { GoogleOAuthProvider } from "@react-oauth/google";
@@ -9,11 +9,11 @@ import { useDispatch, useSelector } from "react-redux";
 import Squares from "../../components/ui/Squares";
 import SpotlightCard from "../../components/ui/SpotlightCard";
 import { logout } from "../../store/authSlice";
-import { setUser } from "../../store/authSlice"
+import { setUser } from "../../store/authSlice";
 
 const Login = ({ userType = "student" }) => {
   const navigate = useNavigate();
-  const dispatch= useDispatch();
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   console.log("login state", user);
@@ -27,7 +27,7 @@ const Login = ({ userType = "student" }) => {
         setLoading(false);
         return;
       }
-  
+
       try {
         const res = await api.post("/api/student/verify-token");
         console.log(res);
@@ -39,10 +39,9 @@ const Login = ({ userType = "student" }) => {
         setLoading(false);
       }
     };
-  
+
     checkUser();
   }, [isAuthenticated, navigate, dispatch]);
-  
 
   const loginFields = [
     {

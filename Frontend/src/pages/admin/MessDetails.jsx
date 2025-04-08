@@ -164,31 +164,31 @@ const MessDetails = () => {
   function convertMealItemsToArrays(data) {
     // Create a deep copy of the data to avoid mutating the original
     const newData = JSON.parse(JSON.stringify(data));
-    
+
     // Process each day in the meals array
-    newData.meals.forEach(day => {
+    newData.meals.forEach((day) => {
       // List of meal types to process
-      const mealTypes = ['breakfast', 'lunch', 'eveningSnacks', 'dinner'];
-      
+      const mealTypes = ["breakfast", "lunch", "eveningSnacks", "dinner"];
+
       // Process each meal type
-      mealTypes.forEach(mealType => {
+      mealTypes.forEach((mealType) => {
         if (day[mealType] && day[mealType].items) {
           // If items is already an array, leave it as is
           if (Array.isArray(day[mealType].items)) {
             return;
           }
-          
+
           // If items is a string, split by comma and trim each item
-          if (typeof day[mealType].items === 'string') {
+          if (typeof day[mealType].items === "string") {
             day[mealType].items = day[mealType].items
-              .split(',')
-              .map(item => item.trim())
-              .filter(item => item.length > 0);
+              .split(",")
+              .map((item) => item.trim())
+              .filter((item) => item.length > 0);
           }
         }
       });
     });
-    
+
     return newData;
   }
 

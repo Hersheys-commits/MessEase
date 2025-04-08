@@ -6,13 +6,13 @@ import { useSelector } from "react-redux";
 
 export const CreateGroupChat = () => {
   const [groupName, setGroupName] = useState("");
-  const {user, code: reduxCode} = useSelector((state) => state.auth);
+  const { user, code: reduxCode } = useSelector((state) => state.auth);
   const [message, setMessage] = useState(""); // Added message state for error handling
   const navigate = useNavigate();
   const location = useLocation();
   console.log(reduxCode);
-  const code  = reduxCode || location.state.code || "";
-  const userId  = user._id || location.state.userId || "";
+  const code = reduxCode || location.state.code || "";
+  const userId = user._id || location.state.userId || "";
   const { hostelId } = location.state || "";
   const createGroup = async (e) => {
     e.preventDefault();
@@ -20,14 +20,11 @@ export const CreateGroupChat = () => {
       setMessage("");
 
       try {
-        const response = await api.post(
-          "/api/admin/createGroupChat",
-          {
-            code: code,
-            groupName,
-            hostelId,
-          }
-        );
+        const response = await api.post("/api/admin/createGroupChat", {
+          code: code,
+          groupName,
+          hostelId,
+        });
         console.log(response.data);
         if (response.status === 201) {
           navigate(`/admin/hostel/${code}`);

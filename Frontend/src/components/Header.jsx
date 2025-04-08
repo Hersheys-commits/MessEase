@@ -72,7 +72,6 @@ const Header = () => {
         try {
           const res = await api.post("/api/student/verify-token");
           console.log("header call to save data in redux auth", res.data);
-          console.log(res.data)
           dispatch(setCode(res.data.code));
           dispatch(setUser(res.data.userInfo));
         } catch (err) {
@@ -168,28 +167,27 @@ const Header = () => {
           </NavLink>
         ))}
         {/* Desktop Logout Button */}
-      
       </nav>
 
       <div className="hidden custom:flex space-x-8">
-      <button
-        onClick={handleLogout}
-        className="hidden md:flex items-center bg-gradient-to-r from-red-600 to-red-800 text-white hover:from-red-700 hover:to-red-900 px-4 py-2 rounded-md transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5 mr-2"
-          viewBox="0 0 20 20"
-          fill="currentColor"
+        <button
+          onClick={handleLogout}
+          className="hidden md:flex items-center bg-gradient-to-r from-red-600 to-red-800 text-white hover:from-red-700 hover:to-red-900 px-4 py-2 rounded-md transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
         >
-          <path
-            fillRule="evenodd"
-            d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V4a1 1 0 00-1-1H3zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z"
-            clipRule="evenodd"
-          />
-        </svg>
-        Logout
-      </button>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 mr-2"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fillRule="evenodd"
+              d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V4a1 1 0 00-1-1H3zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z"
+              clipRule="evenodd"
+            />
+          </svg>
+          Logout
+        </button>
       </div>
       {/* Mobile Menu Button */}
       <div className="custom:hidden relative" ref={menuRef}>
@@ -272,7 +270,9 @@ const Header = () => {
                     {link.icon === "chat" && (
                       <IoChatbubbleEllipses className="h-4 w-4 mr-2 ml-1" />
                     )}
-                    {link.icon === "cart" && <FaCartShopping className="h-4 ml-1 mr-2" />}
+                    {link.icon === "cart" && (
+                      <FaCartShopping className="h-4 ml-1 mr-2" />
+                    )}
                     {link.icon === "mess"
                       ? code !== "000"
                         ? link.title

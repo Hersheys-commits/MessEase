@@ -64,16 +64,14 @@ const ChatInbox = () => {
         <div className="space-y-4">
           {chats
             .filter(
-              (chat) =>
-                !(chat.buyerId === userId && chat.sellerId === userId)
+              (chat) => !(chat.buyerId === userId && chat.sellerId === userId)
             )
             .map((chat) => {
               const otherParty =
                 chat.buyerId === userId ? chat.seller : chat.buyer;
               // Fallback image in case profilePicture is missing.
               const profileImage =
-                otherParty.profilePicture ||
-                "https://via.placeholder.com/40";
+                otherParty.profilePicture || "https://via.placeholder.com/40";
 
               return (
                 <Link
@@ -87,9 +85,7 @@ const ChatInbox = () => {
                       alt={`${otherParty.name} Profile`}
                       className="w-10 h-10 rounded-full object-cover"
                     />
-                    <p className="text-xl font-semibold">
-                      {otherParty.name}
-                    </p>
+                    <p className="text-xl font-semibold">{otherParty.name}</p>
                   </div>
                   {chat.unreadCount > 0 && (
                     <span className="bg-red-500 rounded-full px-3 py-1 text-sm">
@@ -107,8 +103,6 @@ const ChatInbox = () => {
 
 export default ChatInbox;
 
-
-
 // import React, { useEffect, useState } from "react";
 // import { useSelector } from "react-redux";
 // import api from "../../utils/axiosRequest";
@@ -122,26 +116,25 @@ export default ChatInbox;
 //   const [chats, setChats] = useState([]);
 //   const [loading, setLoading] = useState(true);
 // const SERVER_URL="localhost:5173"; // Replace with your server URL
-  // useEffect(() => {
-  //   if (!userId) return;
-  //   const fetchChats = async () => {
-  //     try {
-  //       const response = await api.get(`/api/chat/inbox?userId=${userId}`, {
-  //         withCredentials: true,
-  //       });
-  //       setChats(response.data);
-  //     } catch (error) {
-  //       console.error("Error fetching chat inbox:", error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
+// useEffect(() => {
+//   if (!userId) return;
+//   const fetchChats = async () => {
+//     try {
+//       const response = await api.get(`/api/chat/inbox?userId=${userId}`, {
+//         withCredentials: true,
+//       });
+//       setChats(response.data);
+//     } catch (error) {
+//       console.error("Error fetching chat inbox:", error);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
 
-  //   fetchChats();
-  // }, [userId]);
+//   fetchChats();
+// }, [userId]);
 
-
-  // In your ChatInbox.jsx component
+// In your ChatInbox.jsx component
 // useEffect(() => {
 //   if (!userId) return;
 //   const fetchChats = async () => {
@@ -159,14 +152,14 @@ export default ChatInbox;
 //   };
 
 //   fetchChats();
-  
+
 //   // Set up a socket listener to update inbox in real-time
 //   const socket = io(SERVER_URL, { withCredentials: true });
 //   socket.on("receiveMessage", (message) => {
 //     // Update the chats list when new messages arrive
 //     fetchChats();
 //   });
-  
+
 //   return () => {
 //     if (socket) socket.disconnect();
 //   };
@@ -212,7 +205,7 @@ export default ChatInbox;
 //             const isSeller = chat.sellerId === userId;
 //             const userRole = isSeller ? "Seller" : "Buyer";
 //             const otherRole = isSeller ? "Buyer" : "Seller";
-            
+
 //             return (
 //               <Link
 //                 to={`/chat/${otherParty._id}`}

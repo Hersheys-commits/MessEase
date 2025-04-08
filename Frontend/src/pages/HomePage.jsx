@@ -123,7 +123,7 @@ const HomePage = () => {
     {
       name: "Meet Korat",
       role: "Lead Developer",
-      image: "/src/assets/meet.png",
+      image: "/assets/meet.png",
       git: "https://github.com/meet-korat",
       insta: "https://www.instagram.com/_.meeettt_/",
       linked: "https://www.linkedin.com/in/meet-korat-43a4a9267/",
@@ -131,7 +131,7 @@ const HomePage = () => {
     {
       name: "Harsh Sharma",
       role: "Frontend Developer",
-      image: "/src/assets/harsh.png",
+      image: "/assets/harsh.png",
       git: "https://github.com/Hersheys-commits",
       insta: "https://www.instagram.com/not_too_harshh/",
       linked: "https://www.linkedin.com/in/harsh-sharma-310134298/",
@@ -139,7 +139,7 @@ const HomePage = () => {
     {
       name: "Manu Bhusan",
       role: "Project Manager",
-      image: "/src/assets/manu.png",
+      image: "/assets/manu.png",
       git: "https://github.com/ManuBhushan",
       insta: "https://www.instagram.com/manu__1322_/",
       linked: "https://www.linkedin.com/in/manu-bhushan-63208827b/",
@@ -398,7 +398,7 @@ const HomePage = () => {
 
         {/* Mobile Navigation with improved slide and fade animations */}
         <div
-          className={`md:hidden fixed inset-0 bg-gray-900/95 backdrop-blur-md flex flex-col justify-center items-center transition-all duration-500 ease-in-out z-40 ${
+          className={`md:hidden fixed bg-gray-900/95 backdrop-blur-md flex flex-col justify-center items-center transition-all duration-500 ease-in-out z-40 ${
             isMenuOpen
               ? "opacity-100 pointer-events-auto"
               : "opacity-0 pointer-events-none"
@@ -974,7 +974,7 @@ const HomePage = () => {
               >
                 <div className="overflow-hidden">
                   <img
-                    src={`/src/assets/${index + 1}00.png`}
+                    src={`/assets/${index + 1}00.png`}
                     alt={screen}
                     className="w-full h-64 object-cover transform transition-transform duration-700 hover:scale-110"
                   />

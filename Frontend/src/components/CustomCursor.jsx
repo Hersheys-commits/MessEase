@@ -8,9 +8,31 @@ const CustomCursor = () => {
   const [hovering, setHovering] = useState(false);
   const [isTextInput, setIsTextInput] = useState(false);
   const [clicked, setClicked] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // Hide default cursor
+    // Check if device is mobile
+    const checkMobile = () => {
+      const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+      const mobileRegex =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+      const touchScreenQuery = window.matchMedia(
+        "(hover: none) and (pointer: coarse)"
+      );
+
+      setIsMobile(mobileRegex.test(userAgent) || touchScreenQuery.matches);
+    };
+
+    // Run mobile check on load
+    checkMobile();
+
+    // If mobile, don't set up cursor and return early
+    if (isMobile) {
+      document.body.style.cursor = "auto";
+      return;
+    }
+
+    // Hide default cursor only on non-mobile
     document.body.style.cursor = "none";
 
     const onMouseMove = (e) => {
@@ -96,6 +118,13 @@ const CustomCursor = () => {
 
     observer.observe(document.body, { childList: true, subtree: true });
 
+    // Listen for window resize to recheck device type
+    const handleResize = () => {
+      checkMobile();
+    };
+
+    window.addEventListener("resize", handleResize);
+
     // Clean up
     return () => {
       document.body.style.cursor = "auto";
@@ -104,19 +133,19 @@ const CustomCursor = () => {
       document.removeEventListener("mouseup", onMouseUp);
       document.removeEventListener("mouseleave", onMouseLeave);
       document.removeEventListener("mouseenter", onMouseEnter);
+      window.removeEventListener("resize", handleResize);
       observer.disconnect();
     };
-  }, []);
+  }, [isMobile]);
 
-  if (hidden) return null;
+  // Don't render custom cursor on mobile devices
+  if (isMobile || hidden) return null;
 
   return (
     <>
       <style>{`
-        /* Hide default cursor on all elements */
-        * {
-          cursor: none !important;
-        }
+        /* Hide default cursor on all elements (except mobile) */
+        ${!isMobile ? "* { cursor: none !important; }" : ""}
         
         .spoon-hoverable {
           transition: transform 0.2s ease;

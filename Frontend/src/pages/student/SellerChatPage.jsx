@@ -41,7 +41,7 @@ const SellerChatPage = () => {
 
     const fetchOrCreateChat = async () => {
       try {
-        const response = await api.get(`/api/chat/${sellerId}`,{
+        const response = await api.get(`/api/chat/${sellerId}`, {
           withCredentials: true,
         });
         console.log(response);
@@ -94,58 +94,55 @@ const SellerChatPage = () => {
       return;
     }
     try {
-      if(!chat || !chat._id) {
-        console.log("not chat")
-        const chatResponse= await api.get(`api/chat/${sellerId}`,{
+      if (!chat || !chat._id) {
+        console.log("not chat");
+        const chatResponse = await api.get(`api/chat/${sellerId}`, {
           withCredentials: true,
-        })
+        });
 
         console.log(chatResponse);
-      
 
-        
-      if (!chatResponse.data || !chatResponse.data._id) {
-        throw new Error("Failed to create chat");
+        if (!chatResponse.data || !chatResponse.data._id) {
+          throw new Error("Failed to create chat");
+        }
+
+        setChat(chatResponse.data);
+
+        const messageData = {
+          chatId: chatResponse.data._id,
+          senderId: userId,
+          receiverId: sellerId,
+          text: newMessage,
+        };
+        console.log("before send");
+
+        await api.post(`api/chat/send`, messageData, {
+          withCredentials: true,
+        });
+        console.log("after send");
+
+        socket.current.emit("sendMarketMessage", messageData);
+        setNewMessage("");
+        toast.success("Message sent!");
+
+        console.log(2);
+      } else {
+        const messageData = {
+          chatId: chat._id,
+          senderId: userId,
+          receiverId: sellerId,
+          text: newMessage,
+        };
+        console.log("before chat");
+        await api.post(`api/chat/send`, messageData, {
+          withCredentials: true,
+        });
+        console.log("after chat");
+
+        socket.current.emit("sendMarketMessage", messageData);
+        setNewMessage("");
+        toast.success("Message sent!");
       }
-
-      setChat(chatResponse.data);
-
-      const messageData = {
-        chatId: chatResponse.data._id,
-        senderId: userId,
-        receiverId: sellerId,
-        text: newMessage,
-      };
-      console.log("before send");
-
-      await api.post(`api/chat/send`, messageData, {
-        withCredentials: true,
-      });
-      console.log("after send");
-      
-      socket.current.emit("sendMarketMessage", messageData);
-      setNewMessage("");
-      toast.success("Message sent!");
-
-
-    console.log(2)
-  }else{
-      const messageData = {
-        chatId: chat._id,
-        senderId: userId,
-        receiverId: sellerId,
-        text: newMessage,
-      };
-      console.log("before chat")
-      await api.post(`api/chat/send`, messageData, {
-        withCredentials: true,
-      });
-      console.log("after chat")
-      
-      socket.current.emit("sendMarketMessage", messageData);
-      setNewMessage("");
-      toast.success("Message sent!");
-    }
     } catch (err) {
       console.error("Error sending message:", err);
       setError("Error sending message. Please try again.");

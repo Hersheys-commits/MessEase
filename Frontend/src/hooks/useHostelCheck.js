@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../utils/axiosRequest";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setIsBlocked } from "../store/authSlice";
 
 const useHostelCheck = () => {
   const [loadingCheck, setLoading] = useState(true);
   const navigate = useNavigate();
   const dispatch = useDispatch(); // Move this to the top level of the hook
+  const { code } = useSelector((state) => state.auth);
 
   useEffect(() => {
     const verifyHostel = async () => {
@@ -43,7 +44,11 @@ const useHostelCheck = () => {
       }
     };
 
-    verifyHostel();
+    if (!code) {
+      verifyHostel();
+    } else {
+      setLoading(false);
+    }
   }, [navigate, dispatch]);
 
   return { loadingCheck };

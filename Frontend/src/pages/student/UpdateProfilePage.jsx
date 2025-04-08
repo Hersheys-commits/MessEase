@@ -22,7 +22,6 @@ const UpdateProfile = () => {
 
   // Get user data from Redux store
   const userData = useSelector((state) => state.auth.user);
-  console.log(userData,"ahdfsh");
 
   const redirectPath = location.state?.redirect || "/student/home";
   const alertMessage = location.state?.message || "";
@@ -69,7 +68,6 @@ const UpdateProfile = () => {
         // Get user data
         const userResponse = await api.post("/api/student/verify-token");
         const userInfo = userResponse?.data?.userInfo;
-        console.log(userResponse);
 
         // Update Redux store with user data
         dispatch(setUser(userInfo));
@@ -89,7 +87,6 @@ const UpdateProfile = () => {
 
         // Get hostels for the user's college
         const hostelResponse = await api.post("/api/hostel/fetchAllHostels");
-        console.log(hostelResponse);
         setHostels(hostelResponse.data.hostels);
         setLoading(false);
       } catch (err) {

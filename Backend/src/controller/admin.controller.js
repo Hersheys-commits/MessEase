@@ -260,11 +260,19 @@ export const changePassword = async (req, res) => {
 export const loginAdmin = async (req, res) => {
   try {
     const { email, password } = req.body;
-
-    // Find the admin user by email and ensure the role is admin
-    const adminUser = await User.findOne({ email, role:"admin" },);
+    const adminUser = await User.findOne({
+      email,
+      role: { $in: ["admin", "accountant", "chiefWarden"] },
+    });
     if (!adminUser) {
       return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    if (!adminUser.password) {
+      return res.status(400).json({
+        message:
+          "User registered via Google. Please use Google login or set a password.",
+      });
     }
 
     // Verify password using the schema method
@@ -589,7 +597,7 @@ export const createGroupChat = async (req, res) => {
     console.log(existingGroup);
 
     console.log(existingGroup, "EXISTING GROUP");
-    
+
     if (existingGroup) {
       return res
         .status(400)
@@ -641,8 +649,10 @@ export const getChats = async (req, res) => {
       })
       .sort({ "chats.timestamp": 1 }); // Sort messages from oldest to newest
 
-    if(!groupChat){
-      return res.status(404).json({ message: "Group chat not found", groupChat: false, });
+    if (!groupChat) {
+      return res
+        .status(404)
+        .json({ message: "Group chat not found", groupChat: false });
     }
     // console.log("CHAT2: ", groupChat);
     return res.status(200).json({

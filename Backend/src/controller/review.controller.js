@@ -68,9 +68,7 @@ export const deleteReview = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    const Ind = product.reviews.findIndex(
-      (r) => r._id.toString() === reviewId
-    ); // ✅ use findIndex
+    const Ind = product.reviews.findIndex((r) => r._id.toString() === reviewId); // ✅ use findIndex
     if (Ind === -1) {
       return res.status(404).json({ message: "Review not found" });
     }
@@ -99,7 +97,6 @@ export const deleteReview = async (req, res) => {
     res.status(500).json({ message: "Error in deleting review" });
   }
 };
-
 
 export default {
   addReview,

@@ -6,41 +6,41 @@ import verifyJwt from "../middleware/auth.middleware.js";
 const createChatRouter = (io) => {
   const router = express.Router();
 
-//   // POST /api/chat/create
-// router.post('/create', verifyJwt, async (req, res) => {
-//   try {
-//     const { buyerId, sellerId } = req.body;
-    
-//     // Validate user IDs
-//     if (!buyerId || !sellerId) {
-//       return res.status(400).json({ error: 'Sender and receiver IDs are required' });
-//     }
-    
-//     // Check if chat already exists
-//     let existingChat = await Chat.findOne({
-//       participants: { $all: [buyerId, senderId] }
-//     });
-    
-//     if (existingChat) {
-//       return res.status(200).json(existingChat);
-//     }
-    
-//     // Create new chat
-//     const newChat = new Chat({
-//       participants: [buyerId, senderId],
-//       messages: [],
-//       lastMessage: null,
-//       unreadCount: { [buyerId]: 0, [senderId]: 0 }
-//     });
-    
-//     await newChat.save();
-    
-//     return res.status(201).json(newChat);
-//   } catch (error) {
-//     console.error('Error creating chat:', error);
-//     return res.status(500).json({ error: 'Error creating chat' });
-//   }
-// });
+  //   // POST /api/chat/create
+  // router.post('/create', verifyJwt, async (req, res) => {
+  //   try {
+  //     const { buyerId, sellerId } = req.body;
+
+  //     // Validate user IDs
+  //     if (!buyerId || !sellerId) {
+  //       return res.status(400).json({ error: 'Sender and receiver IDs are required' });
+  //     }
+
+  //     // Check if chat already exists
+  //     let existingChat = await Chat.findOne({
+  //       participants: { $all: [buyerId, senderId] }
+  //     });
+
+  //     if (existingChat) {
+  //       return res.status(200).json(existingChat);
+  //     }
+
+  //     // Create new chat
+  //     const newChat = new Chat({
+  //       participants: [buyerId, senderId],
+  //       messages: [],
+  //       lastMessage: null,
+  //       unreadCount: { [buyerId]: 0, [senderId]: 0 }
+  //     });
+
+  //     await newChat.save();
+
+  //     return res.status(201).json(newChat);
+  //   } catch (error) {
+  //     console.error('Error creating chat:', error);
+  //     return res.status(500).json({ error: 'Error creating chat' });
+  //   }
+  // });
 
   // // Fetch chat inbox for the logged-in user with unread count calculation
   // router.get("/inbox", verifyJwt, async (req, res) => {
@@ -57,14 +57,14 @@ const createChatRouter = (io) => {
 
   //     // Calculate unread messages for each chat
   //     const chatSummaries = chats.map((chat) => {
-  //       const lastMessage = chat.messages.length > 0 
-  //         ? chat.messages[chat.messages.length - 1].text 
+  //       const lastMessage = chat.messages.length > 0
+  //         ? chat.messages[chat.messages.length - 1].text
   //         : "No messages yet";
-          
+
   //       const isUserBuyer = chat.buyerId._id.toString() === userId.toString();
   //       const lastRead = isUserBuyer ? chat.buyerLastRead : chat.sellerLastRead;
-  //       const unreadCount = lastRead 
-  //         ? chat.messages.filter(msg => msg.timestamp > lastRead).length 
+  //       const unreadCount = lastRead
+  //         ? chat.messages.filter(msg => msg.timestamp > lastRead).length
   //         : chat.messages.length;
 
   //       return {
@@ -85,56 +85,56 @@ const createChatRouter = (io) => {
   //   }
   // });
 
-
   // Fetch chat inbox for the logged-in user with unread count calculation
-router.get("/inbox", verifyJwt, async (req, res) => {
-  try {
-    const userId = req.user?._id;
-    if (!userId) return res.status(400).json({ error: "User ID required" });
-    console.log(1);
-    const chats = await Chat.find({
-      $or: [{ buyerId: userId }, { sellerId: userId }],
-    })
-      .populate("buyerId", "name profilePicture")
-      .populate("sellerId", "name profilePicture")
-      .sort({ updatedAt: -1 });
-    console.log(2);
-    // Calculate unread messages for each chat and include last message details
-    const chatSummaries = chats.map((chat) => {
-      // Get last message data with more details
-      const lastMessageData = chat.messages.length > 0 
-        ? {
-            text: chat.messages[chat.messages.length - 1].text,
-            senderId: chat.messages[chat.messages.length - 1].senderId,
-            timestamp: chat.messages[chat.messages.length - 1].timestamp
-          } 
-        : { text: "No messages yet", senderId: null, timestamp: null };
-      
-      const isUserBuyer = chat.buyerId._id.toString() === userId.toString();
-      const lastRead = isUserBuyer ? chat.buyerLastRead : chat.sellerLastRead;
-      const unreadCount = lastRead
-        ? chat.messages.filter(msg => msg.timestamp > lastRead).length 
-        : chat.messages.length;
+  router.get("/inbox", verifyJwt, async (req, res) => {
+    try {
+      const userId = req.user?._id;
+      if (!userId) return res.status(400).json({ error: "User ID required" });
+      console.log(1);
+      const chats = await Chat.find({
+        $or: [{ buyerId: userId }, { sellerId: userId }],
+      })
+        .populate("buyerId", "name profilePicture")
+        .populate("sellerId", "name profilePicture")
+        .sort({ updatedAt: -1 });
+      console.log(2);
+      // Calculate unread messages for each chat and include last message details
+      const chatSummaries = chats.map((chat) => {
+        // Get last message data with more details
+        const lastMessageData =
+          chat.messages.length > 0
+            ? {
+                text: chat.messages[chat.messages.length - 1].text,
+                senderId: chat.messages[chat.messages.length - 1].senderId,
+                timestamp: chat.messages[chat.messages.length - 1].timestamp,
+              }
+            : { text: "No messages yet", senderId: null, timestamp: null };
 
-      return {
-        _id: chat._id,
-        buyerId: chat.buyerId._id.toString(),
-        sellerId: chat.sellerId._id.toString(),
-        buyer: chat.buyerId,
-        seller: chat.sellerId,
-        lastMessage: lastMessageData.text,
-        lastMessageSenderId: lastMessageData.senderId,
-        lastMessageTimestamp: lastMessageData.timestamp,
-        unreadCount,
-      };
-    });
+        const isUserBuyer = chat.buyerId._id.toString() === userId.toString();
+        const lastRead = isUserBuyer ? chat.buyerLastRead : chat.sellerLastRead;
+        const unreadCount = lastRead
+          ? chat.messages.filter((msg) => msg.timestamp > lastRead).length
+          : chat.messages.length;
 
-    res.json(chatSummaries);
-  } catch (error) {
-    console.error("Error fetching chat inbox:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+        return {
+          _id: chat._id,
+          buyerId: chat.buyerId._id.toString(),
+          sellerId: chat.sellerId._id.toString(),
+          buyer: chat.buyerId,
+          seller: chat.sellerId,
+          lastMessage: lastMessageData.text,
+          lastMessageSenderId: lastMessageData.senderId,
+          lastMessageTimestamp: lastMessageData.timestamp,
+          unreadCount,
+        };
+      });
+
+      res.json(chatSummaries);
+    } catch (error) {
+      console.error("Error fetching chat inbox:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
 
   // Get (or create) a chat between the logged-in user and a seller
   router.get("/:sellerId", verifyJwt, async (req, res) => {
@@ -147,7 +147,7 @@ router.get("/inbox", verifyJwt, async (req, res) => {
       console.log(1);
       let chat = await Chat.findOne({
         $or: [
-          { buyerId: userId, sellerId:sellerId },
+          { buyerId: userId, sellerId: sellerId },
           { buyerId: sellerId, sellerId: userId },
         ],
       });
@@ -163,17 +163,17 @@ router.get("/inbox", verifyJwt, async (req, res) => {
         });
         await chat.save();
       }
-      
+
       // res.json(chat);
       const formattedChat = {
         ...chat.toObject(),
-        messages: chat.messages.map(msg => ({
+        messages: chat.messages.map((msg) => ({
           senderId: msg.senderId,
           text: msg.text,
-          timestamp: msg.timestamp
-        }))
+          timestamp: msg.timestamp,
+        })),
       };
-      
+
       res.json(formattedChat);
     } catch (error) {
       console.error("Error fetching chat:", error);
@@ -204,10 +204,10 @@ router.get("/inbox", verifyJwt, async (req, res) => {
       await chat.save();
 
       // Emit socket event to notify the receiver
-      io.to(receiverId.toString()).emit("newMessage", { 
-        chatId, 
-        senderId, 
-        text 
+      io.to(receiverId.toString()).emit("newMessage", {
+        chatId,
+        senderId,
+        text,
       });
 
       res.status(201).json(newMessage);
@@ -217,15 +217,16 @@ router.get("/inbox", verifyJwt, async (req, res) => {
     }
   });
 
-
   // Mark the conversation as read for the logged-in user
   router.put("/mark-read", verifyJwt, async (req, res) => {
     try {
       const { chatId } = req.body;
       const userId = req.user?._id;
-      
+
       if (!chatId || !userId) {
-        return res.status(400).json({ error: "Chat ID and User ID are required" });
+        return res
+          .status(400)
+          .json({ error: "Chat ID and User ID are required" });
       }
 
       const chat = await Chat.findById(chatId);
@@ -237,7 +238,9 @@ router.get("/inbox", verifyJwt, async (req, res) => {
       } else if (chat.sellerId.toString() === userId.toString()) {
         chat.sellerLastRead = new Date();
       } else {
-        return res.status(400).json({ error: "User is not a participant in this chat" });
+        return res
+          .status(400)
+          .json({ error: "User is not a participant in this chat" });
       }
 
       await chat.save();

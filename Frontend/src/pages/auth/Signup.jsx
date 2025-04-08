@@ -27,7 +27,7 @@ const Signup = ({ userType = "student" }) => {
         setLoading(false);
         return;
       }
-  
+
       try {
         const res = await api.post("/api/student/verify-token");
         console.log(res);
@@ -39,10 +39,9 @@ const Signup = ({ userType = "student" }) => {
         setLoading(false);
       }
     };
-  
+
     checkUser();
   }, [isAuthenticated, navigate, dispatch]);
-  
 
   const getFormFields = () => {
     const commonFields = [
@@ -133,7 +132,6 @@ const Signup = ({ userType = "student" }) => {
     userType === "admin"
       ? "rgba(59, 130, 246, 0.3)" // More blue for admin
       : "rgba(125, 211, 252, 0.2)"; // Lighter blue for student
-
 
   if (loading) {
     return (

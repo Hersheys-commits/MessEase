@@ -255,18 +255,29 @@ export const changePassword = async (req, res) => {
 
 export const loginStudent = async (req, res) => {
   const { email, password } = req.body;
+  const user = await User.findOne({
+    email,
+    role: { $in: ["student", "hostelManager", "messManager"] },
+  });
 
-  const user = await User.findOne({ email });
   if (!user) {
     return res.status(400).json({ message: "Invalid User." });
   }
+
+  if (!user.password) {
+    return res.status(400).json({
+      message:
+        "User registered via Google. Please use Google login or set a password.",
+    });
+  }
+
   if (!(await user.isPasswordCorrect(password))) {
     return res.status(400).json({ message: "Invalid Password." });
   }
 
   const accessToken = user.generateAccessToken();
   const refreshToken = user.generateRefreshToken();
-
+  console.log("3");
   const options = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -283,7 +294,7 @@ export const loginStudent = async (req, res) => {
     // add more fields if needed
   };
 
-  res
+  return res
     .status(200)
     .cookie("accessToken", accessToken, options)
     .cookie("refreshToken", refreshToken, options)

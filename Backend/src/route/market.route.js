@@ -54,22 +54,22 @@ router.post("/:productId/buy", verifyJWT, buyNow);
 router.post("/verify-payment", verifyPayment);
 router.get("/orders", verifyJWT, getUserOrders);
 
-router.get("/wishlist-check/:id",verifyJWT,async (req, res) => {
+router.get("/wishlist-check/:id", verifyJWT, async (req, res) => {
   try {
     const id = req.params.id;
     const userId = req.user._id;
-    
+
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
     const isInWishlist = user.wishlist.includes(id);
-    console.log("checking is in wishlist",isInWishlist);
+    console.log("checking is in wishlist", isInWishlist);
     res.status(200).json({ isInWishlist: isInWishlist });
   } catch (error) {
     console.error("Error checking wishlist status:", error);
     res.status(500).json({ message: "Internal server error" });
   }
-})
+});
 
 export default router;

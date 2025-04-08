@@ -3,6 +3,7 @@ import api from "../../utils/axiosRequest.js";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Header from "../../components/Header.jsx";
+import useHostelCheck from "../../hooks/useHostelCheck.js";
 
 const Marketplace = () => {
   const user = useSelector((state) => state.auth.user);
@@ -14,6 +15,7 @@ const Marketplace = () => {
   const [sort, setSort] = useState("");
   const [categories, setCategories] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const { loadingCheck } = useHostelCheck();
 
   // Fetch products
   useEffect(() => {
@@ -69,6 +71,17 @@ const Marketplace = () => {
         return new Date(b.createdAt) - new Date(a.createdAt);
       return 0;
     });
+
+  if (loadingCheck) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-gray-100">
+        <Header />
+        <div className="flex justify-center items-center h-96">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>

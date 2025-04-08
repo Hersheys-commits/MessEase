@@ -13,12 +13,10 @@ export const addToWishlist = async (req, res) => {
     } else {
       user.wishlist.push(productId);
       await user.save();
-      res
-        .status(200)
-        .json({
-          message: "Product added to wishlist",
-          wishlist: user.wishlist,
-        });
+      res.status(200).json({
+        message: "Product added to wishlist",
+        wishlist: user.wishlist,
+      });
     }
   } catch (error) {
     res

@@ -168,11 +168,9 @@ export const markProductsAsSold = async (req, res) => {
     if (!product) return res.status(404).json({ message: "Product not found" });
     const sellerId = req.user._id;
     if (product.sellerId.toString() !== sellerId.toString()) {
-      return res
-        .status(403)
-        .json({
-          message: "You are not authorized to mark this product as sold",
-        });
+      return res.status(403).json({
+        message: "You are not authorized to mark this product as sold",
+      });
     }
     product.sold = true;
     await product.save();
@@ -197,9 +195,12 @@ export const getMyListings = async (req, res) => {
 export const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
-    const product = await Product.findById(id).populate("sellerId","name email");
+    const product = await Product.findById(id).populate(
+      "sellerId",
+      "name email"
+    );
     if (!product) return res.status(404).json({ message: "Product not found" });
-    console.log(product)
+    console.log(product);
     if (!product) return res.status(404).json({ message: "Product not found" });
     res.json(product);
   } catch (error) {
@@ -211,10 +212,10 @@ export const getProductById = async (req, res) => {
 
 export const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find({ sold: false, college: req.user.college  }).populate(
-      "sellerId",
-      "name email"
-    );
+    const products = await Product.find({
+      sold: false,
+      college: req.user.college,
+    }).populate("sellerId", "name email");
     res.json(products);
   } catch (error) {
     res
@@ -244,11 +245,13 @@ export const buyNow = async (req, res) => {
     console.log(buyerId);
     const userId = req.user._id;
     console.log(userId);
-    console.log("req.user.college",req.user.college._id);    
+    console.log("req.user.college", req.user.college._id);
     const product = await Product.findById(productId);
-    console.log("product.college",product.college._id)
-    if(product.college._id.toString()!==req.user.college._id.toString()){
-      return res.status(400).json({ message: "Product not available in your college" });
+    console.log("product.college", product.college._id);
+    if (product.college._id.toString() !== req.user.college._id.toString()) {
+      return res
+        .status(400)
+        .json({ message: "Product not available in your college" });
     }
     if (!product) return res.status(404).json({ message: "Product not found" });
     if (product.sold)

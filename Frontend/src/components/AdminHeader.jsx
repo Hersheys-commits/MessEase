@@ -65,6 +65,7 @@ const AdminHeader = () => {
         try {
           const res = await api.post("/api/admin/verify-token");
           console.log("header call to save data in redux auth", res.data);
+          console.log("check", res.data, window.location.pathname);
           dispatch(setUser(res.data.userInfo));
         } catch (err) {
           console.error("Token verification failed", err);
