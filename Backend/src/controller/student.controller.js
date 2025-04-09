@@ -326,22 +326,27 @@ export const googleAuth = async (req, res) => {
       return res.status(400).json({ message: "College domain is unverified." });
 
     // Check if a student exists with this googleId
-    let user = await User.findOne({ googleId: sub, role: "student" }).select(
+    let user = await User.findOne({ googleId: sub, role: { $in: ["student", "hostelManager", "messManager"] }, }).select(
       "-password -refreshToken"
     );
-    // Also check if a student exists with this email without googleId linked
-    const userWithEmail = await User.findOne({ email, role: "student" }).select(
+
+    // Also check if a student exists with this email (registered via email/password)
+    const userWithEmail = await User.findOne({ email, role: { $in: ["student", "hostelManager", "messManager"] }, }).select(
       "googleId"
     );
+
+    // If a user exists with the same email but without a googleId, link the accounts.
     if (userWithEmail && !userWithEmail.googleId) {
-      return res.status(210).json({
-        error: "email exists",
-        message: "A student with this email already exists.",
-      });
+      userWithEmail.googleId = sub;
+      // Optionally update additional fields like name or picture
+      userWithEmail.fullName = name;
+      userWithEmail.profilePicture = picture;
+      await userWithEmail.save();
+      user = userWithEmail;
     }
 
+    // If user exists (either previously linked or already had a googleId)
     if (user) {
-      // User exists, log them in
       const accessToken = user.generateAccessToken();
       const refreshToken = user.generateRefreshToken();
       user.refreshToken = refreshToken;
@@ -367,7 +372,7 @@ export const googleAuth = async (req, res) => {
           message: "User logged in successfully",
         });
     } else {
-      // No user exists with this googleId; create a new student account
+      // No user exists with this googleId or email, so create a new student account
       user = await User.create({
         fullName: name,
         googleId: sub,
@@ -409,6 +414,7 @@ export const googleAuth = async (req, res) => {
     });
   }
 };
+
 
 /**
  * Logout User

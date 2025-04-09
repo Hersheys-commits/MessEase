@@ -354,38 +354,36 @@ export const googleAuth = async (req, res) => {
 
     const { email, name, sub, picture } = ticket.getPayload();
 
-    // Note: No domain check for admins, as requested
-
-    let admin = await User.findOne({ googleId: sub, role: "admin" }).select(
+    // Look for an admin with an existing googleId
+    let admin = await User.findOne({ googleId: sub, role: { $in: ["admin", "accountant", "chiefWarden"] }, }).select(
       "-password -refreshToken"
     );
+    // Look for an admin registered by email/password (without a googleId)
     let existingAdmin = await User.findOne({
       email: email,
-      role: "admin",
+      role: { $in: ["admin", "accountant", "chiefWarden"] },
     }).select("googleId");
-
-    if (existingAdmin && !existingAdmin.googleId) {
-      return res
-        .status(210)
-        .json(
-          new ApiResponse(
-            210,
-            { error: "email exists" },
-            "Email already exists"
-          )
-        );
-    }
 
     const options = {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      // sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      sameSize: "none",
+      // Use sameSite or other cookie options as needed
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       path: "/",
       maxAge: 24 * 60 * 60 * 1000,
     };
 
+    if (existingAdmin && !existingAdmin.googleId) {
+      // Link the Google account with the existing email/password account
+      existingAdmin.googleId = sub;
+      // Optionally, update additional fields like name or picture
+      existingAdmin.fullName = name;
+      // Save the updated user
+      admin = await existingAdmin.save();
+    }
+
     if (admin) {
+      // If the admin exists or was just linked, generate tokens
       const accessToken = admin.generateAccessToken();
       const refreshToken = admin.generateRefreshToken();
 
@@ -404,6 +402,7 @@ export const googleAuth = async (req, res) => {
           )
         );
     } else {
+      // If no admin exists with this email, create a new admin account
       admin = await User.create({
         fullName: name,
         googleId: sub,

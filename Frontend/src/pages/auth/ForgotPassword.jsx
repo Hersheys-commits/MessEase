@@ -7,7 +7,7 @@ import Squares from "../../components/ui/Squares";
 import SpotlightCard from "../../components/ui/SpotlightCard";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
-import logout from "../../store/authSlice";
+import {logout} from "../../store/authSlice";
 
 const ForgotPassword = ({ userType = "student" }) => {
   const navigate = useNavigate();
@@ -27,9 +27,9 @@ const ForgotPassword = ({ userType = "student" }) => {
       }
 
       try {
-        const res = await api.post("/api/student/verify-token");
+        const res = await api.post(`/api/${userType}/verify-token`);
         console.log(res);
-        navigate("/student/home");
+        navigate(`/${userType}/home`);
       } catch (error) {
         console.log(error);
         dispatch(logout());
