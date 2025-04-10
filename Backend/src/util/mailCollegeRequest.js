@@ -1,3 +1,5 @@
+import { SERVER_URL } from "../constants.js";
+
 export const generateCollegeVerificationEmail = (
   name,
   currentDate,
@@ -152,16 +154,16 @@ export const generateCollegeVerificationEmail = (
             
             <div class="action-buttons">
               <div class="button-cell">
-                <a href="http://localhost:4001/api/college/verification/${code}/verify" class="button verify-button">VERIFY</a>
+                <a href="${SERVER_URL}/api/college/verification/${code}/verify" class="button verify-button">VERIFY</a>
               </div>
               <div class="button-cell">
-                <a href="http://localhost:4001/api/college/verification/${code}/reject" class="button reject-button">REJECT</a>
+                <a href="${SERVER_URL}/api/college/verification/${code}/reject" class="button reject-button">REJECT</a>
               </div>
             </div>
             
             <p>If the buttons above don't work, you can use these links:</p>
-            <p>Verify: <a href="http://localhost:4001/api/college/verification/${code}/verify">http://localhost:4001/api/college/verification/${code}/verify</a></p>
-            <p>Reject: <a href="http://localhost:4001/api/college/verification/${code}/reject">http://localhost:4001/api/college/verification/${code}/reject</a></p>
+            <p>Verify: <a href="${SERVER_URL}/api/college/verification/${code}/verify">${SERVER_URL}/api/college/verification/${code}/verify</a></p>
+            <p>Reject: <a href="${SERVER_URL}/api/college/verification/${code}/reject">${SERVER_URL}/api/college/verification/${code}/reject</a></p>
           </div>
           
           <div class="footer">

@@ -11,6 +11,7 @@ import {
   FaPhone,
   FaGraduationCap,
   FaUpload,
+  FaIdCard,
 } from "react-icons/fa";
 import Header from "../../components/Header";
 import toast from "react-hot-toast";
@@ -40,6 +41,7 @@ const UpdateProfile = () => {
   const [hostels, setHostels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
   const [success, setSuccess] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState("");
@@ -110,9 +112,64 @@ const UpdateProfile = () => {
     fileReader.readAsDataURL(selectedFile);
   }, [selectedFile]);
 
+  // Validate form fields
+  const validateFields = () => {
+    const errors = {};
+    
+    if (!user.name.trim()) {
+      errors.name = "Name is required";
+    }
+    
+    if (!user.branch) {
+      errors.branch = "Branch is required";
+    }
+    
+    if (!user.year) {
+      errors.year = "Year is required";
+    }
+    
+    if (!user.hostel) {
+      errors.hostel = "Hostel is required";
+    }
+    
+    if (!user.room.trim()) {
+      errors.room = "Room number is required";
+    } else if (user.room.length > 5) {
+      errors.room = "Room number cannot exceed 5 characters";
+    }
+    
+    if (!user.rollNumber.trim()) {
+      errors.rollNumber = "Registration/Roll number is required";
+    } else if (user.rollNumber.length > 10) {
+      errors.rollNumber = "Registration number cannot exceed 10 characters";
+    }
+    
+    if (!user.phoneNumber.trim()) {
+      errors.phoneNumber = "Phone number is required";
+    } else if (!/^\d{10}$/.test(user.phoneNumber)) {
+      errors.phoneNumber = "Phone number must be exactly 10 digits";
+    }
+    
+    return errors;
+  };
+
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    
+    // Special validation for phone numbers - only allow digits
+    if (name === "phoneNumber" && value !== "" && !/^\d*$/.test(value)) {
+      return;
+    }
+
+    // Clear field error when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        [name]: undefined,
+      }));
+    }
+    
     setUserState((prev) => ({
       ...prev,
       [name]: value,
@@ -143,6 +200,14 @@ const UpdateProfile = () => {
     e.preventDefault();
     setError("");
     setSuccess("");
+    
+    // Validate all fields
+    const validationErrors = validateFields();
+    if (Object.keys(validationErrors).length > 0) {
+      setFieldErrors(validationErrors);
+      setError("Please fix the errors below");
+      return;
+    }
 
     try {
       // First update profile information
@@ -292,7 +357,7 @@ const UpdateProfile = () => {
                   htmlFor="name"
                   className="block text-sm font-medium text-gray-300"
                 >
-                  Full Name
+                  Full Name <span className="text-red-400">*</span>
                 </label>
                 <div className="mt-1 relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -304,10 +369,16 @@ const UpdateProfile = () => {
                     name="name"
                     value={user.name}
                     onChange={handleInputChange}
-                    className="bg-gray-700 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-3 py-2 sm:text-sm border-gray-600 rounded-md text-white"
+                    className={`bg-gray-700 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-3 py-2 sm:text-sm border ${
+                      fieldErrors.name ? "border-red-500" : "border-gray-600"
+                    } rounded-md text-white`}
                     placeholder="Your full name"
+                    required
                   />
                 </div>
+                {fieldErrors.name && (
+                  <p className="mt-1 text-sm text-red-400">{fieldErrors.name}</p>
+                )}
               </div>
 
               {/* Branch */}
@@ -316,7 +387,7 @@ const UpdateProfile = () => {
                   htmlFor="branch"
                   className="block text-sm font-medium text-gray-300"
                 >
-                  Branch
+                  Branch <span className="text-red-400">*</span>
                 </label>
                 <div className="mt-1 relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -327,7 +398,10 @@ const UpdateProfile = () => {
                     name="branch"
                     value={user.branch}
                     onChange={handleInputChange}
-                    className="bg-gray-700 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-3 py-2 sm:text-sm border-gray-600 rounded-md text-white"
+                    className={`bg-gray-700 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-3 py-2 sm:text-sm border ${
+                      fieldErrors.branch ? "border-red-500" : "border-gray-600"
+                    } rounded-md text-white`}
+                    required
                   >
                     <option value="">Select Branch</option>
                     <option value="CSE">Computer Science</option>
@@ -339,6 +413,9 @@ const UpdateProfile = () => {
                     <option value="BT">Biotechnology</option>
                   </select>
                 </div>
+                {fieldErrors.branch && (
+                  <p className="mt-1 text-sm text-red-400">{fieldErrors.branch}</p>
+                )}
               </div>
 
               {/* Year */}
@@ -347,7 +424,7 @@ const UpdateProfile = () => {
                   htmlFor="year"
                   className="block text-sm font-medium text-gray-300"
                 >
-                  Year
+                  Year <span className="text-red-400">*</span>
                 </label>
                 <div className="mt-1 relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -358,16 +435,21 @@ const UpdateProfile = () => {
                     name="year"
                     value={user.year}
                     onChange={handleInputChange}
-                    className="bg-gray-700 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-3 py-2 sm:text-sm border-gray-600 rounded-md text-white"
+                    className={`bg-gray-700 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-3 py-2 sm:text-sm border ${
+                      fieldErrors.year ? "border-red-500" : "border-gray-600"
+                    } rounded-md text-white`}
+                    required
                   >
                     <option value="">Select Year</option>
                     <option value="1">1st Year</option>
                     <option value="2">2nd Year</option>
                     <option value="3">3rd Year</option>
                     <option value="4">4th Year</option>
-                    <option value="5">5th Year</option>
                   </select>
                 </div>
+                {fieldErrors.year && (
+                  <p className="mt-1 text-sm text-red-400">{fieldErrors.year}</p>
+                )}
               </div>
 
               {/* Hostel - Required Field */}
@@ -387,7 +469,9 @@ const UpdateProfile = () => {
                     name="hostel"
                     value={user.hostel}
                     onChange={handleInputChange}
-                    className="bg-gray-700 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-3 py-2 sm:text-sm border-gray-600 rounded-md text-white"
+                    className={`bg-gray-700 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-3 py-2 sm:text-sm border ${
+                      fieldErrors.hostel ? "border-red-500" : "border-gray-600"
+                    } rounded-md text-white`}
                     required
                   >
                     <option value="">Select Hostel</option>
@@ -398,10 +482,8 @@ const UpdateProfile = () => {
                     ))}
                   </select>
                 </div>
-                {!user.hostel && (
-                  <p className="mt-1 text-sm text-red-400">
-                    You must select a hostel to access the student portal
-                  </p>
+                {fieldErrors.hostel && (
+                  <p className="mt-1 text-sm text-red-400">{fieldErrors.hostel}</p>
                 )}
               </div>
 
@@ -411,7 +493,7 @@ const UpdateProfile = () => {
                   htmlFor="room"
                   className="block text-sm font-medium text-gray-300"
                 >
-                  Room Number
+                  Room Number <span className="text-red-400">*</span>
                 </label>
                 <div className="mt-1 relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -423,10 +505,18 @@ const UpdateProfile = () => {
                     name="room"
                     value={user.room}
                     onChange={handleInputChange}
-                    className="bg-gray-700 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-3 py-2 sm:text-sm border-gray-600 rounded-md text-white"
+                    maxLength={5}
+                    className={`bg-gray-700 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-3 py-2 sm:text-sm border ${
+                      fieldErrors.room ? "border-red-500" : "border-gray-600"
+                    } rounded-md text-white`}
                     placeholder="e.g. A-101"
+                    required
                   />
                 </div>
+                {fieldErrors.room && (
+                  <p className="mt-1 text-sm text-red-400">{fieldErrors.room}</p>
+                )}
+                <p className="mt-1 text-xs text-gray-400">Maximum 5 characters</p>
               </div>
 
               {/* Roll Number */}
@@ -435,19 +525,30 @@ const UpdateProfile = () => {
                   htmlFor="rollNumber"
                   className="block text-sm font-medium text-gray-300"
                 >
-                  Reg/Roll Number
+                  Reg/Roll Number <span className="text-red-400">*</span>
                 </label>
                 <div className="mt-1 relative rounded-md shadow-sm">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FaIdCard className="text-gray-400" />
+                  </div>
                   <input
                     type="text"
                     id="rollNumber"
                     name="rollNumber"
                     value={user.rollNumber}
                     onChange={handleInputChange}
-                    className="bg-gray-700 focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-3 py-2 sm:text-sm border-gray-600 rounded-md text-white"
+                    maxLength={10}
+                    className={`bg-gray-700 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-3 py-2 sm:text-sm border ${
+                      fieldErrors.rollNumber ? "border-red-500" : "border-gray-600"
+                    } rounded-md text-white`}
                     placeholder="Your reg/roll number"
+                    required
                   />
                 </div>
+                {fieldErrors.rollNumber && (
+                  <p className="mt-1 text-sm text-red-400">{fieldErrors.rollNumber}</p>
+                )}
+                <p className="mt-1 text-xs text-gray-400">Maximum 10 characters</p>
               </div>
 
               {/* Phone Number */}
@@ -456,7 +557,7 @@ const UpdateProfile = () => {
                   htmlFor="phoneNumber"
                   className="block text-sm font-medium text-gray-300"
                 >
-                  Phone Number
+                  Phone Number <span className="text-red-400">*</span>
                 </label>
                 <div className="mt-1 relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -468,10 +569,18 @@ const UpdateProfile = () => {
                     name="phoneNumber"
                     value={user.phoneNumber}
                     onChange={handleInputChange}
-                    className="bg-gray-700 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-3 py-2 sm:text-sm border-gray-600 rounded-md text-white"
-                    placeholder="Your phone number"
+                    maxLength={10}
+                    className={`bg-gray-700 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-3 py-2 sm:text-sm border ${
+                      fieldErrors.phoneNumber ? "border-red-500" : "border-gray-600"
+                    } rounded-md text-white`}
+                    placeholder="10-digit mobile number"
+                    required
                   />
                 </div>
+                {fieldErrors.phoneNumber && (
+                  <p className="mt-1 text-sm text-red-400">{fieldErrors.phoneNumber}</p>
+                )}
+                <p className="mt-1 text-xs text-gray-400">Must be exactly 10 digits</p>
               </div>
 
               {/* Submit Button */}

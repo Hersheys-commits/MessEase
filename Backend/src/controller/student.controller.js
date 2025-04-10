@@ -286,13 +286,7 @@ export const loginStudent = async (req, res) => {
     maxAge: 24 * 60 * 60 * 1000,
   };
 
-  const userData = {
-    _id: user._id,
-    name: user.name,
-    email: user.email,
-    role: user.role, // if exists
-    // add more fields if needed
-  };
+  const {googleId: ___, password: __, refreshToken: _, ...userData} = user._doc;
 
   return res
     .status(200)
@@ -488,6 +482,12 @@ export const getStudent = async (req, res) => {
 
 export const checkHostelAssignment = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user?._id).populate("hostel");
+  const userData= {
+    role: user.role,
+    isBlocked: user.isBlocked,
+    hostel: user.hostel,
+  }
+  console.log(userData)
 
   if (!user) {
     throw new ApiError(404, "User not found");

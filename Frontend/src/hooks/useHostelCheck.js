@@ -43,12 +43,7 @@ const useHostelCheck = () => {
         navigate("/student/login");
       }
     };
-
-    if (!code) {
-      verifyHostel();
-    } else {
-      setLoading(false);
-    }
+    verifyHostel();
   }, [navigate, dispatch]);
 
   return { loadingCheck };

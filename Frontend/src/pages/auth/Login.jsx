@@ -9,7 +9,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import Squares from "../../components/ui/Squares";
 import SpotlightCard from "../../components/ui/SpotlightCard";
-import { logout } from "../../store/authSlice";
+import { logout, setUser, setCode } from "../../store/authSlice";
 import useGoogleAuth from "../../hooks/useGoogleAuth";
 
 const Login = ({ userType = "student" }) => {
@@ -31,9 +31,9 @@ const Login = ({ userType = "student" }) => {
       }
 
       try {
-        const res = await api.post("/api/student/verify-token");
+        const res = await api.post(`/api/${userType}/verify-token`);
         console.log(res);
-        navigate("/student/home");
+        navigate(`/${userType}/home`);
       } catch (error) {
         console.log(error);
         dispatch(logout());
@@ -66,6 +66,11 @@ const Login = ({ userType = "student" }) => {
         userType === "admin" ? "/api/admin/login" : "/api/student/login";
 
       const response = await api.post(endpoint, data);
+      console.log(response)
+      dispatch(setUser(response.data.user)); 
+      if(response.data.user?.code){
+        dispatch(setCode(response.data.user.code));
+      }
 
       // Store tokens
       localStorage.setItem("accessToken", response.data.accessToken);

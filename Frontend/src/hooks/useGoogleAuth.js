@@ -1,7 +1,7 @@
 // src/hooks/useGoogleAuth.js
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { setUser } from "../store/authSlice";
+import { setUser, setCode } from "../store/authSlice";
 import toast from "react-hot-toast";
 import api from "../utils/axiosRequest";
 
@@ -18,6 +18,10 @@ const useGoogleAuth = (userType = "student") => {
         tokenId: credentialResponse.credential,
       });
       console.log("first",response);
+      dispatch(setUser(response.data.user));
+      if(response.data.user?.code){
+        dispatch(setCode(response.data.user.code));
+      }
 
       if (response.status === 200) {
         // Store tokens

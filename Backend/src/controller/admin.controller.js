@@ -297,12 +297,7 @@ export const loginAdmin = async (req, res) => {
     adminUser.refreshToken = refreshToken;
     await adminUser.save();
 
-    const user = {
-      email,
-      role: "admin",
-      phoneNumber: adminUser.phoneNumber,
-      name: adminUser.name,
-    };
+    const {googleId: ___, password: __, refreshToken: _, ...user} = adminUser._doc;
 
     return res
       .status(200)
