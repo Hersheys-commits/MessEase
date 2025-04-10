@@ -165,38 +165,6 @@ MessEase is a comprehensive platform designed to streamline mess and hostel mana
 ---
 
 
-3. **Create a `.env` file:**  
-   Create a `.env` file in the root directory and configure the required environment variables:
-
-    ```env
-    PORT=3000
-    DATABASE_URL=your-database-url
-
-    ```
-
-4. **Run the development server:**
-
-    ```bash
-    npm start
-    ```
-    or
-    ```bash
-    yarn start
-    ```
-
-5. **Open in your browser:**  
-   Navigate to [http://localhost:5173](http://localhost:5173) to access the MessEase dashboard.
-
-## Usage
-
-After installation, MessEase provides an interactive dashboard where you can:
-- Schedule and manage mess operations.
-- Monitor tasks in real time.
-- Generate and view detailed performance reports.
-- Configure settings to match your facility's requirements.
-
-
-
 ## License
 
 MessEase is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
