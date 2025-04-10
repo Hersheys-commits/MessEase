@@ -157,7 +157,7 @@ const Signup = ({ userType = "student" }) => {
         />
       </div>
 
-      <GoogleOAuthProvider 
+      <GoogleOAuthProvider
         clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}
         onScriptLoadError={() => console.log("Script load error")}
         onScriptLoadSuccess={() => console.log("Script loaded successfully")}
@@ -234,8 +234,6 @@ const Signup = ({ userType = "student" }) => {
 };
 
 export default Signup;
-
-
 
 // import React, { useState, useEffect } from "react";
 // import AuthForm from "../../components/auth/AuthForm";
@@ -354,13 +352,13 @@ export default Signup;
 //       );
 //     }
 //   };
-  
+
 //   // Handle Google authentication for signup
 //   const handleGoogleSuccess = async (credentialResponse) => {
 //     try {
 //       const decoded = jwtDecode(credentialResponse.credential);
 //       console.log("Decoded token data:", decoded);
-      
+
 //       // Extract user info from the decoded token
 //       const googleUserData = {
 //         email: decoded.email,
@@ -369,26 +367,26 @@ export default Signup;
 //         googleId: decoded.sub,
 //         verified: decoded.email_verified
 //       };
-      
-//       const endpoint = userType === "admin" 
+
+//       const endpoint = userType === "admin"
 //         ? "/api/admin/google" // Using the endpoint from your working example
 //         : "/api/student/google"; // Using the endpoint from your working example
-          
+
 //       // Call your backend with the decoded token data
 //       const response = await api.post(
 //         endpoint,
 //         { googleUser: googleUserData },
 //         { withCredentials: true }
 //       );
-      
+
 //       if (response?.data?.data?.error === "email exists") {
 //         toast.error("Email already exists. Try signing in.");
 //         return;
 //       }
-      
+
 //       // Store user data
 //       localStorage.setItem("user", JSON.stringify(response.data.data));
-      
+
 //       // Update Redux state
 //       // dispatch(
 //       //   setUser({
@@ -396,7 +394,7 @@ export default Signup;
 //       //     accessToken: response.data.data.accessToken,
 //       //   })
 //       // );
-      
+
 //       // Navigate based on first-time user or returning user
 //       // if (response.data.data?.first === false) {
 //       //   navigate("/");
@@ -405,7 +403,7 @@ export default Signup;
 //       // }
 //       navigate(`/${userType}/home`);
 //       toast.success("Google signup successful");
-      
+
 //     } catch (error) {
 //       console.error("Google sign-up error:", error);
 //       toast.error("Google signup failed. Please try again later.");

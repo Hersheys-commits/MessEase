@@ -297,7 +297,12 @@ export const loginAdmin = async (req, res) => {
     adminUser.refreshToken = refreshToken;
     await adminUser.save();
 
-    const {googleId: ___, password: __, refreshToken: _, ...user} = adminUser._doc;
+    const {
+      googleId: ___,
+      password: __,
+      refreshToken: _,
+      ...user
+    } = adminUser._doc;
 
     return res
       .status(200)
@@ -350,9 +355,10 @@ export const googleAuth = async (req, res) => {
     const { email, name, sub, picture } = ticket.getPayload();
 
     // Look for an admin with an existing googleId
-    let admin = await User.findOne({ googleId: sub, role: { $in: ["admin", "accountant", "chiefWarden"] }, }).select(
-      "-password -refreshToken"
-    );
+    let admin = await User.findOne({
+      googleId: sub,
+      role: { $in: ["admin", "accountant", "chiefWarden"] },
+    }).select("-password -refreshToken");
     // Look for an admin registered by email/password (without a googleId)
     let existingAdmin = await User.findOne({
       email: email,
@@ -590,9 +596,9 @@ export const createGroupChat = async (req, res) => {
     const { code, groupName, hostelId } = req.body;
     // Check if a group already exists for this hostel
     const existingGroup = await GroupChat.findOne({ hostelId });
-    console.log(existingGroup);
+    // console.log(existingGroup);
 
-    console.log(existingGroup, "EXISTING GROUP");
+    // console.log(existingGroup, "EXISTING GROUP");
 
     if (existingGroup) {
       return res
@@ -629,7 +635,7 @@ export const getChats = async (req, res) => {
     const userId = req.user._id; // Assuming you have user ID from the request
     const { hostelId, code } = req.query;
     const skip = (page - 1) * limit;
-    console.log("G", req.query);
+    // console.log("G", req.query);
     // Validate required fields
     if (!hostelId || !userId || !code) {
       return res.status(400).json({ error: "All fields are required" });
@@ -664,10 +670,10 @@ export const getChats = async (req, res) => {
 
 export const uploadImage = asyncHandler(async (req, res) => {
   try {
-    console.log("UPLOAD IMAGE BODY: ", req.body);
-    console.log("UPLOAD IMAGE FINAL: ", req.file);
+    // console.log("UPLOAD IMAGE BODY: ", req.body);
+    // console.log("UPLOAD IMAGE FINAL: ", req.file);
     const chatImage = await uploadOnCloudinary(req.file.path);
-    console.log("profilePicture", chatImage);
+    // console.log("profilePicture", chatImage);
     return res.status(200).send({ imageUrl: chatImage.secure_url });
   } catch (error) {
     console.log(error.message);
@@ -677,10 +683,10 @@ export const uploadImage = asyncHandler(async (req, res) => {
 
 export const uploadAudio = asyncHandler(async (req, res) => {
   try {
-    console.log("UPLOAD Audio BODY: ", req.body);
-    console.log("UPLOAD Audio FINAL: ", req.file);
+    // console.log("UPLOAD Audio BODY: ", req.body);
+    // console.log("UPLOAD Audio FINAL: ", req.file);
     const chatAudio = await uploadOnCloudinary(req.file.path);
-    console.log("audioImage", chatAudio);
+    // console.log("audioImage", chatAudio);
     return res.status(200).send({ audioUrl: chatAudio.secure_url });
   } catch (error) {
     console.log(error.message);

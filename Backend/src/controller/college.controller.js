@@ -163,10 +163,10 @@ export const applyRole = async (req, res) => {
       applicationDetails,
     } = req.body;
     // console.log("Code:", code);
-    console.log("Role:", role);
-    console.log("Email:", email);
-    console.log("College Name:", collegeName);
-    console.log("Application Details:", applicationDetails.collegeCode);
+    // console.log("Role:", role);
+    // console.log("Email:", email);
+    // console.log("College Name:", collegeName);
+    // console.log("Application Details:", applicationDetails.collegeCode);
 
     // Create a transporter (configure with your email provider credentials)
     const transporter = nodemailer.createTransport({
@@ -217,7 +217,7 @@ export const applyRole = async (req, res) => {
 export const ReqAccept = async (req, res) => {
   try {
     const { code, role, email } = req.params;
-    console.log(code);
+    // console.log(code);
     const college = await College.findOne({ code });
     if (!college) {
       return res.status(404).json({ message: "College not found" });

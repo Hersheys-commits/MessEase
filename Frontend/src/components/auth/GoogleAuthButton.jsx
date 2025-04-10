@@ -65,7 +65,7 @@ const GoogleAuthButton = ({ userType, buttonText, darkMode = false }) => {
         onSuccess={handleGoogleSuccess}
         onError={handleGoogleFailure}
         useOneTap={false}
-        cookiePolicy={'single_host_origin'}
+        cookiePolicy={"single_host_origin"}
       />
     </div>
   );

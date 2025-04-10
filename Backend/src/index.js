@@ -39,8 +39,6 @@ const io = new Server(server, {
   },
 });
 
-
-
 // Middleware
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
@@ -69,7 +67,7 @@ io.on("connection", (socket) => {
   // User joins a hostel chat
   socket.on("joinRoom", ({ hostelId, userId }) => {
     socket.join(hostelId);
-    console.log(`📢 User ${userId} joined hostel ${hostelId}`);
+    // console.log(`📢 User ${userId} joined hostel ${hostelId}`);
 
     if (!usersMap.has(hostelId)) usersMap.set(hostelId, []);
     usersMap.get(hostelId).push({ userId, socketId: socket.id });
@@ -82,7 +80,7 @@ io.on("connection", (socket) => {
 
   socket.on("createPoll", async ({ poll, hostelId, code }) => {
     try {
-      console.log("Creating new poll:", poll);
+      // console.log("Creating new poll:", poll);
 
       // Store the poll in our Map
       activePollsByHostel.set(hostelId, poll);
@@ -101,7 +99,7 @@ io.on("connection", (socket) => {
       // Broadcast the new poll to all clients in the hostel room
       io.to(hostelId).emit("newPoll", poll);
 
-      console.log(`New poll created for hostel ${hostelId}`);
+      // console.log(`New poll created for hostel ${hostelId}`);
     } catch (error) {
       console.error("Error creating poll:", error);
     }
@@ -109,22 +107,22 @@ io.on("connection", (socket) => {
 
   socket.on("votePoll", ({ pollId, userId, optionIndex, hostelId, code }) => {
     try {
-      console.log(
-        `User ${userId} voted for option ${optionIndex} in poll ${pollId}`
-      );
+      // console.log(
+      //   `User ${userId} voted for option ${optionIndex} in poll ${pollId}`
+      // );
 
       // Get the current poll
       const poll = activePollsByHostel.get(hostelId);
 
       // Check if poll exists and user hasn't voted yet
       if (!poll || poll.id !== pollId) {
-        console.log("Poll not found or poll ID mismatch");
+        // console.log("Poll not found or poll ID mismatch");
         return;
       }
 
       // Check if user has already voted
       if (poll.voters[userId] !== undefined) {
-        console.log(`User ${userId} has already voted`);
+        // console.log(`User ${userId} has already voted`);
         return;
       }
 
@@ -144,7 +142,7 @@ io.on("connection", (socket) => {
       // Broadcast the updated poll to all clients in the hostel room
       io.to(hostelId).emit("pollVoteUpdated", poll);
 
-      console.log(`Vote recorded for poll ${pollId}`);
+      // console.log(`Vote recorded for poll ${pollId}`);
     } catch (error) {
       console.error("Error recording vote:", error);
     }
@@ -153,14 +151,14 @@ io.on("connection", (socket) => {
   // Handle ending a poll
   socket.on("endPoll", ({ pollId, hostelId, code }) => {
     try {
-      console.log(`Ending poll ${pollId} for hostel ${hostelId}`);
+      // console.log(`Ending poll ${pollId} for hostel ${hostelId}`);
 
       // Get the current poll
       const poll = activePollsByHostel.get(hostelId);
 
       // Check if poll exists
       if (!poll || poll.id !== pollId) {
-        console.log("Poll not found or poll ID mismatch");
+        // console.log("Poll not found or poll ID mismatch");
         return;
       }
 
@@ -176,7 +174,7 @@ io.on("connection", (socket) => {
       // Broadcast poll ended to all clients in the hostel room
       io.to(hostelId).emit("pollEnded");
 
-      console.log(`Poll ${pollId} ended successfully`);
+      // console.log(`Poll ${pollId} ended successfully`);
     } catch (error) {
       console.error("Error ending poll:", error);
     }
@@ -185,19 +183,19 @@ io.on("connection", (socket) => {
   const handleMarketChatEvents = () => {
     socket.on("joinChat", ({ buyerId, sellerId }) => {
       // Create a consistent room name by sorting the IDs
-      console.log("first", buyerId, sellerId);
+      // console.log("first", buyerId, sellerId);
       const chatRoom = [buyerId, sellerId].sort().join("-");
       socket.join(chatRoom);
-      console.log(`User joined chat: ${chatRoom}`);
+      // console.log(`User joined chat: ${chatRoom}`);
     });
 
     socket.on("join", (userId) => {
       socket.join(userId); // User joins their own room (userId)
-      console.log(`User ${userId} joined their personal room`);
+      // console.log(`User ${userId} joined their personal room`);
     });
 
     socket.on("sendMarketMessage", (message) => {
-      console.log("in my socket");
+      // console.log("in my socket");
       const { senderId, receiverId } = message;
       // Use the same room naming strategy
       const chatRoom = [senderId, receiverId].sort().join("-");
@@ -217,16 +215,16 @@ io.on("connection", (socket) => {
       senderName,
       audioUrl,
     }) => {
-      console.log("B:", {
-        userId,
-        hostelId,
-        message,
-        code,
-        senderName,
-        hasImage: !!image,
-        hasAudio: !!audioUrl,
-      });
-      console.log("in index.js");
+      // console.log("B:", {
+      //   userId,
+      //   hostelId,
+      //   message,
+      //   code,
+      //   senderName,
+      //   hasImage: !!image,
+      //   hasAudio: !!audioUrl,
+      // });
+      // console.log("in index.js");
 
       if (!hostelId) return;
 
@@ -257,10 +255,10 @@ io.on("connection", (socket) => {
         await groupChat.save();
 
         // Emit the new message to all users in the group
-        console.log({
-          message: chatMessage,
-          sender: { _id: userId, name: senderName },
-        });
+        // console.log({
+        //   message: chatMessage,
+        //   sender: { _id: userId, name: senderName },
+        // });
 
         io.to(hostelId).emit("newMessage", {
           message: chatMessage,
@@ -367,7 +365,7 @@ io.on("connection", (socket) => {
 
   // Handle disconnection
   socket.on("disconnect", () => {
-    console.log("❌ A user disconnected:", socket.id);
+    // console.log("❌ A user disconnected:", socket.id);
 
     usersMap.forEach((users, hostelId) => {
       const updatedUsers = users.filter((user) => user.socketId !== socket.id);

@@ -7,7 +7,7 @@ import Squares from "../../components/ui/Squares";
 import SpotlightCard from "../../components/ui/SpotlightCard";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
-import {logout} from "../../store/authSlice";
+import { logout } from "../../store/authSlice";
 
 const ForgotPassword = ({ userType = "student" }) => {
   const navigate = useNavigate();

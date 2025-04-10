@@ -12,15 +12,15 @@ export const checkAvailability = async (req, res) => {
       .populate("hostel")
       .populate("college");
 
-    console.log("USER: ", user); // get to know the hostel in which user lives
+    // console.log("USER: ", user); // get to know the hostel in which user lives
 
     if (!user || !user.hostel) {
       return res.status(404).json({ error: "User or hostel not found" });
     }
 
     const { hostel, college } = user;
-    console.log("HOSTEL: ", hostel);
-    console.log("COLLEGE: ", college);
+    // console.log("HOSTEL: ", hostel);
+    // console.log("COLLEGE: ", college);
     // Get all rooms of this hostel
     const allRooms = hostel.guestRooms.roomNumbers;
     // console.log("AllRooms: ",allRooms);
@@ -37,7 +37,7 @@ export const checkAvailability = async (req, res) => {
       (room) => !occupiedRoomNumbers.includes(room)
     );
     // console.log("FREE ROOMS: ",freeRooms);
-    console.log({ hostel: hostel.name, college: college.name, freeRooms });
+    // console.log({ hostel: hostel.name, college: college.name, freeRooms });
     res.json({ hostel: hostel.name, college: college.name, freeRooms });
   } catch (error) {
     console.error("Error finding available rooms:", error);
@@ -49,7 +49,7 @@ export const allocateRoom = async (req, res) => {
   try {
     const { roomNumber, checkInDate, checkOutDate } = req.body;
     const userId = req.user._id;
-    console.log("BODY: ", req.body);
+    // console.log("BODY: ", req.body);
     if (!userId || !roomNumber || !checkInDate || !checkOutDate) {
       return res.status(400).json({ error: "Missing required fields" });
     }
@@ -59,8 +59,8 @@ export const allocateRoom = async (req, res) => {
       .populate("college");
 
     const { hostel, college } = user;
-    console.log("HHHH: ", hostel);
-    console.log("CCCC: ", college);
+    // console.log("HHHH: ", hostel);
+    // console.log("CCCC: ", college);
     if (!hostel) {
       return res.status(400).json({ error: "User is not in any hostel " });
     }
@@ -95,7 +95,7 @@ export const allocateRoom = async (req, res) => {
 export const allBookedRoom = async (req, res) => {
   try {
     const userId = req.user._id;
-    console.log(userId);
+    // console.log(userId);
     if (!userId) {
       res.status(401).json({ error: "Not a valid User" });
     }
@@ -104,7 +104,7 @@ export const allBookedRoom = async (req, res) => {
       guest: userId, // Convert userId to ObjectId
       checkOutDate: { $gt: date },
     }).sort({ checkInDate: 1 }); // to get all the booked guest rooms with inc order of checkin so that the user will see the first coming booking first
-    console.log(activeRooms);
+    // console.log(activeRooms);
     res.json(activeRooms);
   } catch (error) {
     console.error("Error fetching active rooms:", error.message);
@@ -117,7 +117,7 @@ export const deleteBookedRoom = async (req, res) => {
   try {
     const { bookingId } = req.query; // Changed from req.body to req.query
     const userId = req.user._id;
-    console.log(userId, bookingId);
+    // console.log(userId, bookingId);
 
     if (!userId || !bookingId) {
       return res

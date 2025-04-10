@@ -243,7 +243,7 @@ export const changePassword = async (req, res) => {
     if (!existingUser)
       return res.status(400).json({ message: "User doesn't exists." });
 
-    console.log("Existing User:", existingUser.password);
+    // console.log("Existing User:", existingUser.password);
     existingUser.password = password;
     await existingUser.save();
 
@@ -277,7 +277,7 @@ export const loginStudent = async (req, res) => {
 
   const accessToken = user.generateAccessToken();
   const refreshToken = user.generateRefreshToken();
-  console.log("3");
+  // console.log("3");
   const options = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -286,7 +286,12 @@ export const loginStudent = async (req, res) => {
     maxAge: 24 * 60 * 60 * 1000,
   };
 
-  const {googleId: ___, password: __, refreshToken: _, ...userData} = user._doc;
+  const {
+    googleId: ___,
+    password: __,
+    refreshToken: _,
+    ...userData
+  } = user._doc;
 
   return res
     .status(200)
@@ -320,14 +325,16 @@ export const googleAuth = async (req, res) => {
       return res.status(400).json({ message: "College domain is unverified." });
 
     // Check if a student exists with this googleId
-    let user = await User.findOne({ googleId: sub, role: { $in: ["student", "hostelManager", "messManager"] }, }).select(
-      "-password -refreshToken"
-    );
+    let user = await User.findOne({
+      googleId: sub,
+      role: { $in: ["student", "hostelManager", "messManager"] },
+    }).select("-password -refreshToken");
 
     // Also check if a student exists with this email (registered via email/password)
-    const userWithEmail = await User.findOne({ email, role: { $in: ["student", "hostelManager", "messManager"] }, }).select(
-      "googleId"
-    );
+    const userWithEmail = await User.findOne({
+      email,
+      role: { $in: ["student", "hostelManager", "messManager"] },
+    }).select("googleId");
 
     // If a user exists with the same email but without a googleId, link the accounts.
     if (userWithEmail && !userWithEmail.googleId) {
@@ -409,7 +416,6 @@ export const googleAuth = async (req, res) => {
   }
 };
 
-
 /**
  * Logout User
  * Clears authentication cookies and unsets refreshToken in DB.
@@ -417,7 +423,7 @@ export const googleAuth = async (req, res) => {
  */
 export const logout = async (req, res) => {
   try {
-    console.log("yyhg");
+    // console.log("yyhg");
     await User.findByIdAndUpdate(
       req.user._id,
       { $unset: { refreshToken: 1 } },
@@ -442,7 +448,7 @@ export const logout = async (req, res) => {
 
 export const verifyToken = async (req, res) => {
   const hostelCode = await Hostel.findById(req.user.hostel).select("code");
-  console.log("HostelCOde", hostelCode);
+  // console.log("HostelCOde", hostelCode);
   if (!hostelCode?.code) {
     return res.status(250).json({
       user: req.user._id,
@@ -482,12 +488,12 @@ export const getStudent = async (req, res) => {
 
 export const checkHostelAssignment = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user?._id).populate("hostel");
-  const userData= {
+  const userData = {
     role: user.role,
     isBlocked: user.isBlocked,
     hostel: user.hostel,
-  }
-  console.log(userData)
+  };
+  // console.log(userData)
 
   if (!user) {
     throw new ApiError(404, "User not found");

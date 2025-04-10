@@ -28,15 +28,7 @@ const HomePage = () => {
   const navigate = useNavigate();
   const sectionsRef = useRef({});
 
-  const navItems = [
-    "hero",
-    "about",
-    "features",
-    "screenshots",
-    "faq",
-    "team",
-    "contact",
-  ];
+  const navItems = ["hero", "about", "features", "screenshots", "faq", "team"];
 
   // Handle navigation scrolling with enhanced tracking
   useEffect(() => {
@@ -122,7 +114,7 @@ const HomePage = () => {
   const teamMembers = [
     {
       name: "Meet Korat",
-      role: "Lead Developer",
+      role: "Full-Stack Developer",
       image: "/assets/meet.png",
       git: "https://github.com/meet-korat",
       insta: "https://www.instagram.com/_.meeettt_/",
@@ -130,7 +122,7 @@ const HomePage = () => {
     },
     {
       name: "Harsh Sharma",
-      role: "Frontend Developer",
+      role: "Full-Stack Developer",
       image: "/assets/harsh.png",
       git: "https://github.com/Hersheys-commits",
       insta: "https://www.instagram.com/not_too_harshh/",
@@ -138,7 +130,7 @@ const HomePage = () => {
     },
     {
       name: "Manu Bhusan",
-      role: "Project Manager",
+      role: "Full-Stack Developer",
       image: "/assets/manu.png",
       git: "https://github.com/ManuBhushan",
       insta: "https://www.instagram.com/manu__1322_/",
@@ -149,24 +141,40 @@ const HomePage = () => {
   // FAQ data
   const faqs = [
     {
-      question: "What makes MessEase different from other messaging apps?",
+      question:
+        "What makes MessEase different from other mess management apps?",
       answer:
-        "MessEase combines advanced encryption with an intuitive interface designed for both personal and professional communication. Our unique features include real-time translation, smart message scheduling, and customizable notification profiles that adapt to your daily routine.",
+        "Mess Ease is designed specifically for hostel and mess management, offering a comprehensive suite of features tailored to the unique needs of students and administrators. Our platform focuses on real-time communication, complaint management, and meal planning, ensuring a seamless experience for all users.",
     },
     {
       question: "Is MessEase free to use?",
       answer:
-        "Yes! MessEase offers a robust free tier that includes all core messaging features. For power users, our Premium subscription ($4.99/month) unlocks advanced features like unlimited message scheduling, enhanced file sharing capabilities, and priority customer support.",
+        "Yes! MessEase offers a robust free tier that includes all core messaging features. For all the users, it unlocks all features to apply/vote for Managerial posts, and Fees can be paid through the app. Guest room allocation and booking is also available. Students can update their profile and see the mess menu and rate daily meals.",
     },
     {
       question: "How secure are my conversations in MessEase?",
       answer:
-        "MessEase employs end-to-end encryption for all conversations, meaning only you and your recipients can read your messages. We utilize industry-leading 256-bit AES encryption, and our servers never store decryption keys. Additionally, you can enable two-factor authentication and set message expiration timers for sensitive conversations.",
+        "We take security seriously. All conversations on MessEase are encrypted, ensuring that your data is safe and private. We also implement strict access controls to protect your information from unauthorized access.",
     },
     {
       question: "Can I use MessEase across multiple devices?",
       answer:
-        "Absolutely! MessEase seamlessly syncs across all your devices - smartphones, tablets, and computers. Your conversation history, settings, and preferences will be consistent no matter which device you're using. You can be logged into up to 5 devices simultaneously with a free account, and unlimited devices with Premium.",
+        "Absolutely! MessEase seamlessly syncs across all your devices - smartphones, tablets, and computers. Your conversation history, settings, and preferences will be consistent no matter which device you're using.",
+    },
+    {
+      question: "Does administration have access to all conversations?",
+      answer:
+        "No, administration does not have access to all conversations. MessEase prioritizes user privacy and confidentiality. Only the necessary information is shared with administrators for effective management, while personal conversations remain private.",
+    },
+    {
+      question: "Does Marketplace have chat support?",
+      answer:
+        "Yes, Marketplace has chat support. Users can communicate directly with sellers or service providers through the app, ensuring a smooth transaction process and quick resolution of any queries.",
+    },
+    {
+      question: "Do MessEase have a report abuse feature?",
+      answer:
+        "Yes, MessEase has a report abuse feature. Users can easily report any inappropriate content or behavior within the app, ensuring a safe and respectful environment for all users. Administration have access to these reports and can take necessary actions.",
     },
   ];
 
@@ -1184,15 +1192,6 @@ const HomePage = () => {
                 </h3>
                 <p className="text-cyan-400 mb-4 font-medium">{member.role}</p>
 
-                <p className="text-gray-400 mb-6 text-sm">
-                  {index === 0 &&
-                    "Full-stack developer with expertise in React and Node.js"}
-                  {index === 1 &&
-                    "UI/UX specialist focusing on responsive and intuitive designs"}
-                  {index === 2 &&
-                    "Agile methodology expert with 3+ years of project management"}
-                </p>
-
                 <div className="flex justify-center space-x-4">
                   {/* Social media icons with improved hover effects */}
                   <a
@@ -1258,191 +1257,6 @@ const HomePage = () => {
                 </div>
               </div>
             ))}
-          </div>
-
-          {/* Join the team call to action */}
-          <div className="mt-16 text-center animate-on-scroll animate-in fade-in-up delay-500">
-            <a
-              href="#contact"
-              className="inline-flex items-center px-6 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-medium hover:from-cyan-600 hover:to-blue-700 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/20 group"
-            >
-              Join Our Team
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 ml-2 transform group-hover:translate-x-1 transition-transform duration-300"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 8l4 4m0 0l-4 4m4-4H3"
-                />
-              </svg>
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* Contact Section with form animations */}
-      <section
-        id="contact"
-        className="py-16 bg-cyan-900 text-white relative overflow-hidden"
-      >
-        {/* Animated background elements */}
-        <div
-          className="absolute top-20 right-10 w-96 h-96 bg-blue-600 rounded-full opacity-10 blur-3xl"
-          style={{ transform: `translateY(${(scrollY - 3600) * 0.05}px)` }}
-        ></div>
-        <div
-          className="absolute bottom-20 left-10 w-64 h-64 bg-cyan-300 rounded-full opacity-10 blur-3xl"
-          style={{ transform: `translateY(${(scrollY - 3600) * -0.03}px)` }}
-        ></div>
-
-        <div className="container mx-auto px-4 relative">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4 animate-on-scroll animate-in fade-in-up">
-              Get In Touch
-            </h2>
-            <div className="w-16 h-1 bg-white mx-auto mb-6 animate-on-scroll animate-in zoom-in delay-100"></div>
-            <p className="max-w-3xl mx-auto animate-on-scroll animate-in fade-in-up delay-200">
-              Have questions? We're here to help. Reach out to our team.
-            </p>
-          </div>
-
-          <div className="max-w-4xl mx-auto bg-gray-800 rounded-lg shadow-xl overflow-hidden border border-gray-700 animate-on-scroll animate-in zoom-in delay-100">
-            <div className="flex flex-col md:flex-row">
-              <div className="md:w-2/5 bg-gray-900 p-8 animate-on-scroll animate-in fade-in-left delay-200">
-                <h3 className="text-2xl font-bold mb-6">Contact Information</h3>
-                <div className="space-y-4">
-                  <p className="flex items-center transform transition-all duration-300 hover:translate-x-2">
-                    <span className="mr-2">📧</span> support@messease.com
-                  </p>
-                  <p className="flex items-center transform transition-all duration-300 hover:translate-x-2">
-                    <span className="mr-2">📱</span> +1 (555) 123-4567
-                  </p>
-                  <p className="flex items-center transform transition-all duration-300 hover:translate-x-2">
-                    <span className="mr-2">📍</span> MNNIT Allahabad, Prayagraj,
-                    Uttar Pradesh, India – 211004
-                  </p>
-                </div>
-
-                <div className="mt-8">
-                  <h4 className="text-lg font-semibold mb-3">Follow Us</h4>
-                  <div className="flex space-x-4">
-                    {/* Social media icons with improved hover effects */}
-                    <a
-                      href="#"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-10 h-10 rounded-full bg-gray-700/50 flex items-center justify-center text-gray-300 hover:bg-cyan-600 hover:text-white transform transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-cyan-600/20"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z" />
-                      </svg>
-                    </a>
-                    <a
-                      href="#"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-10 h-10 rounded-full bg-gray-700/50 flex items-center justify-center text-gray-300 hover:bg-blue-600 hover:text-white transform transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-blue-600/20"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z" />
-                      </svg>
-                    </a>
-                    <a
-                      href="#"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-10 h-10 rounded-full bg-gray-700/50 flex items-center justify-center text-gray-300 hover:bg-sky-500 hover:text-white transform transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-sky-500/20"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" />
-                      </svg>
-                    </a>
-                    <a
-                      href="#"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-10 h-10 rounded-full bg-gray-700/50 flex items-center justify-center text-gray-300 hover:bg-gradient-to-br hover:from-purple-600 hover:via-pink-500 hover:to-orange-400 hover:text-white transform transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-pink-600/20"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
-                      </svg>
-                    </a>
-                  </div>
-                </div>
-              </div>
-              <div className="md:w-3/5 p-8 text-gray-200 animate-on-scroll animate-in fade-in-right delay-200">
-                <h3 className="text-2xl font-bold mb-6">Send us a Message</h3>
-                <form className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="transform transition-all duration-300 hover:translate-y-1 focus-within:translate-y-1">
-                      <label className="block text-gray-300 mb-2">
-                        First Name
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white transition-all duration-300 focus:bg-gray-600"
-                        placeholder="John"
-                      />
-                    </div>
-                    <div className="transform transition-all duration-300 hover:translate-y-1 focus-within:translate-y-1">
-                      <label className="block text-gray-300 mb-2">
-                        Last Name
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white transition-all duration-300 focus:bg-gray-600"
-                        placeholder="Doe"
-                      />
-                    </div>
-                  </div>
-                  <div className="transform transition-all duration-300 hover:translate-y-1 focus-within:translate-y-1">
-                    <label className="block text-gray-300 mb-2">Email</label>
-                    <input
-                      type="email"
-                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white transition-all duration-300 focus:bg-gray-600"
-                      placeholder="your@email.com"
-                    />
-                  </div>
-                  <div className="transform transition-all duration-300 hover:translate-y-1 focus-within:translate-y-1">
-                    <label className="block text-gray-300 mb-2">Message</label>
-                    <textarea
-                      rows="4"
-                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white transition-all duration-300 focus:bg-gray-600"
-                      placeholder="How can we help you?"
-                    ></textarea>
-                  </div>
-                  <button className="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:shadow-lg hover:shadow-cyan-600/30 transform hover:-translate-y-1">
-                    Send Message
-                  </button>
-                </form>
-              </div>
-            </div>
           </div>
         </div>
       </section>

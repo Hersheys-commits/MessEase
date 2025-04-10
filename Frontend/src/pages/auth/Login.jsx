@@ -19,7 +19,7 @@ const Login = ({ userType = "student" }) => {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   console.log("login state", user);
   console.log("login state", isAuthenticated);
-  const {handleGoogleSuccess, handleGoogleFailure} = useGoogleAuth(userType);
+  const { handleGoogleSuccess, handleGoogleFailure } = useGoogleAuth(userType);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -66,9 +66,9 @@ const Login = ({ userType = "student" }) => {
         userType === "admin" ? "/api/admin/login" : "/api/student/login";
 
       const response = await api.post(endpoint, data);
-      console.log(response)
-      dispatch(setUser(response.data.user)); 
-      if(response.data.user?.code){
+      console.log(response);
+      dispatch(setUser(response.data.user));
+      if (response.data.user?.code) {
         dispatch(setCode(response.data.user.code));
       }
 
@@ -128,7 +128,7 @@ const Login = ({ userType = "student" }) => {
         />
       </div>
 
-      <GoogleOAuthProvider 
+      <GoogleOAuthProvider
         clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}
         onScriptLoadError={() => console.log("Script load error")}
         onScriptLoadSuccess={() => console.log("Script loaded successfully")}
@@ -293,7 +293,7 @@ export default Login;
 //     try {
 //       const decoded = jwtDecode(credentialResponse.credential);
 //       console.log("Decoded token data:", decoded);
-      
+
 //       // Extract user info from the decoded token
 //       const googleUserData = {
 //         email: decoded.email,
@@ -302,27 +302,27 @@ export default Login;
 //         googleId: decoded.sub,
 //         verified: decoded.email_verified
 //       };
-      
+
 //       // Determine correct endpoint - check that these endpoints exist on your backend
-//       const endpoint = userType === "admin" 
+//       const endpoint = userType === "admin"
 //         ? "/api/admin/google" // Using the endpoint from your working example
 //         : "/api/student/google"; // Using the endpoint from your working example
-          
+
 //       // Call your backend with the decoded token data
 //       const response = await api.post(
 //         endpoint,
 //         { googleUser: googleUserData },
 //         { withCredentials: true }
 //       );
-      
+
 //       if (response?.data?.data?.error === "email exists") {
 //         toast.error("Email already exists. Try signing in.");
 //         return;
 //       }
-      
+
 //       // Store user data
 //       localStorage.setItem("user", JSON.stringify(response.data.data));
-      
+
 //       // Update Redux state
 //       // dispatch(
 //       //   setUser({
@@ -330,12 +330,12 @@ export default Login;
 //       //     accessToken: response.data.data.accessToken,
 //       //   })
 //       // );
-      
+
 //       toast.success(`${userType === "admin" ? "Admin" : "Student"} login successful!`);
-      
+
 //       const redirectPath = userType === "admin" ? "/admin/home" : "/student/home";
 //       navigate(redirectPath);
-      
+
 //     } catch (error) {
 //       console.error("Google sign-in error:", error);
 //       toast.error("Google login failed. Please try again later.");

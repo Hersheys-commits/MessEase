@@ -19,7 +19,7 @@ export const createComplaint = async (req, res) => {
     const files = req.files;
     const user = req.user;
 
-    console.log(description, category);
+    // console.log(description, category);
 
     if (!description || !category) {
       return res.status(400).json({
@@ -59,7 +59,7 @@ export const createComplaint = async (req, res) => {
       imageUrls = uploadResults.filter((result) => result !== null);
     }
 
-    console.log(1);
+    // console.log(1);
     const complaint = new Complaint({
       status: ComplaintStatus.PENDING,
       User: user._id,
@@ -68,9 +68,9 @@ export const createComplaint = async (req, res) => {
       images: imageUrls,
       Hostelcode: hostel.code,
     });
-    console.log(2);
+    // console.log(2);
     await complaint.save();
-    console.log(3);
+    // console.log(3);
     return res.status(201).json({
       message: "Complaint created successfully",
       complaint,
@@ -88,13 +88,13 @@ export const createComplaint = async (req, res) => {
 export const getComplaints = async (req, res) => {
   try {
     const { code } = req.params;
-    console.log(code);
+    // console.log(code);
     const complaint = await Complaint.find({
       Hostelcode: code,
       category: "Hostel",
     });
 
-    console.log(complaint);
+    // console.log(complaint);
 
     if (complaint.length === 0) {
       return res.status(200).json({
@@ -115,16 +115,16 @@ export const getComplaints = async (req, res) => {
 
 export const updateComplaint = async (req, res) => {
   const { id } = req.params;
-  console.log(id);
+  // console.log(id);
   const { status } = req.params;
-  console.log(status);
+  // console.log(status);
   const complaint = await Complaint.findById(id);
   if (!complaint) {
     return res.status(404).json({
       message: "Complaint not found",
     });
   }
-  console.log(complaint.status);
+  // console.log(complaint.status);
   // console.log(first);
   complaint.status = status;
   await complaint.save();
@@ -140,8 +140,8 @@ export const getMessComplaints = async (req, res) => {
       Hostelcode: code,
       category: { $ne: "Hostel" },
     });
-    console.log(complaint);
-    console.log(1);
+    // console.log(complaint);
+    // console.log(1);
     return res.status(200).json({
       complaint,
     });
@@ -158,7 +158,7 @@ export const UserComplaints = async (req, res) => {
   try {
     const user = req.user;
     const complaints = await Complaint.find({ User: user._id });
-    console.log("User complaints fetched successfully", complaints);
+    // console.log("User complaints fetched successfully", complaints);
     return res.status(200).json({
       complaints,
     });

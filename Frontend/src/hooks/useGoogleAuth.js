@@ -17,9 +17,9 @@ const useGoogleAuth = (userType = "student") => {
       const response = await api.post(endpoint, {
         tokenId: credentialResponse.credential,
       });
-      console.log("first",response);
+      console.log("first", response);
       dispatch(setUser(response.data.user));
-      if(response.data.user?.code){
+      if (response.data.user?.code) {
         dispatch(setCode(response.data.user.code));
       }
 
@@ -38,7 +38,7 @@ const useGoogleAuth = (userType = "student") => {
         navigate(redirectPath);
       }
     } catch (error) {
-      console.log("Google sign-in error:",error);
+      console.log("Google sign-in error:", error);
       if (error.response?.status === 210) {
         toast.error(
           "An account with this email already exists. Please log in with password."
@@ -60,8 +60,6 @@ const useGoogleAuth = (userType = "student") => {
 };
 
 export default useGoogleAuth;
-
-
 
 // // src/hooks/useGoogleAuth.js
 // import { useNavigate } from "react-router-dom";

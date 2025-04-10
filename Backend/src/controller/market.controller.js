@@ -43,7 +43,7 @@ export const createProduct = async (req, res) => {
       // Wait for all uploads and filter out failures
       const uploadResults = await Promise.all(uploadPromises);
       imageUrls = uploadResults.filter((url) => url);
-      console.log(`Successfully uploaded ${imageUrls.length} images`);
+      // console.log(`Successfully uploaded ${imageUrls.length} images`);
     }
 
     // Build and save the product
@@ -58,7 +58,7 @@ export const createProduct = async (req, res) => {
     });
 
     await newProduct.save();
-    console.log("Product saved:", newProduct._id);
+    // console.log("Product saved:", newProduct._id);
     res
       .status(201)
       .json({ message: "Product created successfully", product: newProduct });
@@ -106,13 +106,13 @@ export const updateProduct = async (req, res) => {
           return null;
         }
       });
-      console.log(imageUrls.url);
+      // console.log(imageUrls.url);
 
       const uploadResults = await Promise.all(uploadPromises);
-      console.log(uploadResults);
+      // console.log(uploadResults);
       imageUrls = uploadResults.filter((url) => url);
-      console.log(imageUrls);
-      console.log(`Updated with ${imageUrls.length} uploaded images`);
+      // console.log(imageUrls);
+      // console.log(`Updated with ${imageUrls.length} uploaded images`);
     }
 
     // Update the product
@@ -242,12 +242,12 @@ export const buyNow = async (req, res) => {
   try {
     const { productId } = req.params;
     const buyerId = req.body;
-    console.log(buyerId);
+    // console.log(buyerId);
     const userId = req.user._id;
-    console.log(userId);
-    console.log("req.user.college", req.user.college._id);
+    // console.log(userId);
+    // console.log("req.user.college", req.user.college._id);
     const product = await Product.findById(productId);
-    console.log("product.college", product.college._id);
+    // console.log("product.college", product.college._id);
     if (product.college._id.toString() !== req.user.college._id.toString()) {
       return res
         .status(400)
