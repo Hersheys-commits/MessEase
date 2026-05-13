@@ -28,13 +28,13 @@ export const instance = new RazorPay({
   key_secret: process.env.RAZORPAY_API_SECRET,
 });
 
-const clientUrl = CLIENT_URL || "http://localhost:8000";
+const clientUrl = CLIENT_URL || "http://localhost:8000" || "http://lh1mkcd2.167-99-105-161.sslip.io";
 
 const app = express();
 const server = createServer(app); // Create an HTTP server
 const io = new Server(server, {
   cors: {
-    origin: true,
+    origin: clientUrl,
     credentials: true,
   },
 });
@@ -45,7 +45,7 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(cookieParser());
 app.use(
   cors({
-    origin: true,
+    origin: clientUrl,
     credentials: true,
   })
 );

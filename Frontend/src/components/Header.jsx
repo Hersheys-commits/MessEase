@@ -90,7 +90,7 @@ const Header = () => {
     { title: "Profile", path: "/student/profile", icon: "user" },
     { title: "Fees", path: "/student/fees", icon: "money" },
     { title: "Mess", path: `/student/mess/${code}`, icon: "mess" },
-    { title: "BOT", path: `/bot/${user._id}`, icon: "chat" },
+    // { title: "BOT", path: `/bot/${user._id}`, icon: "chat" },
     { title: "Marketplace", path: "/marketplace", icon: "cart" },
   ];
 
