@@ -34,7 +34,7 @@ const app = express();
 const server = createServer(app); // Create an HTTP server
 const io = new Server(server, {
   cors: {
-    origin: clientUrl,
+    origin: true,
     credentials: true,
   },
 });
@@ -45,7 +45,7 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(cookieParser());
 app.use(
   cors({
-    origin: clientUrl,
+    origin: true,
     credentials: true,
   })
 );

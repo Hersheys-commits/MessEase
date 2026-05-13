@@ -57,6 +57,8 @@ import ChatInbox from "./pages/student/ChatInbox.jsx";
 import ProductDetails from "./pages/student/ProductDetails.jsx";
 import { useDispatch } from "react-redux";
 import { setUser } from "./store/authSlice.js";
+// import ComplaintBot from "./pages/student/Complaint_bot.jsx";
+import ComplaintBot from "./pages/student/ComplaintBot.jsx";
 
 function App() {
   const dispatch = useDispatch();
@@ -89,6 +91,7 @@ function App() {
           path="/student/forgot-password"
           element={<ForgotPassword userType="student" />}
         />
+        {/* <Route path="/bot/:code" element={<ComplaintBot />} /> */}
         <Route path="/college/verify/:code" element={<CollegeVerifyPage />} />
         <Route path="/admin/college/create" element={<CreateCollegePage />} />
         <Route path="/admin/create-hostel" element={<HostelForm />} />
@@ -194,7 +197,7 @@ function App() {
         <Route path="/book-rooms" element={<BookRooms />} />
         <Route path="/see-booking" element={<BookedRooms />} />
         <Route path="/admin/create-GroupChat" element={<CreateGroupChat />} />
-        <Route path="/hostel/groupChat/:code" element={<GroupChat />} />
+        <Route path="/bot/:code" element={<ComplaintBot />} />
       </Routes>
       {/* <Toaster
         position="top-right"
