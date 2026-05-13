@@ -66,11 +66,6 @@ const Login = ({ userType = "student" }) => {
         userType === "admin" ? "/api/admin/login" : "/api/student/login";
 
       const response = await api.post(endpoint, data);
-      console.log(response);
-      dispatch(setUser(response.data.user));
-      if (response.data.user?.code) {
-        dispatch(setCode(response.data.user.code));
-      }
 
       // Store tokens
       localStorage.setItem("accessToken", response.data.accessToken);
